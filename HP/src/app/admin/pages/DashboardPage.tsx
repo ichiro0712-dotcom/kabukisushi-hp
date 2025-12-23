@@ -96,7 +96,12 @@ export function DashboardPage() {
               <h3 className="font-bold text-gray-900">KABUKI寿司 新店舗</h3>
               <p className="text-xs text-gray-500 mt-1">最終更新: 2日前</p>
               <div className="mt-4 flex gap-2">
-                <button className="flex-1 px-3 py-2 bg-white border border-purple-600 text-purple-600 text-sm rounded-lg hover:bg-purple-50 transition-colors">編集</button>
+                <button
+                  onClick={() => window.location.href = '/editor_mock.html'}
+                  className="flex-1 px-3 py-2 bg-white border border-purple-600 text-purple-600 text-sm rounded-lg hover:bg-purple-50 transition-colors"
+                >
+                  編集
+                </button>
                 <button className="px-3 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition-colors">設定</button>
               </div>
             </div>
