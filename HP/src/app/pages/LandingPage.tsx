@@ -403,12 +403,16 @@ export function LandingPage() {
                     </div>
                 </div>
             </section>
-
             {/* Footer */}
             <footer className="bg-[#1C1C1C] text-[#e8eaec] py-8 border-t border-[#deb55a]/20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <p style={{ fontFamily: "'Bad Script', cursive" }} className="text-2xl mb-2 text-[#fcebc5]">KABUKI寿司 1番通り店</p>
                     <p className="text-sm text-gray-400">© 2024 KABUKI Sushi. All rights reserved.</p>
+                    <div className="mt-4">
+                        <a href="/admin/dashboard" className="text-xs text-gray-600 hover:text-[#deb55a] transition-colors">
+                            管理画面へ
+                        </a>
+                    </div>
                 </div>
             </footer>
         </div>
