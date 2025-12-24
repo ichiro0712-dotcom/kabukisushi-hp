@@ -24,6 +24,7 @@ import {
     Save
 } from 'lucide-react';
 import { LandingPage } from '../../pages/LandingPage';
+import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 
 export type BackgroundType = 'color' | 'image' | 'video';
 
@@ -41,6 +42,7 @@ export default function EditorPage() {
     const [showBackgroundPanel, setShowBackgroundPanel] = useState(false);
     const [backgroundEditSection, setBackgroundEditSection] = useState<string | null>(null);
     const [activeBackgroundTab, setActiveBackgroundTab] = useState<BackgroundType>('image');
+    const [showAssetLibrary, setShowAssetLibrary] = useState(false);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -78,6 +80,13 @@ export default function EditorPage() {
                 ...config
             }
         }));
+    };
+
+    const handleImageSelect = (url: string) => {
+        if (backgroundEditSection) {
+            updateBackground(backgroundEditSection, { type: 'image', value: url });
+        }
+        setShowAssetLibrary(false);
     };
 
 
@@ -301,13 +310,19 @@ export default function EditorPage() {
                                             style={{ backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                                         />
                                     ))}
-                                    <button className="aspect-video rounded border border-dashed border-gray-700 flex flex-col items-center justify-center gap-1 hover:border-gray-500 bg-white/5 group">
+                                    <button
+                                        onClick={() => setShowAssetLibrary(true)}
+                                        className="aspect-video rounded border border-dashed border-gray-700 flex flex-col items-center justify-center gap-1 hover:border-gray-500 bg-white/5 group"
+                                    >
                                         <Plus size={14} className="text-gray-500 group-hover:text-gray-300" />
                                         <span className="text-[10px] text-gray-500">その他</span>
                                     </button>
                                 </div>
 
-                                <button className="w-full py-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] rounded text-[11px] font-bold transition-all flex items-center justify-center gap-2">
+                                <button
+                                    onClick={() => setShowAssetLibrary(true)}
+                                    className="w-full py-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] rounded text-[11px] font-bold transition-all flex items-center justify-center gap-2"
+                                >
                                     画像アップロード
                                 </button>
                             </div>
@@ -418,6 +433,12 @@ export default function EditorPage() {
                     </div>
                 </div>
             </div>
+            {/* Image Asset Library Modal */}
+            <ImageAssetLibrary
+                isOpen={showAssetLibrary}
+                onClose={() => setShowAssetLibrary(false)}
+                onSelect={handleImageSelect}
+            />
         </div>
     );
 }
