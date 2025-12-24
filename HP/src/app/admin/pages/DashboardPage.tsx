@@ -76,7 +76,7 @@ export function DashboardPage() {
               <p className="text-xs text-gray-500 mt-1">最終更新: 6時間前</p>
               <div className="mt-4 flex gap-2">
                 <button
-                  onClick={() => window.location.href = '/editor_mock.html'}
+                  onClick={() => navigate('/admin/editor')}
                   className="flex-1 px-3 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   編集
@@ -97,7 +97,7 @@ export function DashboardPage() {
               <p className="text-xs text-gray-500 mt-1">最終更新: 2日前</p>
               <div className="mt-4 flex gap-2">
                 <button
-                  onClick={() => window.location.href = '/editor_mock.html'}
+                  onClick={() => navigate('/admin/editor')}
                   className="flex-1 px-3 py-2 bg-white border border-purple-600 text-purple-600 text-sm rounded-lg hover:bg-purple-50 transition-colors"
                 >
                   編集

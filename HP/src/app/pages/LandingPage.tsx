@@ -1,9 +1,48 @@
 import { useState } from 'react';
-import { Menu, X, MapPin, Phone, Clock } from 'lucide-react';
+import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import type { BackgroundConfig } from '../admin/pages/EditorPage';
 
-export function LandingPage() {
+interface LandingPageProps {
+    isEditing?: boolean;
+    onSectionSelect?: (id: string) => void;
+    onBackgroundEdit?: (id: string) => void;
+    activeSection?: string;
+    backgroundSettings?: Record<string, BackgroundConfig>;
+}
+
+
+export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEdit, activeSection, backgroundSettings }: LandingPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const getBackgroundStyle = (sectionId: string) => {
+        const config = backgroundSettings?.[sectionId];
+        if (!config) return {};
+
+        if (config.type === 'color') {
+            return { backgroundColor: config.value, backgroundImage: 'none' };
+        } else if (config.type === 'image') {
+            return { backgroundImage: `url('${config.value}')`, backgroundColor: 'transparent' };
+        }
+        return {};
+    };
+
+
+    const BackgroundButton = ({ sectionId }: { sectionId: string }) => (
+        <div
+            onClick={(e) => {
+                e.stopPropagation();
+                onSectionSelect?.(sectionId);
+                onBackgroundEdit?.(sectionId);
+            }}
+            className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-1 bg-black/70 hover:bg-black/90 text-white rounded cursor-pointer transition-all border border-white/10 group shadow-md"
+        >
+            <span className="text-[10px] font-bold">背景</span>
+            <div className="flex items-center justify-center">
+                <ImageIcon size={12} className="text-gray-300 group-hover:text-white" />
+            </div>
+        </div>
+    );
 
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
@@ -20,19 +59,19 @@ export function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <button
-                            onClick={() => scrollToSection('home')}
+                            onClick={() => !isEditing && scrollToSection('home')}
                             style={{ fontFamily: "'Bad Script', cursive" }}
-                            className="text-2xl text-[#fcebc5] hover:text-[#deb55a] transition-colors"
+                            className={`text-2xl text-[#fcebc5] transition-colors ${!isEditing ? 'hover:text-[#deb55a]' : ''}`}
                         >
                             KABUKI寿司 1番通り店
                         </button>
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex space-x-8">
-                            <button onClick={() => scrollToSection('about')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">ABOUT</button>
-                            <button onClick={() => scrollToSection('gallery')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">GALLERY</button>
-                            <button onClick={() => scrollToSection('menu')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">MENU</button>
-                            <button onClick={() => scrollToSection('access')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">ACCESS</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('about') : scrollToSection('about')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">ABOUT</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('gallery') : scrollToSection('gallery')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">GALLERY</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('menu') : scrollToSection('menu')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">MENU</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('access') : scrollToSection('access')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">ACCESS</button>
                         </div>
 
                         {/* Mobile Menu Button */}
@@ -49,17 +88,24 @@ export function LandingPage() {
                 {isMobileMenuOpen && (
                     <div className="md:hidden bg-[#1C1C1C] border-t border-[#deb55a]/20">
                         <div className="px-4 py-4 space-y-3">
-                            <button onClick={() => scrollToSection('about')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">ABOUT</button>
-                            <button onClick={() => scrollToSection('gallery')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">GALLERY</button>
-                            <button onClick={() => scrollToSection('menu')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">MENU</button>
-                            <button onClick={() => scrollToSection('access')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">ACCESS</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('about') : scrollToSection('about')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">ABOUT</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('gallery') : scrollToSection('gallery')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">GALLERY</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('menu') : scrollToSection('menu')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">MENU</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('access') : scrollToSection('access')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">ACCESS</button>
                         </div>
                     </div>
                 )}
             </nav>
 
             {/* Hero Section */}
-            <section id="home" className="relative min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdXNoaSUyMGphcGFuZXNlJTIwZm9vZHxlbnwxfHx8fDE3NjU5NjY2ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080')` }}>
+            <section
+                id="home"
+                onClick={() => isEditing && onSectionSelect?.('home')}
+                className={`relative min-h-screen flex items-center justify-center bg-cover bg-center transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'home' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('home')}
+            >
+                {isEditing && <BackgroundButton sectionId="home" />}
+
                 <div className="absolute inset-0 bg-black/60"></div>
                 <div className="relative z-10 text-center px-4 max-w-4xl">
                     <div className="mb-8">
@@ -115,7 +161,14 @@ export function LandingPage() {
             </section>
 
             {/* About Section */}
-            <section id="about" className="py-20 bg-white">
+            <section
+                id="about"
+                onClick={() => isEditing && onSectionSelect?.('about')}
+                className={`py-20 transition-all duration-300 relative ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'about' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('about')}
+            >
+
+                {isEditing && <BackgroundButton sectionId="about" />}
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4">ABOUT US</h2>
                     <div className="grid md:grid-cols-2 gap-12 items-center mt-12">
@@ -139,7 +192,14 @@ export function LandingPage() {
             </section>
 
             {/* Gallery Section */}
-            <section id="gallery" className="py-20 bg-[#E8EAEC]">
+            <section
+                id="gallery"
+                onClick={() => isEditing && onSectionSelect?.('gallery')}
+                className={`py-20 transition-all duration-300 relative ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'gallery' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('gallery')}
+            >
+
+                {isEditing && <BackgroundButton sectionId="gallery" />}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#1C1C1C]">Gallery</h2>
                     <p className="text-center text-gray-600 mb-12">Photos from our restaurant.</p>
@@ -158,7 +218,14 @@ export function LandingPage() {
             </section>
 
             {/* Access Section */}
-            <section id="access" className="py-20 bg-cover bg-center relative" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080')` }}>
+            <section
+                id="access"
+                onClick={() => isEditing && onSectionSelect?.('access')}
+                className={`py-20 bg-cover bg-center relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'access' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('access')}
+            >
+
+                {isEditing && <BackgroundButton sectionId="access" />}
                 <div className="absolute inset-0 bg-white/90"></div>
                 <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C]">ACCESS</h2>
@@ -193,7 +260,14 @@ export function LandingPage() {
             </section>
 
             {/* Menu Section */}
-            <section id="menu" className="py-20 bg-[#f5f5f5]">
+            <section
+                id="menu"
+                onClick={() => isEditing && onSectionSelect?.('menu')}
+                className={`py-20 transition-all duration-300 relative ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'menu' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('menu')}
+            >
+
+                {isEditing && <BackgroundButton sectionId="menu" />}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#1C1C1C]">Menu</h2>
                     <p className="text-center text-xl mb-12" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>Course</p>
@@ -364,7 +438,14 @@ export function LandingPage() {
             </section>
 
             {/* Affiliated Store Section */}
-            <section className="py-20 bg-cover bg-center relative" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80')` }}>
+            <section
+                id="affiliated"
+                onClick={() => isEditing && onSectionSelect?.('affiliated')}
+                className={`py-20 bg-cover bg-center relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('affiliated')}
+            >
+
+                {isEditing && <BackgroundButton sectionId="affiliated" />}
                 <div className="absolute inset-0 bg-black/70"></div>
                 <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-4 text-[#fcebc5]">Affiliated store of KABUKI SUSHI</h2>
@@ -404,7 +485,14 @@ export function LandingPage() {
                 </div>
             </section>
             {/* Footer */}
-            <footer className="bg-[#1C1C1C] text-[#e8eaec] py-8 border-t border-[#deb55a]/20">
+            <footer
+                id="footer"
+                onClick={() => isEditing && onSectionSelect?.('footer')}
+                className={`text-[#e8eaec] py-8 border-t border-[#deb55a]/20 transition-all duration-300 relative ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'footer' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('footer')}
+            >
+
+                {isEditing && <BackgroundButton sectionId="footer" />}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <p style={{ fontFamily: "'Bad Script', cursive" }} className="text-2xl mb-2 text-[#fcebc5]">KABUKI寿司 1番通り店</p>
                     <p className="text-sm text-gray-400">© 2024 KABUKI Sushi. All rights reserved.</p>
