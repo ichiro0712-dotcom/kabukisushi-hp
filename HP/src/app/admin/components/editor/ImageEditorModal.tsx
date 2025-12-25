@@ -24,6 +24,8 @@ interface EditorState {
     rotation: number;
     filter: string;
     drawings: any[];
+    width?: number;
+    height?: number;
 }
 
 type ToolType = 'none' | 'resize' | 'crop' | 'filter' | 'rotate' | 'draw' | 'text';
@@ -44,6 +46,11 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     const [brushSize, setBrushSize] = useState(12);
     const [showColorPicker, setShowColorPicker] = useState(false);
 
+    const [resizeWidth, setResizeWidth] = useState('2000');
+    const [resizeHeight, setResizeHeight] = useState('1333');
+    const [maintainRatio, setMaintainRatio] = useState(true);
+    const [originalRatio, setOriginalRatio] = useState(2000 / 1333);
+
     const colorPresets = [
         ['#000000', '#333333', '#666666', '#999999', '#cccccc', '#eeeeee', '#ffffff', 'transparent'],
         ['#ff3b30', '#ff9500', '#ffcc00', '#4cd964', '#007aff', '#5856d6', '#af52de', '#ff2d55']
@@ -56,11 +63,19 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     // Initialize history
     useEffect(() => {
         if (isOpen) {
-            const initialState = { rotation: 0, filter: 'none', drawings: [] };
+            const initialState: EditorState = {
+                rotation: 0,
+                filter: 'none',
+                drawings: [],
+                width: 2000,
+                height: 1333
+            };
             setHistory([initialState]);
             setHistoryIndex(0);
             setCurrentState(initialState);
             setActiveTool('none');
+            setResizeWidth('2000');
+            setResizeHeight('1333');
         }
     }, [isOpen]);
 
@@ -134,6 +149,19 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
             ...currentState,
             filter: filters[nextIdx]
         });
+    };
+
+    const handleResizeApply = () => {
+        const w = parseInt(resizeWidth);
+        const h = parseInt(resizeHeight);
+        if (!isNaN(w) && !isNaN(h)) {
+            pushState({
+                ...currentState,
+                width: w,
+                height: h
+            });
+            setActiveTool('none');
+        }
     };
 
     const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -320,6 +348,80 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                 </div>
             </div>
 
+            {/* Resize Sub-Toolbar */}
+            {activeTool === 'resize' && (
+                <div className="h-[100px] bg-[#2d2d2d] border-b border-white/5 flex items-center justify-center grow-in animate-in px-8">
+                    <div className="flex items-center gap-8">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-bold text-gray-500">横幅</label>
+                            <input
+                                type="text"
+                                value={resizeWidth}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setResizeWidth(val);
+                                    if (maintainRatio) {
+                                        const w = parseInt(val);
+                                        if (!isNaN(w)) {
+                                            setResizeHeight(Math.round(w / originalRatio).toString());
+                                        }
+                                    }
+                                }}
+                                className="w-24 bg-[#1a1a1a] border border-white/10 rounded px-2 py-1 text-xs font-bold text-white focus:border-[#93B719] outline-none"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-bold text-gray-500">高さ</label>
+                            <input
+                                type="text"
+                                value={resizeHeight}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setResizeHeight(val);
+                                    if (maintainRatio) {
+                                        const h = parseInt(val);
+                                        if (!isNaN(h)) {
+                                            setResizeWidth(Math.round(h * originalRatio).toString());
+                                        }
+                                    }
+                                }}
+                                className="w-24 bg-[#1a1a1a] border border-white/10 rounded px-2 py-1 text-xs font-bold text-white focus:border-[#93B719] outline-none"
+                            />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer pt-4 group">
+                            <div className="relative flex items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={maintainRatio}
+                                    onChange={(e) => setMaintainRatio(e.target.checked)}
+                                    className="peer sr-only"
+                                />
+                                <div className="w-4 h-4 border border-white/20 rounded peer-checked:bg-[#007aff] peer-checked:border-[#007aff] transition-colors" />
+                                <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 left-0.5 transition-opacity" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="4">
+                                    <path d="M3.5 8.5L6.5 11.5L12.5 4.5" />
+                                </svg>
+                            </div>
+                            <span className="text-[11px] text-gray-400 group-hover:text-gray-200 transition-colors">アスペクト比を維持する</span>
+                        </label>
+
+                        <div className="flex items-center gap-4 ml-6 pt-4 border-l border-white/10 pl-8">
+                            <button
+                                onClick={handleResizeApply}
+                                className="text-[11px] font-bold text-white hover:text-[#93B719] transition-colors"
+                            >
+                                適用
+                            </button>
+                            <button
+                                onClick={() => setActiveTool('none')}
+                                className="text-[11px] font-bold text-gray-500 hover:text-gray-300 transition-colors"
+                            >
+                                取り消す
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Sub-Toolbar for Tools */}
             {activeTool === 'draw' && (
                 <div className="h-[100px] bg-[#2d2d2d] flex flex-col items-center justify-center gap-4 border-b border-white/5 shadow-inner grow-in animate-in">
@@ -471,6 +573,12 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
                 {/* Status Bar / Info */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 text-xs font-medium text-gray-500 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm">
+                    {currentState.width && (
+                        <>
+                            <span>{currentState.width} × {currentState.height}</span>
+                            <div className="w-1 h-1 rounded-full bg-gray-700" />
+                        </>
+                    )}
                     <span>{currentState.rotation}° Rotation</span>
                     <div className="w-1 h-1 rounded-full bg-gray-700" />
                     <span>Filter: {currentState.filter === 'none' ? 'None' : 'Active'}</span>
