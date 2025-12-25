@@ -26,6 +26,7 @@ interface EditorState {
     drawings: any[];
     width?: number;
     height?: number;
+    mode?: 'resize' | 'crop';
 }
 
 type ToolType = 'none' | 'resize' | 'crop' | 'filter' | 'rotate' | 'draw' | 'text';
@@ -176,7 +177,8 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
             filter: 'none',
             drawings: [],
             width: parseInt(resizeWidth),
-            height: parseInt(resizeHeight)
+            height: parseInt(resizeHeight),
+            mode: undefined
         });
     };
 
@@ -204,7 +206,8 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
             pushState({
                 ...currentState,
                 width: w,
-                height: h
+                height: h,
+                mode: 'resize'
             });
             setActiveTool('none');
         }
@@ -252,7 +255,8 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         pushState({
             ...currentState,
             width: newWidth,
-            height: newHeight
+            height: newHeight,
+            mode: 'crop'
         });
 
         setResizeWidth(newWidth.toString());
@@ -707,7 +711,7 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                         onLoad={handleImageLoad}
                         className="w-full h-full select-none transition-all duration-300"
                         style={{
-                            objectFit: 'fill'
+                            objectFit: currentState.mode === 'crop' ? 'cover' : 'fill'
                         }}
                     />
 
