@@ -188,6 +188,45 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         }
     };
 
+    const handleCropApply = () => {
+        if (!currentState.width || !currentState.height) return;
+
+        let newWidth = currentState.width;
+        let newHeight = currentState.height;
+
+        const ratios: Record<string, number> = {
+            'square': 1,
+            '3:2': 3 / 2,
+            '4:3': 4 / 3,
+            '5:4': 5 / 4,
+            '7:5': 7 / 5,
+            '16:9': 16 / 9
+        };
+
+        if (cropRatio !== 'custom' && ratios[cropRatio]) {
+            const targetRatio = ratios[cropRatio];
+            const currentRatio = currentState.width / currentState.height;
+
+            if (targetRatio > currentRatio) {
+                // Target is wider than current: reduce height
+                newHeight = Math.round(currentState.width / targetRatio);
+            } else {
+                // Target is taller than current: reduce width
+                newWidth = Math.round(currentState.height * targetRatio);
+            }
+        }
+
+        pushState({
+            ...currentState,
+            width: newWidth,
+            height: newHeight
+        });
+
+        setResizeWidth(newWidth.toString());
+        setResizeHeight(newHeight.toString());
+        setActiveTool('none');
+    };
+
     const handleCanvasMouseDown = (e: React.MouseEvent) => {
         if (activeTool !== 'draw') return;
         const canvas = canvasRef.current;
@@ -474,7 +513,7 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
                     <div className="flex items-center gap-4 mt-1 border-t border-white/5 pt-2 w-full justify-center">
                         <button
-                            onClick={() => setActiveTool('none')}
+                            onClick={handleCropApply}
                             className="text-[11px] font-bold text-white hover:text-[#93B719] transition-colors"
                         >
                             適用
