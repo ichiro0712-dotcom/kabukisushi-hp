@@ -118,15 +118,21 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
     const handleUndo = () => {
         if (historyIndex > 0) {
+            const prevState = history[historyIndex - 1];
             setHistoryIndex(historyIndex - 1);
-            setCurrentState(history[historyIndex - 1]);
+            setCurrentState(prevState);
+            if (prevState.width) setResizeWidth(prevState.width.toString());
+            if (prevState.height) setResizeHeight(prevState.height.toString());
         }
     };
 
     const handleRedo = () => {
         if (historyIndex < history.length - 1) {
+            const nextState = history[historyIndex + 1];
             setHistoryIndex(historyIndex + 1);
-            setCurrentState(history[historyIndex + 1]);
+            setCurrentState(nextState);
+            if (nextState.width) setResizeWidth(nextState.width.toString());
+            if (nextState.height) setResizeHeight(nextState.height.toString());
         }
     };
 
@@ -556,7 +562,11 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                     <img
                         src={imageUrl}
                         alt="Editing"
-                        className="max-w-full max-h-[60vh] object-contain select-none"
+                        className="max-w-full max-h-[60vh] object-contain select-none transition-all duration-300"
+                        style={{
+                            width: currentState.width ? `${currentState.width}px` : 'auto',
+                            height: currentState.height ? `${currentState.height}px` : 'auto',
+                        }}
                     />
 
                     <canvas
