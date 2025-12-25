@@ -135,8 +135,10 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
 
         setIsDrawing(true);
         setStartPoint({ x, y });
@@ -160,8 +162,10 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
 
         if (drawMode === 'free') {
             setCurrentState(prev => {
@@ -181,8 +185,10 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
 
         if (drawMode === 'line' && startPoint) {
             const newDrawing = {
