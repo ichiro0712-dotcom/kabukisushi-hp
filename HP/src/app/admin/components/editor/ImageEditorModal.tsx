@@ -64,6 +64,8 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
 
     const [cropRatio, setCropRatio] = useState<CropRatio>('custom');
+    const [cropBox, setCropBox] = useState({ left: 15, top: 15, width: 70, height: 70 });
+    const [dragSession, setDragSession] = useState<{ type: string, startX: number, startY: number, startBox: any } | null>(null);
 
     // Initialize history
     useEffect(() => {
@@ -217,7 +219,6 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         let width = currentState.width;
         let height = currentState.height;
 
-        // Fallback to natural dimensions if state is missing
         if (!width || !height) {
             if (imageRef.current) {
                 width = imageRef.current.naturalWidth;
@@ -227,46 +228,91 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
         if (!width || !height) return;
 
-        let newWidth = width;
-        let newHeight = height;
+        let finalWidth = width;
+        let finalHeight = height;
 
-        const ratios: Record<string, number> = {
-            'square': 1,
-            '3:2': 3 / 2,
-            '4:3': 4 / 3,
-            '5:4': 5 / 4,
-            '7:5': 7 / 5,
-            '16:9': 16 / 9
-        };
+        if (cropRatio === 'custom') {
+            finalWidth = Math.round((width * cropBox.width) / 100);
+            finalHeight = Math.round((height * cropBox.height) / 100);
+        } else {
+            const ratios: Record<string, number> = {
+                'square': 1,
+                '3:2': 3 / 2,
+                '4:3': 4 / 3,
+                '5:4': 5 / 4,
+                '7:5': 7 / 5,
+                '16:9': 16 / 9
+            };
 
-        if (cropRatio !== 'custom' && ratios[cropRatio]) {
-            const targetRatio = ratios[cropRatio];
-            const currentRatio = width / height;
+            if (ratios[cropRatio]) {
+                const targetRatio = ratios[cropRatio];
+                const currentRatio = width / height;
 
-            if (Math.abs(currentRatio - targetRatio) > 0.01) {
                 if (currentRatio > targetRatio) {
-                    // Current is wider: reduce width
-                    newWidth = height * targetRatio;
+                    finalWidth = height * targetRatio;
                 } else {
-                    // Current is taller: reduce height
-                    newHeight = width / targetRatio;
+                    finalHeight = width / targetRatio;
                 }
             }
         }
 
-        const finalWidth = Math.round(newWidth);
-        const finalHeight = Math.round(newHeight);
+        const roundedWidth = Math.round(finalWidth);
+        const roundedHeight = Math.round(finalHeight);
 
         pushState({
             ...currentState,
-            width: finalWidth,
-            height: finalHeight,
+            width: roundedWidth,
+            height: roundedHeight,
             mode: 'crop'
         });
 
-        setResizeWidth(finalWidth.toString());
-        setResizeHeight(finalHeight.toString());
+        setResizeWidth(roundedWidth.toString());
+        setResizeHeight(roundedHeight.toString());
         setActiveTool('none');
+    };
+
+    const handleCropBoxMouseDown = (e: React.MouseEvent, type: string) => {
+        e.stopPropagation();
+        setDragSession({
+            type,
+            startX: e.clientX,
+            startY: e.clientY,
+            startBox: { ...cropBox }
+        });
+    };
+
+    const handleEditorMouseMove = (e: React.MouseEvent) => {
+        if (!dragSession) return;
+
+        const deltaX = ((e.clientX - dragSession.startX) / (imageRef.current?.parentElement?.clientWidth || 1000)) * 100;
+        const deltaY = ((e.clientY - dragSession.startY) / (imageRef.current?.parentElement?.clientHeight || 800)) * 100;
+
+        const newBox = { ...dragSession.startBox };
+
+        if (dragSession.type === 'move') {
+            newBox.left = Math.max(0, Math.min(100 - newBox.width, dragSession.startBox.left + deltaX));
+            newBox.top = Math.max(0, Math.min(100 - newBox.height, dragSession.startBox.top + deltaY));
+        } else if (dragSession.type.includes('right')) {
+            newBox.width = Math.max(10, Math.min(100 - newBox.left, dragSession.startBox.width + deltaX));
+        } else if (dragSession.type.includes('left')) {
+            const possibleX = Math.max(0, Math.min(dragSession.startBox.left + dragSession.startBox.width - 10, dragSession.startBox.left + deltaX));
+            newBox.width = dragSession.startBox.width + (dragSession.startBox.left - possibleX);
+            newBox.left = possibleX;
+        }
+
+        if (dragSession.type.includes('bottom')) {
+            newBox.height = Math.max(10, Math.min(100 - newBox.top, dragSession.startBox.height + deltaY));
+        } else if (dragSession.type.includes('top')) {
+            const possibleY = Math.max(0, Math.min(dragSession.startBox.top + dragSession.startBox.height - 10, dragSession.startBox.top + deltaY));
+            newBox.height = dragSession.startBox.height + (dragSession.startBox.top - possibleY);
+            newBox.top = possibleY;
+        }
+
+        setCropBox(newBox);
+    };
+
+    const handleEditorMouseUp = () => {
+        setDragSession(null);
     };
 
     const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -697,7 +743,12 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
             )}
 
             {/* Editing Canvas Area */}
-            <div className="flex-1 bg-[#151515] flex items-center justify-center p-12 overflow-hidden relative">
+            <div
+                className="flex-1 bg-[#151515] flex items-center justify-center p-12 overflow-hidden relative"
+                onMouseMove={handleEditorMouseMove}
+                onMouseUp={handleEditorMouseUp}
+                onMouseLeave={handleEditorMouseUp}
+            >
                 <div className="relative shadow-[0_0_100px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out bg-black flex items-center justify-center"
                     style={{
                         transform: `rotate(${currentState.rotation}deg)`,
@@ -735,34 +786,58 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                             <div
                                 key={cropRatio}
-                                className="border-2 border-[#93B719] shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] transition-all duration-300 relative flex items-center justify-center animate-in zoom-in-95"
+                                onMouseDown={(e) => cropRatio === 'custom' && handleCropBoxMouseDown(e, 'move')}
+                                className={`border-2 border-[#93B719] shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] transition-all duration-300 relative flex items-center justify-center ${cropRatio === 'custom' ? 'pointer-events-auto cursor-move' : ''}`}
                                 style={{
-                                    width: cropRatio === 'square' ? '50%' :
-                                        cropRatio === '3:2' ? '70%' :
-                                            cropRatio === '4:3' ? '65%' :
-                                                cropRatio === '5:4' ? '60%' :
-                                                    cropRatio === '7:5' ? '65%' :
-                                                        cropRatio === '16:9' ? '90%' : '75%',
+                                    left: cropRatio === 'custom' ? `${cropBox.left}%` : 'auto',
+                                    top: cropRatio === 'custom' ? `${cropBox.top}%` : 'auto',
+                                    width: cropRatio === 'custom' ? `${cropBox.width}%` :
+                                        cropRatio === 'square' ? '50%' :
+                                            cropRatio === '3:2' ? '70%' :
+                                                cropRatio === '4:3' ? '65%' :
+                                                    cropRatio === '5:4' ? '60%' :
+                                                        cropRatio === '7:5' ? '65%' :
+                                                            cropRatio === '16:9' ? '90%' : '75%',
                                     aspectRatio: cropRatio === 'square' ? '1/1' :
                                         cropRatio === '3:2' ? '3/2' :
                                             cropRatio === '4:3' ? '4/3' :
                                                 cropRatio === '5:4' ? '5/4' :
                                                     cropRatio === '7:5' ? '7/5' :
-                                                        cropRatio === '16:9' ? '16/9' : '1/1',
-                                    height: 'auto',
-                                    maxHeight: '90%',
-                                    maxWidth: '90%'
+                                                        cropRatio === '16:9' ? '16/9' :
+                                                            cropRatio === 'custom' ? 'none' : '1/1',
+                                    height: cropRatio === 'custom' ? `${cropBox.height}%` : 'auto',
+                                    maxHeight: '95%',
+                                    maxWidth: '95%',
+                                    position: cropRatio === 'custom' ? 'absolute' : 'relative'
                                 }}
                             >
                                 {/* Crop Handles */}
-                                <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-4 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute top-1/2 -translate-y-1/2 -right-1 w-2 h-4 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-2 bg-white border border-[#93B719] rounded-sm" />
-                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-2 bg-white border border-[#93B719] rounded-sm" />
+                                {cropRatio === 'custom' ? (
+                                    <>
+                                        {/* Corner Handles */}
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'top-left')} className="absolute -top-1.5 -left-1.5 w-4 h-4 bg-white border border-[#93B719] rounded-sm cursor-nwse-resize pointer-events-auto shadow-sm" />
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'top-right')} className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-white border border-[#93B719] rounded-sm cursor-nesw-resize pointer-events-auto shadow-sm" />
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'bottom-left')} className="absolute -bottom-1.5 -left-1.5 w-4 h-4 bg-white border border-[#93B719] rounded-sm cursor-nesw-resize pointer-events-auto shadow-sm" />
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'bottom-right')} className="absolute -bottom-1.5 -right-1.5 w-4 h-4 bg-white border border-[#93B719] rounded-sm cursor-nwse-resize pointer-events-auto shadow-sm" />
+
+                                        {/* Side Handles */}
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'left')} className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-6 bg-white border border-[#93B719] rounded-sm cursor-ew-resize pointer-events-auto shadow-sm" />
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'right')} className="absolute top-1/2 -translate-y-1/2 -right-1 w-2 h-6 bg-white border border-[#93B719] rounded-sm cursor-ew-resize pointer-events-auto shadow-sm" />
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'top')} className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-2 bg-white border border-[#93B719] rounded-sm cursor-ns-resize pointer-events-auto shadow-sm" />
+                                        <div onMouseDown={(e) => handleCropBoxMouseDown(e, 'bottom')} className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-2 bg-white border border-[#93B719] rounded-sm cursor-ns-resize pointer-events-auto shadow-sm" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-4 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute top-1/2 -translate-y-1/2 -right-1 w-2 h-4 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-2 bg-white border border-[#93B719] rounded-sm" />
+                                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-2 bg-white border border-[#93B719] rounded-sm" />
+                                    </>
+                                )}
 
                                 {/* Grid Lines */}
                                 <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
