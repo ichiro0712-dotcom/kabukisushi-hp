@@ -64,9 +64,16 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
 
     const [cropRatio, setCropRatio] = useState<CropRatio>('custom');
-    const [cropBox, setCropBox] = useState({ left: 0, top: 0, width: 0, height: 0 });
+    const [cropBox, setCropBox] = useState({ left: 15, top: 15, width: 70, height: 70 });
     const [dragSession, setDragSession] = useState<{ type: string, startX: number, startY: number, startBox: any } | null>(null);
     const [isCreatingCrop, setIsCreatingCrop] = useState(false);
+
+    // Default crop box when switching to custom
+    useEffect(() => {
+        if (activeTool === 'crop' && cropRatio === 'custom' && cropBox.width === 0) {
+            setCropBox({ left: 15, top: 15, width: 70, height: 70 });
+        }
+    }, [activeTool, cropRatio]);
 
     // Initialize history
     useEffect(() => {
@@ -233,8 +240,10 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         let finalHeight = height;
 
         if (cropRatio === 'custom') {
-            finalWidth = Math.round((width * cropBox.width) / 100);
-            finalHeight = Math.round((height * cropBox.height) / 100);
+            // Avoid zero-size application
+            if (cropBox.width < 1 || cropBox.height < 1) return;
+            finalWidth = Math.max(10, Math.round((width * cropBox.width) / 100));
+            finalHeight = Math.max(10, Math.round((height * cropBox.height) / 100));
         } else {
             const ratios: Record<string, number> = {
                 'square': 1,
@@ -260,6 +269,9 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         const roundedWidth = Math.round(finalWidth);
         const roundedHeight = Math.round(finalHeight);
 
+        // Update originalRatio so subsequent actions (like resize sync) work with new image base
+        setOriginalRatio(roundedWidth / roundedHeight);
+
         pushState({
             ...currentState,
             width: roundedWidth,
@@ -269,6 +281,9 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
         setResizeWidth(roundedWidth.toString());
         setResizeHeight(roundedHeight.toString());
+
+        // Reset cropBox for next use
+        setCropBox({ left: 0, top: 0, width: 0, height: 0 });
         setActiveTool('none');
     };
 
@@ -796,15 +811,16 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                 onMouseUp={handleEditorMouseUp}
                 onMouseLeave={handleEditorMouseUp}
             >
-                <div className="relative shadow-[0_0_100px_rgba(0,0,0,0.5)] transition-all duration-500 ease-in-out bg-black flex items-center justify-center"
+                <div className="relative shadow-[2xl] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] bg-black flex items-center justify-center overflow-hidden"
                     style={{
                         transform: `rotate(${currentState.rotation}deg)`,
                         filter: currentState.filter,
                         aspectRatio: currentState.width && currentState.height ? `${currentState.width}/${currentState.height}` : 'auto',
-                        width: currentState.width && currentState.height ? (currentState.width > currentState.height ? '80%' : 'auto') : 'auto',
-                        height: currentState.width && currentState.height ? (currentState.height >= currentState.width ? '70vh' : 'auto') : 'auto',
+                        width: currentState.width && currentState.height ? (currentState.width / currentState.height > 1.4 ? '90%' : 'auto') : 'auto',
+                        height: currentState.width && currentState.height ? (currentState.width / currentState.height <= 0.8 ? '70vh' : 'auto') : 'auto',
+                        minWidth: currentState.width && currentState.height && currentState.width / currentState.height > 0.8 && currentState.width / currentState.height <= 1.4 ? '500px' : 'auto',
                         maxWidth: '90%',
-                        maxHeight: '70vh'
+                        maxHeight: '75vh'
                     }}
                 >
                     <img
