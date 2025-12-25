@@ -243,24 +243,29 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
             const targetRatio = ratios[cropRatio];
             const currentRatio = width / height;
 
-            if (currentRatio > targetRatio) {
-                // Current is wider than target: reduce width
-                newWidth = Math.round(height * targetRatio);
-            } else {
-                // Current is taller than target: reduce height
-                newHeight = Math.round(width / targetRatio);
+            if (Math.abs(currentRatio - targetRatio) > 0.01) {
+                if (currentRatio > targetRatio) {
+                    // Current is wider: reduce width
+                    newWidth = height * targetRatio;
+                } else {
+                    // Current is taller: reduce height
+                    newHeight = width / targetRatio;
+                }
             }
         }
 
+        const finalWidth = Math.round(newWidth);
+        const finalHeight = Math.round(newHeight);
+
         pushState({
             ...currentState,
-            width: newWidth,
-            height: newHeight,
+            width: finalWidth,
+            height: finalHeight,
             mode: 'crop'
         });
 
-        setResizeWidth(newWidth.toString());
-        setResizeHeight(newHeight.toString());
+        setResizeWidth(finalWidth.toString());
+        setResizeHeight(finalHeight.toString());
         setActiveTool('none');
     };
 
@@ -727,20 +732,24 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                     />
 
                     {activeTool === 'crop' && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                             <div
-                                className="border-2 border-[#93B719] shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] transition-all duration-500 ease-in-out relative flex items-center justify-center"
+                                key={cropRatio}
+                                className="border-2 border-[#93B719] shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] transition-all duration-300 relative flex items-center justify-center animate-in zoom-in-95"
                                 style={{
-                                    width: cropRatio === 'custom' ? '70%' :
-                                        cropRatio === 'square' ? '60%' :
-                                            cropRatio === '16:9' ? '95%' : '85%',
-                                    aspectRatio: cropRatio === 'square' ? '1 / 1' :
-                                        cropRatio === '3:2' ? '3 / 2' :
-                                            cropRatio === '4:3' ? '4 / 3' :
-                                                cropRatio === '5:4' ? '5 / 4' :
-                                                    cropRatio === '7:5' ? '7 / 5' :
-                                                        cropRatio === '16:9' ? '16 / 9' : 'auto',
-                                    height: cropRatio === 'custom' ? '70%' : 'auto',
+                                    width: cropRatio === 'square' ? '50%' :
+                                        cropRatio === '3:2' ? '70%' :
+                                            cropRatio === '4:3' ? '65%' :
+                                                cropRatio === '5:4' ? '60%' :
+                                                    cropRatio === '7:5' ? '65%' :
+                                                        cropRatio === '16:9' ? '90%' : '75%',
+                                    aspectRatio: cropRatio === 'square' ? '1/1' :
+                                        cropRatio === '3:2' ? '3/2' :
+                                            cropRatio === '4:3' ? '4/3' :
+                                                cropRatio === '5:4' ? '5/4' :
+                                                    cropRatio === '7:5' ? '7/5' :
+                                                        cropRatio === '16:9' ? '16/9' : '1/1',
+                                    height: 'auto',
                                     maxHeight: '90%',
                                     maxWidth: '90%'
                                 }}
