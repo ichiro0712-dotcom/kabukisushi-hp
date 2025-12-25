@@ -285,16 +285,23 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     const handleEditorMouseDown = (e: React.MouseEvent) => {
         if (activeTool !== 'crop' || cropRatio !== 'custom') return;
 
-        const rect = e.currentTarget.getBoundingClientRect();
-        const startXPercent = ((e.clientX - rect.left) / rect.width) * 100;
-        const startYPercent = ((e.clientY - rect.top) / rect.height) * 100;
+        const container = imageRef.current?.parentElement;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+
+        // Ensure the click is within the image area (with some margin)
+        const x = e.clientX;
+        const y = e.clientY;
+
+        const startXPercent = Math.max(0, Math.min(100, ((x - rect.left) / rect.width) * 100));
+        const startYPercent = Math.max(0, Math.min(100, ((y - rect.top) / rect.height) * 100));
 
         setIsCreatingCrop(true);
         setCropBox({ left: startXPercent, top: startYPercent, width: 0, height: 0 });
         setDragSession({
             type: 'create',
-            startX: e.clientX,
-            startY: e.clientY,
+            startX: x,
+            startY: y,
             startBox: { left: startXPercent, top: startYPercent, width: 0, height: 0 }
         });
     };
