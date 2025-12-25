@@ -88,14 +88,30 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         setResizeHeight(naturalH.toString());
         setOriginalRatio(naturalW / naturalH);
 
-        if (historyIndex === 0 && !currentState.width) {
+        if (!currentState.width) {
             const updatedState = { ...currentState, width: naturalW, height: naturalH };
             setCurrentState(updatedState);
             const newHistory = [...history];
-            newHistory[0] = updatedState;
+            if (newHistory.length > 0) {
+                newHistory[historyIndex >= 0 ? historyIndex : 0] = {
+                    ...newHistory[historyIndex >= 0 ? historyIndex : 0],
+                    width: naturalW,
+                    height: naturalH
+                };
+            }
             setHistory(newHistory);
         }
     };
+
+    // Ensure dimensions are captured even if onLoad is skipped (cached)
+    useEffect(() => {
+        if (isOpen && imageRef.current && imageRef.current.complete) {
+            const img = imageRef.current;
+            if (img.naturalWidth && !currentState.width) {
+                handleImageLoad({ currentTarget: img } as any);
+            }
+        }
+    }, [isOpen, currentState.width]);
 
     // Draw existing drawings on canvas whenever state changes
     useEffect(() => {
@@ -155,7 +171,13 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     };
 
     const handleReset = () => {
-        pushState({ rotation: 0, filter: 'none', drawings: [] });
+        pushState({
+            rotation: 0,
+            filter: 'none',
+            drawings: [],
+            width: parseInt(resizeWidth),
+            height: parseInt(resizeHeight)
+        });
     };
 
     const handleRotate = () => {
@@ -189,10 +211,21 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     };
 
     const handleCropApply = () => {
-        if (!currentState.width || !currentState.height) return;
+        let width = currentState.width;
+        let height = currentState.height;
 
-        let newWidth = currentState.width;
-        let newHeight = currentState.height;
+        // Fallback to natural dimensions if state is missing
+        if (!width || !height) {
+            if (imageRef.current) {
+                width = imageRef.current.naturalWidth;
+                height = imageRef.current.naturalHeight;
+            }
+        }
+
+        if (!width || !height) return;
+
+        let newWidth = width;
+        let newHeight = height;
 
         const ratios: Record<string, number> = {
             'square': 1,
@@ -205,14 +238,14 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
         if (cropRatio !== 'custom' && ratios[cropRatio]) {
             const targetRatio = ratios[cropRatio];
-            const currentRatio = currentState.width / currentState.height;
+            const currentRatio = width / height;
 
             if (targetRatio > currentRatio) {
                 // Target is wider than current: reduce height
-                newHeight = Math.round(currentState.width / targetRatio);
+                newHeight = Math.round(width / targetRatio);
             } else {
                 // Target is taller than current: reduce width
-                newWidth = Math.round(currentState.height * targetRatio);
+                newWidth = Math.round(height * targetRatio);
             }
         }
 
