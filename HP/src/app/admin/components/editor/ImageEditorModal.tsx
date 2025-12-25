@@ -64,8 +64,9 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
     const [startPoint, setStartPoint] = useState<{ x: number, y: number } | null>(null);
 
     const [cropRatio, setCropRatio] = useState<CropRatio>('custom');
-    const [cropBox, setCropBox] = useState({ left: 15, top: 15, width: 70, height: 70 });
+    const [cropBox, setCropBox] = useState({ left: 0, top: 0, width: 0, height: 0 });
     const [dragSession, setDragSession] = useState<{ type: string, startX: number, startY: number, startBox: any } | null>(null);
+    const [isCreatingCrop, setIsCreatingCrop] = useState(false);
 
     // Initialize history
     useEffect(() => {
@@ -281,31 +282,68 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
         });
     };
 
+    const handleEditorMouseDown = (e: React.MouseEvent) => {
+        if (activeTool !== 'crop' || cropRatio !== 'custom') return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const startXPercent = ((e.clientX - rect.left) / rect.width) * 100;
+        const startYPercent = ((e.clientY - rect.top) / rect.height) * 100;
+
+        setIsCreatingCrop(true);
+        setCropBox({ left: startXPercent, top: startYPercent, width: 0, height: 0 });
+        setDragSession({
+            type: 'create',
+            startX: e.clientX,
+            startY: e.clientY,
+            startBox: { left: startXPercent, top: startYPercent, width: 0, height: 0 }
+        });
+    };
+
     const handleEditorMouseMove = (e: React.MouseEvent) => {
         if (!dragSession) return;
 
-        const deltaX = ((e.clientX - dragSession.startX) / (imageRef.current?.parentElement?.clientWidth || 1000)) * 100;
-        const deltaY = ((e.clientY - dragSession.startY) / (imageRef.current?.parentElement?.clientHeight || 800)) * 100;
+        const container = imageRef.current?.parentElement;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+
+        const deltaX = ((e.clientX - dragSession.startX) / rect.width) * 100;
+        const deltaY = ((e.clientY - dragSession.startY) / rect.height) * 100;
 
         const newBox = { ...dragSession.startBox };
 
-        if (dragSession.type === 'move') {
+        if (dragSession.type === 'create') {
+            if (deltaX > 0) {
+                newBox.width = Math.min(100 - newBox.left, deltaX);
+            } else {
+                newBox.left = Math.max(0, dragSession.startBox.left + deltaX);
+                newBox.width = Math.abs(deltaX);
+            }
+
+            if (deltaY > 0) {
+                newBox.height = Math.min(100 - newBox.top, deltaY);
+            } else {
+                newBox.top = Math.max(0, dragSession.startBox.top + deltaY);
+                newBox.height = Math.abs(deltaY);
+            }
+        } else if (dragSession.type === 'move') {
             newBox.left = Math.max(0, Math.min(100 - newBox.width, dragSession.startBox.left + deltaX));
             newBox.top = Math.max(0, Math.min(100 - newBox.height, dragSession.startBox.top + deltaY));
         } else if (dragSession.type.includes('right')) {
-            newBox.width = Math.max(10, Math.min(100 - newBox.left, dragSession.startBox.width + deltaX));
+            newBox.width = Math.max(5, Math.min(100 - newBox.left, dragSession.startBox.width + deltaX));
         } else if (dragSession.type.includes('left')) {
-            const possibleX = Math.max(0, Math.min(dragSession.startBox.left + dragSession.startBox.width - 10, dragSession.startBox.left + deltaX));
+            const possibleX = Math.max(0, Math.min(dragSession.startBox.left + dragSession.startBox.width - 5, dragSession.startBox.left + deltaX));
             newBox.width = dragSession.startBox.width + (dragSession.startBox.left - possibleX);
             newBox.left = possibleX;
         }
 
-        if (dragSession.type.includes('bottom')) {
-            newBox.height = Math.max(10, Math.min(100 - newBox.top, dragSession.startBox.height + deltaY));
-        } else if (dragSession.type.includes('top')) {
-            const possibleY = Math.max(0, Math.min(dragSession.startBox.top + dragSession.startBox.height - 10, dragSession.startBox.top + deltaY));
-            newBox.height = dragSession.startBox.height + (dragSession.startBox.top - possibleY);
-            newBox.top = possibleY;
+        if (dragSession.type !== 'create') {
+            if (dragSession.type.includes('bottom')) {
+                newBox.height = Math.max(5, Math.min(100 - newBox.top, dragSession.startBox.height + deltaY));
+            } else if (dragSession.type.includes('top')) {
+                const possibleY = Math.max(0, Math.min(dragSession.startBox.top + dragSession.startBox.height - 5, dragSession.startBox.top + deltaY));
+                newBox.height = dragSession.startBox.height + (dragSession.startBox.top - possibleY);
+                newBox.top = possibleY;
+            }
         }
 
         setCropBox(newBox);
@@ -313,6 +351,7 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
     const handleEditorMouseUp = () => {
         setDragSession(null);
+        setIsCreatingCrop(false);
     };
 
     const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -744,7 +783,8 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
 
             {/* Editing Canvas Area */}
             <div
-                className="flex-1 bg-[#151515] flex items-center justify-center p-12 overflow-hidden relative"
+                className={`flex-1 bg-[#151515] flex items-center justify-center p-12 overflow-hidden relative ${activeTool === 'crop' && cropRatio === 'custom' ? 'cursor-crosshair' : ''}`}
+                onMouseDown={handleEditorMouseDown}
                 onMouseMove={handleEditorMouseMove}
                 onMouseUp={handleEditorMouseUp}
                 onMouseLeave={handleEditorMouseUp}
@@ -786,9 +826,17 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                             <div
                                 key={cropRatio}
-                                onMouseDown={(e) => cropRatio === 'custom' && handleCropBoxMouseDown(e, 'move')}
-                                className={`border-2 border-[#93B719] shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] transition-all duration-300 relative flex items-center justify-center ${cropRatio === 'custom' ? 'pointer-events-auto cursor-move' : ''}`}
+                                onMouseDown={(e) => {
+                                    if (cropRatio === 'custom') {
+                                        e.stopPropagation();
+                                        handleCropBoxMouseDown(e, 'move');
+                                    }
+                                }}
+                                className={`border border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] transition-all duration-300 relative flex items-center justify-center ${cropRatio === 'custom' ? 'pointer-events-auto cursor-move' : ''}`}
                                 style={{
+                                    borderStyle: cropRatio === 'custom' ? 'dashed' : 'solid',
+                                    borderWidth: cropRatio === 'custom' ? '1px' : '2px',
+                                    borderColor: cropRatio === 'custom' ? 'rgba(255,255,255,0.8)' : '#93B719',
                                     left: cropRatio === 'custom' ? `${cropBox.left}%` : 'auto',
                                     top: cropRatio === 'custom' ? `${cropBox.top}%` : 'auto',
                                     width: cropRatio === 'custom' ? `${cropBox.width}%` :
@@ -806,9 +854,10 @@ export default function ImageEditorModal({ isOpen, onClose, imageUrl, onSave }: 
                                                         cropRatio === '16:9' ? '16/9' :
                                                             cropRatio === 'custom' ? 'none' : '1/1',
                                     height: cropRatio === 'custom' ? `${cropBox.height}%` : 'auto',
-                                    maxHeight: '95%',
-                                    maxWidth: '95%',
-                                    position: cropRatio === 'custom' ? 'absolute' : 'relative'
+                                    maxHeight: '100%',
+                                    maxWidth: '100%',
+                                    position: cropRatio === 'custom' ? 'absolute' : 'relative',
+                                    display: cropRatio === 'custom' && cropBox.width === 0 ? 'none' : 'flex'
                                 }}
                             >
                                 {/* Crop Handles */}
