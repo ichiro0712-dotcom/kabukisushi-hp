@@ -838,9 +838,9 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
                             <ImageWithFallback
-                                src="/assets/honten_card.png"
+                                src="/assets/honten_card_new.jpg"
                                 alt="KABUKI寿司 本店"
-                                className="w-full h-48 object-cover rounded-lg mb-4"
+                                className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
                             />
                             <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#fcebc5]">■KABUKI寿司 本店</h3>
                             <div className="space-y-2 text-[#e8eaec]">
@@ -854,9 +854,9 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
 
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
                             <ImageWithFallback
-                                src="https://images.unsplash.com/photo-1651977560790-42e0c5cf2ba2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&h=400&auto=format&q=80"
+                                src="/assets/soba_card_new.jpg"
                                 alt="KABUKI SOBA"
-                                className="w-full h-48 object-cover rounded-lg mb-4"
+                                className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
                             />
                             <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#fcebc5]">■KABUKI SOBA</h3>
                             <div className="space-y-2 text-[#e8eaec]">
