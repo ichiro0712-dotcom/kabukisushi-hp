@@ -20,7 +20,7 @@ const DEFAULT_BACKGROUND_SETTINGS: Record<string, BackgroundConfig> = {
     gallery: { type: 'color', value: '#E8EAEC' },
     access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
     menu: { type: 'color', value: '#f5f5f5' },
-    affiliated: { type: 'image', value: 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80' },
+    affiliated: { type: 'image', value: '/assets/honten_hero.jpg' },
     footer: { type: 'color', value: '#1C1C1C' }
 };
 
