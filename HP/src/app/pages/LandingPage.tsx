@@ -838,7 +838,7 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
                             <ImageWithFallback
-                                src="https://images.unsplash.com/photo-1651977560790-42e0c5cf2ba2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&h=400&auto=format&q=80"
+                                src="/assets/honten_card.png"
                                 alt="KABUKI寿司 本店"
                                 className="w-full h-48 object-cover rounded-lg mb-4"
                             />
