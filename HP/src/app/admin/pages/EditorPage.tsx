@@ -64,7 +64,7 @@ export default function EditorPage() {
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
         home: { type: 'image', value: '/assets/home_hero.jpg' },
-        about: { type: 'color', value: '#ffffff' },
+        about: { type: 'color', value: '#ffffff', textTheme: 'dark' },
         gallery: { type: 'color', value: '#E8EAEC' },
         access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
         menu: { type: 'color', value: '#f5f5f5' },

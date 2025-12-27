@@ -432,15 +432,15 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                 {isEditing && <SectionToolbar sectionId="about" />}
                 <div className={`mx-auto ${getContainerWidthClass('about')}`}>
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4">ABOUT US</h2>
-                    <div className="grid md:grid-cols-2 gap-12 items-center mt-12">
-                        <div>
+                    <div className="flex flex-col items-center gap-12 mt-12">
+                        <div className="w-full max-w-4xl">
                             <ImageWithFallback
-                                src="https://images.unsplash.com/photo-1651977560790-42e0c5cf2ba2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdXNoaSUyMHJlc3RhdXJhbnQlMjBpbnRlcmlvcnxlbnwxfHx8fDE3NjYwNjUxODJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                                src="/assets/about_content_new.jpg"
                                 alt="KABUKI寿司 1番通り店"
                                 className="rounded-lg shadow-xl w-full h-auto"
                             />
                         </div>
-                        <div className="space-y-4" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
+                        <div className="space-y-4 text-center max-w-3xl mx-auto" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
                             <p className="text-lg">KABUKI寿司の2号店となる <strong>「KABUKI寿司 1番通り店」</strong> をオープンいたしました。</p>
                             <p>1番通り店では、これまでの伝統を受け継ぎながらも、さらなる進化を目指しています。</p>
                             <p>店主を務めるのは、<strong>新進気鋭の若手寿司職人増田</strong>。</p>
@@ -464,12 +464,24 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                 <div className={`mx-auto ${getContainerWidthClass('gallery')}`}>
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#1C1C1C]">Gallery</h2>
                     <p className="text-center text-gray-600 mb-12">Photos from our restaurant.</p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {[
+                            '/assets/gallery_2.jpg',
+                            '/assets/gallery_4.jpg',
+                            '/assets/gallery_3.jpg',
+                            '/assets/gallery_5.jpg',
+                            '/assets/gallery_1.jpg',
+                            '/assets/gallery_6.jpg',
+                            '/assets/gallery_7.jpg',
+                            '/assets/gallery_8.jpg',
+                            '/assets/gallery_9.jpg',
+                            '/assets/gallery_10.jpg',
+                            '/assets/gallery_11.jpg',
+                        ].map((src, i) => (
                             <div key={i} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow">
                                 <ImageWithFallback
-                                    src={`https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&h=400&auto=format&q=80`}
-                                    alt={`Gallery ${i}`}
+                                    src={src}
+                                    alt={`Gallery ${i + 1}`}
                                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                 />
                             </div>
@@ -511,7 +523,7 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                         </div>
                         <div className="rounded-lg overflow-hidden shadow-xl">
                             <ImageWithFallback
-                                src="https://images.unsplash.com/photo-1638866381709-071747b518c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&h=450&auto=format&q=80"
+                                src="/assets/access_map.jpg"
                                 alt="Map"
                                 className="w-full h-auto"
                             />
@@ -560,42 +572,42 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {[
-                                { name: '赤身', price: '550' },
-                                { name: '中トロ', price: '780' },
-                                { name: '大トロ', price: '880' },
-                                { name: '大トロ炙り', price: '880' },
-                                { name: '海ぶどうトロ手巻き', price: '880' },
-                                { name: 'タイ', price: '480' },
-                                { name: '金目鯛', price: '550' },
-                                { name: 'カマス', price: '550' },
-                                { name: 'サワラ', price: '550' },
-                                { name: 'ブリ', price: '550' },
-                                { name: 'アジ', price: '450' },
-                                { name: 'カツオ', price: '500', soldOut: true },
-                                { name: 'サーモン', price: '450' },
-                                { name: '炙りサーモン', price: '450' },
-                                { name: '車海老', price: '980' },
-                                { name: '車海老カダイフ揚げ', price: '1300' },
-                                { name: '生海老漬け', price: '480' },
-                                { name: 'イカ', price: '550' },
-                                { name: '水タコ', price: '550' },
-                                { name: 'ホタテ', price: '600' },
-                                { name: '赤貝', price: '850' },
-                                { name: 'えんがわ', price: '550' },
-                                { name: 'ウナギドック', price: '680' },
-                                { name: '穴子', price: '680' },
-                                { name: 'ノドグロドック', price: '900' },
-                                { name: 'タチウオドック', price: '700', soldOut: true },
-                                { name: 'とびっこ', price: '400' },
-                                { name: '白子軍艦', price: '550' },
-                                { name: 'いくら', price: '600' },
-                                { name: 'ウニ', price: '880' },
-                                { name: '玉子', price: '350' },
-                                { name: '芽ネギ', price: '350' },
+                                { name: '赤身', price: '550', image: '/assets/nigiri_akami.jpg' },
+                                { name: '中トロ', price: '780', image: '/assets/nigiri_chutoro.jpg' },
+                                { name: '大トロ', price: '880', image: '/assets/nigiri_otoro.jpg' },
+                                { name: '大トロ炙り', price: '880', image: '/assets/nigiri_otoroaburi.jpg' },
+                                { name: '海ぶどうトロ手巻き', price: '880', image: '/assets/nigiri_budo_toro_maki.jpg' },
+                                { name: 'タイ', price: '480', image: '/assets/nigiri_tai.jpg' },
+                                { name: '金目鯛', price: '550', image: '/assets/nigiri_kinmedai.jpg' },
+                                { name: 'カマス', price: '550', image: '/assets/nigiri_kamasu.jpg' },
+                                { name: 'サワラ', price: '550', image: '/assets/nigiri_sawara.jpg' },
+                                { name: 'ブリ', price: '550', image: '/assets/nigiri_buri.jpg' },
+                                { name: 'アジ', price: '450', image: '/assets/nigiri_aji.jpg' },
+                                { name: 'カツオ', price: '500', soldOut: true, image: '/assets/nigiri_katsuo.jpg' },
+                                { name: 'サーモン', price: '450', image: '/assets/nigiri_samon.jpg' },
+                                { name: '炙りサーモン', price: '450', image: '/assets/nigiri_aburisamon.jpg' },
+                                { name: '車海老', price: '980', image: '/assets/nigiri_ebi.jpg' },
+                                { name: '車海老カダイフ揚げ', price: '1300', image: '/assets/nigiri_ebidokku.jpeg' },
+                                { name: '生海老漬け', price: '480', image: '/assets/nigiri_ebiduke.jpg' },
+                                { name: 'イカ', price: '550', image: '/assets/nigiri_ika.jpg' },
+                                { name: '水タコ', price: '550', image: '/assets/nigiri_tako.jpg' },
+                                { name: 'ホタテ', price: '600', image: '/assets/nigiri_hotate.jpg' },
+                                { name: '赤貝', price: '850', image: '/assets/nigiri_akagai.jpg' },
+                                { name: 'えんがわ', price: '550', image: '/assets/nigiri_engawa.jpg' },
+                                { name: 'ウナギドック', price: '680', image: '/assets/nigiri_unagi.jpg' },
+                                { name: '穴子', price: '680', image: '/assets/nigiri_anago.jpg' },
+                                { name: 'ノドグロドック', price: '900', image: '/assets/nigiri_nodogurodokku.jpg' },
+                                { name: 'タチウオドック', price: '700', image: '/assets/nigiri_tachiuodokku.jpg' },
+                                { name: 'とびっこ', price: '400', image: '/assets/nigiri_tobikko.jpg' },
+                                { name: '白子軍艦', price: '550', image: '/assets/nigiri_shirako.jpg' },
+                                { name: 'いくら', price: '600', image: '/assets/nigiri_ikura.jpg' },
+                                { name: 'ウニ', price: '880', image: '/assets/nigiri_uni.jpg' },
+                                { name: '玉子', price: '350', image: '/assets/nigiri_tamago.jpg' },
+                                { name: '芽ネギ', price: '350', image: '/assets/nigiri_menegi.jpg' },
                             ].map((item, index) => (
                                 <div key={index} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
                                     <ImageWithFallback
-                                        src="https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80"
+                                        src={(item as any).image || "https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80"}
                                         alt={item.name}
                                         className="w-full h-48 object-cover rounded mb-3"
                                     />
@@ -616,16 +628,16 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {[
-                                { name: 'トロたく巻き', price: '1200' },
-                                { name: 'ネギトロ巻き', price: '1000' },
-                                { name: '鉄火巻き', price: '1200' },
-                                { name: 'ウニトロ巻き', price: '2000' },
-                                { name: 'カッパ巻き', price: '650' },
-                                { name: 'かんぴょう巻き', price: '650' },
+                                { name: 'トロたく巻き', price: '1200', image: '/assets/makimono_torotaku.jpg' },
+                                { name: 'ネギトロ巻き', price: '1000', image: '/assets/makimono_negitoro.jpg' },
+                                { name: '鉄火巻き', price: '1200', image: '/assets/makimono_tekka.jpg' },
+                                { name: 'ウニトロ巻き', price: '2000', image: '/assets/makimono_unitoro.jpg' },
+                                { name: 'カッパ巻き', price: '650', image: '/assets/makimono_kappa.jpg' },
+                                { name: 'かんぴょう巻き', price: '650', image: '/assets/makimono_kanpyou.jpg' },
                             ].map((item, index) => (
                                 <div key={index} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
                                     <ImageWithFallback
-                                        src="https://images.unsplash.com/photo-1712725214706-e564b8dd1bbe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80"
+                                        src={(item as any).image || "https://images.unsplash.com/photo-1712725214706-e564b8dd1bbe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80"}
                                         alt={item.name}
                                         className="w-full h-48 object-cover rounded mb-3"
                                     />
@@ -643,20 +655,27 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {[
-                                { name: '味噌汁', price: '350' },
-                                { name: '茶碗蒸し', price: '650' },
-                                { name: '刺身盛り合わせ', price: '2000', note: '※その他(赤身だけ3人前、おまかせ3種類2人前)など、お客様のご要望あれば、お気軽にお申し付けください。' },
-                                { name: 'カニつまみ', price: '980' },
-                                { name: '白子（ポン酢・天ぷら）', price: '1300' },
-                                { name: '生牡蠣', price: '750' },
-                                { name: '海鮮ユッケ', price: '980' },
-                                { name: 'マグロカマ焼き', price: '3200' },
-                                { name: 'サーモンハラス焼き', price: '1800' },
-                                { name: 'タチウオ塩焼き', price: '980' },
-                                { name: 'つまみ玉子', price: '680' },
-                                { name: '大福アイス', price: '580' },
+                                { name: '味噌汁', price: '350', image: '/assets/ippin_misoshiru.jpg' },
+                                { name: '茶碗蒸し', price: '650', image: '/assets/ippin_chawanmushi.jpg' },
+                                { name: '刺身盛り合わせ', price: '2000', note: '※その他(赤身だけ3人前、おまかせ3種類2人前)など、お客様のご要望あれば、お気軽にお申し付けください。', image: '/assets/ippin_sashimori.jpg' },
+                                { name: 'カニつまみ', price: '980', image: '/assets/ippin_kanitsuami.jpg' },
+                                { name: '白子（ポン酢・天ぷら）', price: '1300', image: '/assets/ippin_shirapon.jpg' },
+                                { name: '生牡蠣', price: '750', image: '/assets/ippin_namagaki.jpg' },
+                                { name: '海鮮ユッケ', price: '980', image: '/assets/ippin_kaisenyukke.jpg' },
+                                { name: 'マグロカマ焼き', price: '3200', image: '/assets/ippin_kamayai.jpg' },
+                                { name: 'サーモンハラス焼き', price: '1800', image: '/assets/ippin_harasuyaki.jpg' },
+                                { name: 'タチウオ塩焼き', price: '980', image: '/assets/ippin_tachiuoyaki.jpg' },
+                                { name: 'つまみ玉子', price: '680', image: '/assets/ippin_tsumatama.jpg' },
+                                { name: '大福アイス', price: '580', image: '/assets/ippin_ice.jpg' },
                             ].map((item, index) => (
                                 <div key={index} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
+                                    {(item as any).image && (
+                                        <ImageWithFallback
+                                            src={(item as any).image}
+                                            alt={item.name}
+                                            className="w-full h-48 object-cover rounded mb-3"
+                                        />
+                                    )}
                                     <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="font-bold text-lg text-[#1C1C1C] mb-2">{item.name}</h4>
                                     <p className="text-[#deb55a] font-bold mb-2">¥{item.price}</p>
                                     {item.note && <p className="text-sm text-gray-600">{item.note}</p>}
@@ -670,28 +689,101 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                         <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">Drink</h3>
                         <p className="text-center text-gray-600 mb-8">お飲み物</p>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="max-w-4xl mx-auto space-y-8">
+                            {/* Sake Section */}
                             <div className="bg-white rounded-lg shadow-lg p-6">
                                 <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">日本酒（１合）</h4>
-                                <ul className="space-y-2">
-                                    <li className="flex justify-between"><span>黒龍　福井</span><span className="text-[#deb55a] font-bold">¥1,800</span></li>
-                                    <li className="flex justify-between"><span>三井の寿　福岡</span><span className="text-[#deb55a] font-bold">¥1,500</span></li>
-                                    <li className="flex justify-between"><span>日高見　宮城</span><span className="text-[#deb55a] font-bold">¥1,500</span></li>
-                                    <li className="flex justify-between"><span>ゼブラ　山形</span><span className="text-[#deb55a] font-bold">¥3,500</span></li>
-                                </ul>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {[
+                                        { name: '写楽 福島', price: '2000', image: '/assets/drink_sharaku.jpg' },
+                                        { name: '三井の寿 福岡', price: '1500', image: '/assets/drink_miinokotobuki.jpg' },
+                                        { name: '日高見 宮城', price: '1500', image: '/assets/drink_hitakami.jpg' },
+                                        { name: 'ゼブラ 山形', price: '2000', image: '/assets/drink_zebra.jpg' },
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex flex-col items-center">
+                                            <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm">
+                                                <ImageWithFallback
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="font-bold text-sm text-[#1C1C1C]">{item.name}</p>
+                                                <p className="text-[#deb55a] font-bold text-sm">¥{item.price}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
-                            <div className="bg-white rounded-lg shadow-lg p-6">
-                                <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">ビール・焼酎・その他</h4>
-                                <ul className="space-y-2 text-sm">
-                                    <li className="flex justify-between"><span>サントリー プレミアムモルツ生</span><span className="text-[#deb55a] font-bold">¥880</span></li>
-                                    <li className="flex justify-between"><span>サッポロラガー中瓶</span><span className="text-[#deb55a] font-bold">¥900</span></li>
-                                    <li className="flex justify-between"><span>角ハイボール</span><span className="text-[#deb55a] font-bold">¥770</span></li>
-                                    <li className="flex justify-between"><span>富乃宝山(芋)</span><span className="text-[#deb55a] font-bold">¥880</span></li>
-                                    <li className="flex justify-between"><span>吉四六(麦)</span><span className="text-[#deb55a] font-bold">¥880</span></li>
-                                    <li className="flex justify-between"><span>鳥飼(米)</span><span className="text-[#deb55a] font-bold">¥880</span></li>
-                                    <li className="flex justify-between"><span>グラスワイン(赤・白)</span><span className="text-[#deb55a] font-bold">¥1,000〜</span></li>
-                                </ul>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                {/* Alcohol Section */}
+                                <div className="bg-white rounded-lg shadow-lg p-6">
+                                    <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">アルコール</h4>
+                                    <div className="space-y-4 text-sm">
+                                        <ul className="space-y-2">
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">サントリー プレミアムモルツ生</span><span className="text-[#deb55a] font-bold">／880</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">サッポロラガー中瓶</span><span className="text-[#deb55a] font-bold">／900</span></li>
+                                        </ul>
+
+                                        <ul className="space-y-2 border-t pt-4">
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">角ハイボール</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">知多</span><span className="text-[#deb55a] font-bold">／1600</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">白州</span><span className="text-[#deb55a] font-bold">／1800</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">山﨑</span><span className="text-[#deb55a] font-bold">／1800</span></li>
+                                        </ul>
+
+                                        <ul className="space-y-2 border-t pt-4">
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">ガリサワー</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">レモンサワー</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">濃厚緑茶ハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">さんぴん茶ハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">ウーロンハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">コーン茶ハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                        </ul>
+
+                                        <div className="border-t pt-4">
+                                            <p className="font-bold text-[#1C1C1C] mb-2 text-xs">グラスワイン</p>
+                                            <li className="flex justify-between list-none"><span className="text-[#1C1C1C]">赤・白</span><span className="text-[#deb55a] font-bold">／1000〜1300</span></li>
+                                        </div>
+
+                                        <div className="border-t pt-4">
+                                            <p className="font-bold text-[#1C1C1C] mb-2 text-xs">ボトルワイン</p>
+                                            <li className="flex justify-between list-none"><span className="text-[#1C1C1C]">白・ヴェルメンティーノ・グアド・アル・タッソ</span><span className="text-[#deb55a] font-bold">／10000</span></li>
+                                        </div>
+
+                                        <div className="border-t pt-4">
+                                            <p className="font-bold text-[#1C1C1C] mb-2 text-xs">シャンパン</p>
+                                            <li className="flex justify-between list-none"><span className="text-[#1C1C1C]">ペリエ ジュエ グラン ブリュット</span><span className="text-[#deb55a] font-bold">／25000</span></li>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-8">
+                                    {/* Shochu Section */}
+                                    <div className="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">焼酎・泡盛・ハブ酒</h4>
+                                        <ul className="space-y-2 text-sm">
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">富乃宝山(芋)</span><span className="text-[#deb55a] font-bold">／880</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">吉四六(麦)</span><span className="text-[#deb55a] font-bold">／880</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">鳥飼(米)</span><span className="text-[#deb55a] font-bold">／880</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">残波白（泡盛)</span><span className="text-[#deb55a] font-bold">／770</span></li>
+                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">ハブ酒ショット</span><span className="text-[#deb55a] font-bold">／1000</span></li>
+                                        </ul>
+                                    </div>
+
+                                    {/* Others Section */}
+                                    <div className="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">その他</h4>
+                                        <ul className="space-y-2 text-sm">
+                                            <li className="flex justify-between">
+                                                <span className="text-[#1C1C1C]">さんぴん茶、ウーロン茶、緑茶、<br />コーン茶、コカ・コーラ、炭酸水</span>
+                                                <span className="text-[#deb55a] font-bold whitespace-nowrap">各種 ¥500</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
