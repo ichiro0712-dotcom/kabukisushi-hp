@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenterVertical, RotateCcw } from 'lucide-react';
+import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 
@@ -400,10 +400,12 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                 {/* Original hardcoded overlay - conditionally render if no config overlay is active to preserve default look until edited */}
                 {(!backgroundSettings?.['home']?.overlayOpacity) && <div className="absolute inset-0 bg-black/60"></div>}
                 <div className={`relative z-10 text-center mx-auto ${getContainerWidthClass('home')}`}>
-                    <div className="mb-8">
-                        <div className="w-48 h-32 mx-auto mb-4 bg-[#deb55a]/10 rounded flex items-center justify-center">
-                            <span style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-[#fcebc5]">KABUKI</span>
-                        </div>
+                    <div className="mb-8 flex justify-center">
+                        <ImageWithFallback
+                            src="/assets/logo.png"
+                            alt="KABUKI寿司 1番通り店 ロゴ"
+                            className="w-auto h-32 md:h-40 object-contain"
+                        />
                     </div>
                     <div className="space-y-6">
                         <a
@@ -603,7 +605,7 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {[
-                                { name: '赤身', price: '550', image: '/assets/nigiri_akami.jpg' },
+                                { name: 'てすと', price: '550', image: '/assets/nigiri_akami.jpg' },
                                 { name: '中トロ', price: '780', image: '/assets/nigiri_chutoro.jpg' },
                                 { name: '大トロ', price: '880', image: '/assets/nigiri_otoro.jpg' },
                                 { name: '大トロ炙り', price: '880', image: '/assets/nigiri_otoroaburi.jpg' },
@@ -614,7 +616,7 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                                 { name: 'サワラ', price: '550', image: '/assets/nigiri_sawara.jpg' },
                                 { name: 'ブリ', price: '550', image: '/assets/nigiri_buri.jpg' },
                                 { name: 'アジ', price: '450', image: '/assets/nigiri_aji.jpg' },
-                                { name: 'カツオ', price: '500', soldOut: true, image: '/assets/nigiri_katsuo.jpg' },
+                                { name: 'カツオ', price: '500', image: '/assets/nigiri_katsuo.jpg' },
                                 { name: 'サーモン', price: '450', image: '/assets/nigiri_samon.jpg' },
                                 { name: '炙りサーモン', price: '450', image: '/assets/nigiri_aburisamon.jpg' },
                                 { name: '車海老', price: '980', image: '/assets/nigiri_ebi.jpg' },
@@ -644,7 +646,7 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                                     />
                                     <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="font-bold text-lg text-[#1C1C1C]">
                                         {item.name}
-                                        {item.soldOut && <span className="text-red-600 text-sm ml-2">売り切れ</span>}
+                                        {(item as any).soldOut && <span className="text-red-600 text-sm ml-2">売り切れ</span>}
                                     </h4>
                                     <p className="text-[#deb55a] font-bold">¥{item.price}</p>
                                 </div>
@@ -866,6 +868,15 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                             </div>
                         </div>
                     </div>
+
+                    {/* New Map Image */}
+                    <div className="mt-8 rounded-lg overflow-hidden shadow-xl max-w-4xl mx-auto">
+                        <ImageWithFallback
+                            src="/assets/affiliated_map.jpg"
+                            alt="Affiliated Stores Map"
+                            className="w-full h-auto"
+                        />
+                    </div>
                 </div>
             </section>
             {/* Footer */}
@@ -878,12 +889,38 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                 {renderBackgroundContent('footer')}
                 {isEditing && <SectionToolbar sectionId="footer" />}
                 <div className={`mx-auto text-center ${getContainerWidthClass('footer')}`}>
-                    <p style={{ fontFamily: "'Bad Script', cursive" }} className="text-2xl mb-2 text-[#fcebc5]">KABUKI寿司 1番通り店</p>
-                    <p className="text-sm text-gray-400">© 2024 KABUKI Sushi. All rights reserved.</p>
-                    <div className="mt-4">
-                        <a href="/admin/dashboard" className="text-xs text-gray-600 hover:text-[#deb55a] transition-colors">
-                            管理画面へ
+                    <div className="flex justify-center gap-6 mb-8">
+                        <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                            <Instagram size={20} />
                         </a>
+                        <a href="https://www.tiktok.com/@kabukisushi1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                            <Music2 size={20} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=100068484907117&locale=hi_IN" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                            <Facebook size={20} />
+                        </a>
+                        <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                            <Youtube size={20} />
+                        </a>
+                        <a href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                            <Link size={20} />
+                        </a>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-4 mb-8">
+                        <div className="flex items-center gap-2 text-[#e8eaec]">
+                            <Phone size={18} className="text-[#deb55a]" />
+                            <span className="text-lg font-semibold">0363021477</span>
+                        </div>
+                    </div>
+
+                    <div className="text-sm text-gray-400 space-y-4">
+                        <p>Restaurant © 2019</p>
+                        <div>
+                            <a href="/admin/dashboard" className="text-xs text-gray-600 hover:text-[#deb55a] transition-colors">
+                                管理画面へ
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>
