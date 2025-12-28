@@ -409,7 +409,7 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                     </div>
                     <div className="space-y-6">
                         <a
-                            href="https://grizzle-giraffe-1fgdjb.mystrikingly.com/traveler"
+                            href="/traveler"
                             style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
                             className="inline-block px-6 py-2 text-sm text-[#e8eaec] hover:text-[#deb55a] transition-colors border border-[#e8eaec]/30 rounded hover:border-[#deb55a]"
                         >
@@ -605,18 +605,15 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {[
-                                { name: 'てすと', price: '550', image: '/assets/nigiri_akami.jpg' },
+                                { name: '赤身', price: '550', image: '/assets/nigiri_akami.jpg' },
                                 { name: '中トロ', price: '780', image: '/assets/nigiri_chutoro.jpg' },
                                 { name: '大トロ', price: '880', image: '/assets/nigiri_otoro.jpg' },
                                 { name: '大トロ炙り', price: '880', image: '/assets/nigiri_otoroaburi.jpg' },
                                 { name: '海ぶどうトロ手巻き', price: '880', image: '/assets/nigiri_budo_toro_maki.jpg' },
                                 { name: 'タイ', price: '480', image: '/assets/nigiri_tai.jpg' },
-                                { name: '金目鯛', price: '550', image: '/assets/nigiri_kinmedai.jpg' },
-                                { name: 'カマス', price: '550', image: '/assets/nigiri_kamasu.jpg' },
                                 { name: 'サワラ', price: '550', image: '/assets/nigiri_sawara.jpg' },
                                 { name: 'ブリ', price: '550', image: '/assets/nigiri_buri.jpg' },
                                 { name: 'アジ', price: '450', image: '/assets/nigiri_aji.jpg' },
-                                { name: 'カツオ', price: '500', image: '/assets/nigiri_katsuo.jpg' },
                                 { name: 'サーモン', price: '450', image: '/assets/nigiri_samon.jpg' },
                                 { name: '炙りサーモン', price: '450', image: '/assets/nigiri_aburisamon.jpg' },
                                 { name: '車海老', price: '980', image: '/assets/nigiri_ebi.jpg' },
@@ -634,7 +631,6 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                                 { name: 'とびっこ', price: '400', image: '/assets/nigiri_tobikko.jpg' },
                                 { name: '白子軍艦', price: '550', image: '/assets/nigiri_shirako.jpg' },
                                 { name: 'いくら', price: '600', image: '/assets/nigiri_ikura.jpg' },
-                                { name: 'ウニ', price: '880', image: '/assets/nigiri_uni.jpg' },
                                 { name: '玉子', price: '350', image: '/assets/nigiri_tamago.jpg' },
                                 { name: '芽ネギ', price: '350', image: '/assets/nigiri_menegi.jpg' },
                             ].map((item, index) => (
@@ -664,7 +660,6 @@ export function LandingPage({ isEditing = false, onSectionSelect, onBackgroundEd
                                 { name: 'トロたく巻き', price: '1200', image: '/assets/makimono_torotaku.jpg' },
                                 { name: 'ネギトロ巻き', price: '1000', image: '/assets/makimono_negitoro.jpg' },
                                 { name: '鉄火巻き', price: '1200', image: '/assets/makimono_tekka.jpg' },
-                                { name: 'ウニトロ巻き', price: '2000', image: '/assets/makimono_unitoro.jpg' },
                                 { name: 'カッパ巻き', price: '650', image: '/assets/makimono_kappa.jpg' },
                                 { name: 'かんぴょう巻き', price: '650', image: '/assets/makimono_kanpyou.jpg' },
                             ].map((item, index) => (

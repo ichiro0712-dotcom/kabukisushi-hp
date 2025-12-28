@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
+import { TravelerPage } from './pages/TravelerPage';
 import { AdminLayout } from './admin/layouts/AdminLayout';
 import { DashboardPage } from './admin/pages/DashboardPage';
 import { LoginPage } from './admin/pages/LoginPage';
@@ -16,6 +17,7 @@ export default function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/traveler" element={<TravelerPage />} />
 
             {/* Admin Routes */}
             <Route path="/admin/login" element={<LoginPage />} />
