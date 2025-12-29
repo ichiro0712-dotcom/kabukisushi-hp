@@ -179,3 +179,68 @@
     line-height: 1.5;
   }
 }
+
+/* Custom Repeatable Delete Button Styles */
+.s-repeatable-delete-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  cursor: pointer;
+  background-color: #d4183d;
+  border-radius: 4px;
+  color: white;
+  font-family: sans-serif;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.s-repeatable-delete-button:hover {
+  background-color: #e61c44;
+  transform: scale(1.05);
+}
+
+.s-repeatable-delete-button::before {
+  content: "✕";
+  font-size: 16px;
+  font-weight: bold;
+  transition: opacity 0.2s ease;
+}
+
+.s-repeatable-delete-button.is-confirming {
+  width: auto;
+  min-width: 90px;
+  padding: 0 12px;
+  background-color: #d4183d;
+}
+
+.s-repeatable-delete-button.is-confirming::before {
+  display: none;
+}
+
+.delete-button-wrap {
+  display: none;
+}
+
+.s-repeatable-delete-button.is-confirming .delete-button-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.delete-button-confirm {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: bold;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(5px); }
+  to { opacity: 1; transform: translateX(0); }
+}
