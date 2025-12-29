@@ -94,6 +94,9 @@ export default function EditorPage() {
     // Text settings state
     const [textSettings, setTextSettings] = useState<Record<string, Record<string, string>>>(DEFAULT_TEXT_SETTINGS);
 
+    const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
+    const updateLastSaved = () => setLastSavedTime(new Date());
+
     // History state for Undo/Redo
     const [past, setPast] = useState<any[]>([]);
     const [future, setFuture] = useState<any[]>([]);
@@ -139,6 +142,7 @@ export default function EditorPage() {
         localStorage.setItem('site_layout_settings', JSON.stringify(previousState.layoutSettings));
         localStorage.setItem('site_text_settings', JSON.stringify(previousState.textSettings));
         window.dispatchEvent(new Event('storage'));
+        updateLastSaved();
     };
 
     const redo = () => {
@@ -166,6 +170,7 @@ export default function EditorPage() {
         localStorage.setItem('site_layout_settings', JSON.stringify(nextState.layoutSettings));
         localStorage.setItem('site_text_settings', JSON.stringify(nextState.textSettings));
         window.dispatchEvent(new Event('storage'));
+        updateLastSaved();
     };
 
 
@@ -822,6 +827,7 @@ export default function EditorPage() {
                                 localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
                                 localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
                                 window.dispatchEvent(new Event('storage'));
+                                updateLastSaved();
                                 alert('保存しました!');
                             }}
                             className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
@@ -829,16 +835,9 @@ export default function EditorPage() {
                             保存
                         </button>
 
-                        <span className="text-[10px] text-gray-400 italic">最終保存: たった今</span>
-                        <button className="px-5 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded border border-gray-300 transition-colors bg-white">
-                            プレビュー
-                        </button>
-                        <button
-                            onClick={handlePublish}
-                            className="px-6 py-1.5 text-xs font-bold text-white bg-[#88c057] hover:bg-[#7ab04a] rounded shadow-[0_2px_4px_rgba(136,192,87,0.3)] transition-all"
-                        >
-                            公開する
-                        </button>
+                        <span className="text-[10px] text-gray-400 italic">
+                            最終保存: {lastSavedTime ? lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '未保存'}
+                        </span>
                     </div>
                 </div>
 
