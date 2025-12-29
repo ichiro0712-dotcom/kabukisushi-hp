@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText } from 'lucide-react';
+import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText, Trash2, EyeOff, Ban, Globe } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 
@@ -75,53 +75,53 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         ippin_title: 'IPPIN',
         ippin_subtitle: '一品料理',
         // NIGIRI items
-        nigiri_0_name: '赤身', nigiri_0_price: '550', nigiri_0_image: '/assets/nigiri_akami.jpg',
-        nigiri_1_name: '中トロ', nigiri_1_price: '780', nigiri_1_image: '/assets/nigiri_chutoro.jpg',
-        nigiri_2_name: '大トロ', nigiri_2_price: '880', nigiri_2_image: '/assets/nigiri_otoro.jpg',
-        nigiri_3_name: '大トロ炙り', nigiri_3_price: '880', nigiri_3_image: '/assets/nigiri_otoroaburi.jpg',
-        nigiri_4_name: '海ぶどうトロ手巻き', nigiri_4_price: '880', nigiri_4_image: '/assets/nigiri_budo_toro_maki.jpg',
-        nigiri_5_name: 'タイ', nigiri_5_price: '480', nigiri_5_image: '/assets/nigiri_tai.jpg',
-        nigiri_6_name: 'サワラ', nigiri_6_price: '550', nigiri_6_image: '/assets/nigiri_sawara.jpg',
-        nigiri_7_name: 'ブリ', nigiri_7_price: '550', nigiri_7_image: '/assets/nigiri_buri.jpg',
-        nigiri_8_name: 'アジ', nigiri_8_price: '450', nigiri_8_image: '/assets/nigiri_aji.jpg',
-        nigiri_9_name: 'サーモン', nigiri_9_price: '450', nigiri_9_image: '/assets/nigiri_samon.jpg',
-        nigiri_10_name: '炙りサーモン', nigiri_10_price: '450', nigiri_10_image: '/assets/nigiri_aburisamon.jpg',
-        nigiri_11_name: '車海老', nigiri_11_price: '980', nigiri_11_image: '/assets/nigiri_ebi.jpg',
-        nigiri_12_name: '車海老カダイフ揚げ', nigiri_12_price: '1300', nigiri_12_image: '/assets/nigiri_ebidokku.jpeg',
-        nigiri_13_name: '生海老漬け', nigiri_13_price: '480', nigiri_13_image: '/assets/nigiri_ebiduke.jpg',
-        nigiri_14_name: 'イカ', nigiri_14_price: '550', nigiri_14_image: '/assets/nigiri_ika.jpg',
-        nigiri_15_name: '水タコ', nigiri_15_price: '550', nigiri_15_image: '/assets/nigiri_tako.jpg',
-        nigiri_16_name: 'ホタテ', nigiri_16_price: '600', nigiri_16_image: '/assets/nigiri_hotate.jpg',
-        nigiri_17_name: '赤貝', nigiri_17_price: '850', nigiri_17_image: '/assets/nigiri_akagai.jpg',
-        nigiri_18_name: 'えんがわ', nigiri_18_price: '550', nigiri_18_image: '/assets/nigiri_engawa.jpg',
-        nigiri_19_name: 'ウナギドック', nigiri_19_price: '680', nigiri_19_image: '/assets/nigiri_unagi.jpg',
-        nigiri_20_name: '穴子', nigiri_20_price: '680', nigiri_20_image: '/assets/nigiri_anago.jpg',
-        nigiri_21_name: 'ノドグロドック', nigiri_21_price: '900', nigiri_21_image: '/assets/nigiri_nodogurodokku.jpg',
-        nigiri_22_name: 'タチウオドック', nigiri_22_price: '700', nigiri_22_image: '/assets/nigiri_tachiuodokku.jpg',
-        nigiri_23_name: 'とびっこ', nigiri_23_price: '400', nigiri_23_image: '/assets/nigiri_tobikko.jpg',
-        nigiri_24_name: '白子軍艦', nigiri_24_price: '550', nigiri_24_image: '/assets/nigiri_shirako.jpg',
-        nigiri_25_name: 'いくら', nigiri_25_price: '600', nigiri_25_image: '/assets/nigiri_ikura.jpg',
-        nigiri_26_name: '玉子', nigiri_26_price: '350', nigiri_26_image: '/assets/nigiri_tamago.jpg',
-        nigiri_27_name: '芽ネギ', nigiri_27_price: '350', nigiri_27_image: '/assets/nigiri_menegi.jpg',
+        nigiri_0_name: '赤身', nigiri_0_name_en: 'Lean Tuna', nigiri_0_name_ko: '다랑어붉은살', nigiri_0_name_zh: '鮪魚（魚身瘦肉部分）', nigiri_0_price: '550', nigiri_0_image: '/assets/nigiri_akami.jpg',
+        nigiri_1_name: '中トロ', nigiri_1_name_en: 'Chutoro', nigiri_1_name_sub: '(medium fatty tuna)', nigiri_1_name_ko: '다랑어중뱃살', nigiri_1_name_zh: '鮪魚（油脂中等部位）', nigiri_1_price: '780', nigiri_1_image: '/assets/nigiri_chutoro.jpg',
+        nigiri_2_name: '大トロ', nigiri_2_name_en: 'Otoro', nigiri_2_name_sub: '(super fatty tuna)', nigiri_2_name_ko: '다랑어대뱃살', nigiri_2_name_zh: '鮪魚（油脂較多部位）', nigiri_2_price: '880', nigiri_2_image: '/assets/nigiri_otoro.jpg',
+        nigiri_3_name: '大トロ炙り', nigiri_3_name_en: 'Seared Otoro', nigiri_3_name_ko: '다랑어대뱃살구이', nigiri_3_name_zh: '炙焼鮪魚（油脂較多部位）', nigiri_3_price: '880', nigiri_3_image: '/assets/nigiri_otoroaburi.jpg',
+        nigiri_4_name: '海ぶどうトロ手巻き', nigiri_4_name_en: 'Tuna And Sea Grapes Hand Roll', nigiri_4_name_ko: '바다 포도 참치 손말이', nigiri_4_name_zh: '海葡萄金槍魚手巻', nigiri_4_price: '880', nigiri_4_image: '/assets/nigiri_budo_toro_maki.jpg',
+        nigiri_5_name: 'タイ', nigiri_5_name_en: 'Snapper', nigiri_5_name_ko: '도미', nigiri_5_name_zh: '鯛魚', nigiri_5_price: '480', nigiri_5_image: '/assets/nigiri_tai.jpg',
+        nigiri_6_name: 'サワラ', nigiri_6_name_en: 'Spanish Mackerel', nigiri_6_name_ko: '삼치', nigiri_6_name_zh: '鰆魚', nigiri_6_price: '550', nigiri_6_image: '/assets/nigiri_sawara.jpg',
+        nigiri_7_name: 'ブリ', nigiri_7_name_en: 'Yellow Tail', nigiri_7_name_ko: '방어', nigiri_7_name_zh: '鰤魚', nigiri_7_price: '550', nigiri_7_image: '/assets/nigiri_buri.jpg',
+        nigiri_8_name: 'アジ', nigiri_8_name_en: 'Horse Mackerel', nigiri_8_name_sub: '(Aji)', nigiri_8_name_ko: '전갱이', nigiri_8_name_zh: '竹莢魚', nigiri_8_price: '450', nigiri_8_image: '/assets/nigiri_aji.jpg',
+        nigiri_9_name: 'サーモン', nigiri_9_name_en: 'Salmon', nigiri_9_name_ko: '연어', nigiri_9_name_zh: '鮭魚', nigiri_9_price: '450', nigiri_9_image: '/assets/nigiri_samon.jpg',
+        nigiri_10_name: '炙りサーモン', nigiri_10_name_en: 'Seared Salmon', nigiri_10_name_ko: '구운 연어', nigiri_10_name_zh: '炙焼鮭魚', nigiri_10_price: '450', nigiri_10_image: '/assets/nigiri_aburisamon.jpg',
+        nigiri_11_name: '車海老', nigiri_11_name_en: 'Japanese Tiger Prawn', nigiri_11_name_ko: '왕새우', nigiri_11_name_zh: '車海老', nigiri_11_price: '980', nigiri_11_image: '/assets/nigiri_ebi.jpg',
+        nigiri_12_name: '車海老カダイフ揚げ', nigiri_12_name_en: 'Fried Japanese Tiger Prawn', nigiri_12_name_ko: '새우튀김', nigiri_12_name_zh: '炸車海蝦', nigiri_12_price: '1300', nigiri_12_image: '/assets/nigiri_ebidokku.jpeg',
+        nigiri_13_name: '生海老漬け', nigiri_13_name_en: 'Shrimp', nigiri_13_name_ko: '새우', nigiri_13_name_zh: '蝦子', nigiri_13_price: '480', nigiri_13_image: '/assets/nigiri_ebiduke.jpg',
+        nigiri_14_name: 'イカ', nigiri_14_name_en: 'Squid', nigiri_14_name_ko: '뼈오징어', nigiri_14_name_zh: '墨水烏賊', nigiri_14_price: '550', nigiri_14_image: '/assets/nigiri_ika.jpg',
+        nigiri_15_name: '水タコ', nigiri_15_name_en: 'Octopus', nigiri_15_name_ko: '문어', nigiri_15_name_zh: '章魚', nigiri_15_price: '550', nigiri_15_image: '/assets/nigiri_tako.jpg',
+        nigiri_16_name: 'ホタテ', nigiri_16_name_en: 'Scallop', nigiri_16_name_sub: '(Hotate)', nigiri_16_name_ko: '가리비', nigiri_16_name_zh: '扇貝', nigiri_16_price: '600', nigiri_16_image: '/assets/nigiri_hotate.jpg',
+        nigiri_17_name: '赤貝', nigiri_17_name_en: 'Ark Shell', nigiri_17_name_ko: '홍합', nigiri_17_name_zh: '紅貝', nigiri_17_price: '850', nigiri_17_image: '/assets/nigiri_akagai.jpg',
+        nigiri_18_name: 'えんがわ', nigiri_18_name_en: 'Seared Flounder Fin', nigiri_18_name_ko: '광어 지느러미', nigiri_18_name_zh: '鰭辺肉', nigiri_18_price: '550', nigiri_18_image: '/assets/nigiri_engawa.jpg',
+        nigiri_19_name: 'ウナギドック', nigiri_19_name_en: 'Eel', nigiri_19_name_sub: '(Unagi)', nigiri_19_name_ko: '장어', nigiri_19_name_zh: '鰻', nigiri_19_price: '680', nigiri_19_image: '/assets/nigiri_unagi.jpg',
+        nigiri_20_name: '穴子', nigiri_20_name_en: 'Conger Eel', nigiri_20_name_ko: '홀자', nigiri_20_name_zh: '星鰻', nigiri_20_price: '680', nigiri_20_image: '/assets/nigiri_anago.jpg',
+        nigiri_21_name: 'ノドグロドック', nigiri_21_name_en: 'Blackthroat Seaperch', nigiri_21_name_ko: '눈볼대', nigiri_21_name_zh: '紅喉魚', nigiri_21_price: '900', nigiri_21_image: '/assets/nigiri_nodogurodokku.jpg',
+        nigiri_22_name: 'タチウオドック', nigiri_22_name_en: 'Cutlassfish', nigiri_22_name_ko: '갈치', nigiri_22_name_zh: '刀魚', nigiri_22_price: '700', nigiri_22_image: '/assets/nigiri_tachiuodokku.jpg',
+        nigiri_23_name: 'とびっこ', nigiri_23_name_en: 'Tobiko', nigiri_23_name_sub: '(flying fish roe)', nigiri_23_name_ko: '날치알', nigiri_23_name_zh: '飛魚卵', nigiri_23_price: '400', nigiri_23_image: '/assets/nigiri_tobikko.jpg',
+        nigiri_24_name: '白子軍艦', nigiri_24_name_en: 'Shirako gunkan', nigiri_24_name_sub: '(Cod milt)', nigiri_24_name_ko: '곤이', nigiri_24_name_zh: '魚白', nigiri_24_price: '550', nigiri_24_image: '/assets/nigiri_shirako.jpg',
+        nigiri_25_name: 'いくら', nigiri_25_name_en: 'Ikura', nigiri_25_name_sub: '(Salmon roe)', nigiri_25_name_ko: '연어알', nigiri_25_name_zh: '鮭魚卵', nigiri_25_price: '600', nigiri_25_image: '/assets/nigiri_ikura.jpg',
+        nigiri_26_name: '玉子', nigiri_26_name_en: 'Tamago', nigiri_26_name_sub: '(Japanese Omelet)', nigiri_26_name_ko: '달걀', nigiri_26_name_zh: '鶏蛋', nigiri_26_price: '350', nigiri_26_image: '/assets/nigiri_tamago.jpg',
+        nigiri_27_name: '芽ネギ', nigiri_27_name_en: 'Green Onion Shoots', nigiri_27_name_ko: '싹눈파', nigiri_27_name_zh: '嫩葱', nigiri_27_price: '350', nigiri_27_image: '/assets/nigiri_menegi.jpg',
         // MAKIMONO items
-        makimono_0_name: 'トロたく巻き', makimono_0_price: '1200', makimono_0_image: '/assets/makimono_torotaku.jpg',
-        makimono_1_name: 'ネギトロ巻き', makimono_1_price: '1000', makimono_1_image: '/assets/makimono_negitoro.jpg',
-        makimono_2_name: '鉄火巻き', makimono_2_price: '1200', makimono_2_image: '/assets/makimono_tekka.jpg',
-        makimono_3_name: 'カッパ巻き', makimono_3_price: '650', makimono_3_image: '/assets/makimono_kappa.jpg',
-        makimono_4_name: 'かんぴょう巻き', makimono_4_price: '650', makimono_4_image: '/assets/makimono_kanpyou.jpg',
+        makimono_0_name: 'トロたく巻き', makimono_0_name_en: 'Tuna And Pickled Radish Sushi Roll', makimono_0_name_ko: '도로 타쿠 김밥', makimono_0_name_zh: '鮪魚腌萝卜巻', makimono_0_price: '1200', makimono_0_image: '/assets/makimono_torotaku.jpg',
+        makimono_1_name: 'ネギトロ巻き', makimono_1_name_en: 'Tuna And Green Onion Sushi Roll', makimono_1_name_ko: '네기토로 김밥', makimono_1_name_zh: '葱鮪魚巻', makimono_1_price: '1000', makimono_1_image: '/assets/makimono_negitoro.jpg',
+        makimono_2_name: '鉄火巻き', makimono_2_name_en: 'Tuna Sushi Roll', makimono_2_name_ko: '참치 김밥', makimono_2_name_zh: '鉄火巻（新鮮金槍魚巻）', makimono_2_price: '1200', makimono_2_image: '/assets/makimono_tekka.jpg',
+        makimono_3_name: 'カッパ巻き', makimono_3_name_en: 'Cucumber Sushi Roll', makimono_3_name_ko: '오이 김밥', makimono_3_name_zh: '河童巻（小黄瓜寿司巻）', makimono_3_price: '650', makimono_3_image: '/assets/makimono_kappa.jpg',
+        makimono_4_name: 'かんぴょう巻き', makimono_4_name_en: 'Kanpyo Sushi Roll', makimono_4_name_ko: '나나시 김밥', makimono_4_name_zh: '瓠瓜干寿司巻', makimono_4_price: '650', makimono_4_image: '/assets/makimono_kanpyou.jpg',
         // IPPIN items
-        ippin_0_name: '味噌汁', ippin_0_price: '350', ippin_0_image: '/assets/ippin_misoshiru.jpg',
-        ippin_1_name: '茶碗蒸し', ippin_1_price: '650', ippin_1_image: '/assets/ippin_chawanmushi.jpg',
-        ippin_2_name: '刺身盛り合わせ', ippin_2_price: '2000', ippin_2_note: '※その他(赤身だけ3人前、おまかせ3種類2人前)など、お客様のご要望あれば、お気軽にお申し付けください。', ippin_2_image: '/assets/ippin_sashimori.jpg',
-        ippin_3_name: 'カニつまみ', ippin_3_price: '980', ippin_3_image: '/assets/ippin_kanitsuami.jpg',
-        ippin_4_name: '白子（ポン酢・天ぷら）', ippin_4_price: '1300', ippin_4_image: '/assets/ippin_shirapon.jpg',
-        ippin_5_name: '生牡蠣', ippin_5_price: '750', ippin_5_image: '/assets/ippin_namagaki.jpg',
-        ippin_6_name: '海鮮ユッケ', ippin_6_price: '980', ippin_6_image: '/assets/ippin_kaisenyukke.jpg',
-        ippin_7_name: 'マグロカマ焼き', ippin_7_price: '3200', ippin_7_image: '/assets/ippin_kamayai.jpg',
-        ippin_8_name: 'サーモンハラス焼き', ippin_8_price: '1800', ippin_8_image: '/assets/ippin_harasuyaki.jpg',
-        ippin_9_name: 'タチウオ塩焼き', ippin_9_price: '980', ippin_9_image: '/assets/ippin_tachiuoyaki.jpg',
-        ippin_10_name: 'つまみ玉子', ippin_10_price: '680', ippin_10_image: '/assets/ippin_tsumatama.jpg',
-        ippin_11_name: '大福アイス', ippin_11_price: '580', ippin_11_image: '/assets/ippin_ice.jpg'
+        ippin_0_name: '味噌汁', ippin_0_name_en: 'Miso Soup', ippin_0_name_ko: '된장국', ippin_0_name_zh: '味噌湯', ippin_0_price: '350', ippin_0_image: '/assets/ippin_misoshiru.jpg',
+        ippin_1_name: '茶碗蒸し', ippin_1_name_en: 'Steamed Egg (Chawan-mushi)', ippin_1_name_ko: '차완무시', ippin_1_name_zh: '茶碗蒸', ippin_1_price: '650', ippin_1_image: '/assets/ippin_chawanmushi.jpg',
+        ippin_2_name: '刺身盛り合わせ', ippin_2_name_en: '6 Kinds of Sashimi', ippin_2_name_ko: '사시미 5가지 모듬', ippin_2_name_zh: '生魚片什錦拼盤', ippin_2_price: '2000', ippin_2_note: '※その他(赤身だけ3人前、おまかせ3種類2人前)など、お客様のご要望あれば、お気軽にお申し付けください。', ippin_2_note_en: '※We can also accommodate other requests such as 3 servings of lean meat only, 2 servings of 3 types of chef\'s choice, etc. Please feel free to ask.', ippin_2_image: '/assets/ippin_sashimori.jpg',
+        ippin_3_name: 'カニつまみ', ippin_3_name_en: 'Crab', ippin_3_name_ko: '게', ippin_3_name_zh: '蟹', ippin_3_price: '980', ippin_3_image: '/assets/ippin_kanitsuami.jpg',
+        ippin_4_name: '白子（ポン酢・天ぷら）', ippin_4_name_en: 'Shirako (With Ponzu or Tempura)', ippin_4_name_ko: '흰자', ippin_4_name_zh: '白子', ippin_4_price: '1300', ippin_4_image: '/assets/ippin_shirapon.jpg',
+        ippin_5_name: '生牡蠣', ippin_5_name_en: 'Oyster', ippin_5_name_ko: '진주 굴', ippin_5_name_zh: '塩牡蠣', ippin_5_price: '750', ippin_5_image: '/assets/ippin_namagaki.jpg',
+        ippin_6_name: '海鮮ユッケ', ippin_6_name_en: 'Seafood Yukhoe', ippin_6_name_ko: '해산물 육회', ippin_6_name_zh: '海鮮生魚片', ippin_6_price: '980', ippin_6_image: '/assets/ippin_kaisenyukke.jpg',
+        ippin_7_name: 'マグロカマ焼き', ippin_7_name_en: 'Grilled Bluefin Tuna Collar', ippin_7_name_ko: '참치 카마 구い', ippin_7_name_zh: '焼金槍魚領肉', ippin_7_price: '3200', ippin_7_image: '/assets/ippin_kamayai.jpg',
+        ippin_8_name: 'サーモンハラス焼き', ippin_8_name_en: 'Grilled Salmon Belly', ippin_8_name_ko: '연어 배 구い', ippin_8_name_zh: '焼三文魚腩', ippin_8_price: '1800', ippin_8_image: '/assets/ippin_harasuyaki.jpg',
+        ippin_9_name: 'タチウオ塩焼き', ippin_9_name_en: 'Grilled Cutlassfish', ippin_9_name_ko: '갈치', ippin_9_name_zh: '刀魚', ippin_9_price: '980', ippin_9_image: '/assets/ippin_tachiuoyaki.jpg',
+        ippin_10_name: 'つまみ玉子', ippin_10_name_en: 'Tamago (Japanese Omelet)', ippin_10_name_ko: '달걀', ippin_10_name_zh: '鶏蛋', ippin_10_price: '680', ippin_10_image: '/assets/ippin_tsumatama.jpg',
+        ippin_11_name: '大福アイス', ippin_11_name_en: 'Mochi with icecream', ippin_11_name_ko: '', ippin_11_name_zh: '', ippin_11_price: '580', ippin_11_image: '/assets/ippin_ice.jpg'
     },
     affiliated: {
         title: 'Affiliated store of KABUKI SUSHI',
@@ -135,6 +135,48 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         store2_address: '〒160-0021 東京都新宿区歌舞伎町２丁目２７ １２Lee２ビル １F',
         store2_phone: 'TEL：03-6457-3112',
         store2_hours: 'OPEN：19:00-6:00'
+    },
+    drink: {
+        title: 'Drink',
+        subtitle: 'お飲み物',
+        nihonshu_title: '日本酒（１合）',
+        alcohol_title: 'アルコール',
+        shochu_title: '焼酎・泡盛・ハブ酒',
+        other_title: 'その他',
+        // Nihonshu items
+        nihonshu_0_name: '写楽 福島', nihonshu_0_name_en: 'SHARAKU (FUKUSHIMA)', nihonshu_0_name_ko: '샤라쿠', nihonshu_0_name_zh: '写楽', nihonshu_0_price: '2000', nihonshu_0_image: '/assets/drink_sharaku.jpg',
+        nihonshu_1_name: '三井の寿 福岡', nihonshu_1_name_en: 'MIINOKOTOBUKI (FUKUOKA)', nihonshu_1_name_ko: '미이노코ト부키', nihonshu_1_name_zh: '三井寿', nihonshu_1_price: '1500', nihonshu_1_image: '/assets/drink_miinokotobuki.jpg',
+        nihonshu_2_name: '日高見 宮城', nihonshu_2_name_en: 'HITAKAMI (MIYAGI)', nihonshu_2_name_ko: '히타카미', nihonshu_2_name_zh: '日高見', nihonshu_2_price: '1500', nihonshu_2_image: '/assets/drink_hitakami.jpg',
+        nihonshu_3_name: 'ゼブラ 山形', nihonshu_3_name_en: 'ZEBRA (YAMAGATA)', nihonshu_3_name_ko: '제브라', nihonshu_3_name_zh: 'ZEBRA', nihonshu_3_price: '2000', nihonshu_3_image: '/assets/drink_zebra.jpg',
+        // Alcohol items
+        alcohol_0_name: 'サントリー プレミアムモルツ生', alcohol_0_name_en: 'DRAFT BEER (SUNTORY THE PREMIUM MALTS)', alcohol_0_name_ko: '생맥주 (산토리 프리미엄 몰츠)', alcohol_0_name_zh: '生啤酒', alcohol_0_price: '880',
+        alcohol_1_name: 'サッポロラガー中瓶', alcohol_1_name_en: 'BOTTLED BEER (SAPPORO LAGER BEER 500ml)', alcohol_1_name_ko: '병맥주 (삿포로 라거)', alcohol_1_name_zh: '瓶装啤酒', alcohol_1_price: '900',
+        alcohol_2_name: '角ハイボール', alcohol_2_name_en: 'HIGHBALL (SUNTORY Kaku)', alcohol_2_name_ko: '가쿠 하이볼', alcohol_2_name_zh: '角高球酒', alcohol_2_price: '770',
+        alcohol_3_name: '知多', alcohol_3_name_en: 'Chita', alcohol_3_name_ko: '치타', alcohol_3_name_zh: '知多', alcohol_3_price: '1600',
+        alcohol_4_name: '白州', alcohol_4_name_en: 'Hakushu', alcohol_4_name_ko: '하쿠슈', alcohol_4_name_zh: '白州', alcohol_4_price: '1800',
+        alcohol_5_name: '山﨑', alcohol_5_name_en: 'Yamazaki', alcohol_5_name_ko: '야마자키', alcohol_5_name_zh: '山崎', alcohol_5_price: '1800',
+        alcohol_6_name: 'ガリサワー', alcohol_6_name_en: 'GARI SOUR', alcohol_6_name_ko: '가리 사와', alcohol_6_name_zh: '姜片沙瓦', alcohol_6_price: '770',
+        alcohol_7_name: 'レモンサワー', alcohol_7_name_en: 'LEMON SOUR', alcohol_7_name_ko: '레몬 사와', alcohol_7_name_zh: '檸檬沙瓦', alcohol_7_price: '770',
+        alcohol_8_name: '濃厚緑茶ハイ', alcohol_8_name_en: 'GREEN TEA HIGH', alcohol_8_name_ko: '녹차 하이', alcohol_8_name_zh: '緑茶高球酒', alcohol_8_price: '770',
+        alcohol_9_name: 'さんぴん茶ハイ', alcohol_9_name_en: 'JASMINE TEA HIGH', alcohol_9_name_ko: '자스민차 하이', alcohol_9_name_zh: '茉莉花茶高球酒', alcohol_9_price: '770',
+        alcohol_10_name: 'ウーロンハイ', alcohol_10_name_en: 'OOLONG TEA HIGH', alcohol_10_name_ko: '우롱차 하이', alcohol_10_name_zh: '烏龍茶高球酒', alcohol_10_price: '770',
+        alcohol_11_name: 'コーン茶ハイ', alcohol_11_name_en: 'CORN TEA HIGH', alcohol_11_name_ko: '옥수수차 하이', alcohol_11_name_zh: '玉米茶高球酒', alcohol_11_price: '770',
+        alcohol_12_name: '赤・白ワイン（グラス）', alcohol_12_name_en: 'GLASS OF WINE (Red/White)', alcohol_12_name_ko: '와인 (레드/화이트)', alcohol_12_name_zh: '紅・白酒（杯装）', alcohol_12_price: '1000〜1300',
+        alcohol_13_name: '白・ヴェルメンティーノ（ボトル）', alcohol_13_name_en: 'BOTTLE OF WHITE WINE (Vermentino)', alcohol_13_name_ko: '화이트 와인 (보틀)', alcohol_13_name_zh: '白・維蒙蒂諾（瓶装）', alcohol_13_price: '10000',
+        alcohol_14_name: 'ペリエ ジュエ（シャンパン）', alcohol_14_name_en: 'BOTTLE OF CHAMPAGNE (Perrier Jouët)', alcohol_14_name_ko: '샴페인 (페리에 주에)', alcohol_14_name_zh: '巴黎之花（香檳）', alcohol_14_price: '25000',
+        // Shochu items
+        shochu_0_name: '富乃宝山(芋)', shochu_0_name_en: 'SWEET POTATO SHOCHU (Tomino Houzan)', shochu_0_name_ko: '고구마 소주 (토미노 호우잔)', shochu_0_name_zh: '地瓜焼酒', shochu_0_price: '880',
+        shochu_1_name: '吉四六(麦)', shochu_1_name_en: 'BARLEY SHOCHU (Kitchomu)', shochu_1_name_ko: '보리 소주 (킷쵸무)', shochu_1_name_zh: '麦焼酒', shochu_1_price: '880',
+        shochu_2_name: '鳥飼(米)', shochu_2_name_en: 'RICE SHOCHU (Torikai)', shochu_2_name_ko: '쌀 소주 (토리카이)', shochu_2_name_zh: '米焼酒', shochu_2_price: '880',
+        shochu_3_name: '残波白（泡盛)', shochu_3_name_en: 'AWAMORI (Zanpa White)', shochu_3_name_ko: '아와모리 (잔파 화이트)', shochu_3_name_zh: '泡盛', shochu_3_price: '770',
+        shochu_4_name: 'ハブ酒ショット', shochu_4_name_en: 'SNAKE WINE SHOT', shochu_4_name_ko: '하부자케 (뱀술)', shochu_4_name_zh: '蛇酒', shochu_4_price: '1000',
+        // Other items
+        other_0_name: 'さんぴん茶', other_0_name_en: 'JASMINE TEA', other_0_name_ko: '자스민차', other_0_name_zh: '茉莉花茶', other_0_price: '500',
+        other_1_name: 'ウーロン茶', other_1_name_en: 'OOLONG TEA', other_1_name_ko: '우롱차', other_1_name_zh: '烏龍茶', other_1_price: '500',
+        other_2_name: '緑茶', other_2_name_en: 'GREEN TEA', other_2_name_ko: '녹차', other_2_name_zh: '緑茶', other_2_price: '500',
+        other_3_name: 'コーン茶', other_3_name_en: 'CORN TEA', other_3_name_ko: '옥수수차', other_3_name_zh: '玉米茶', other_3_price: '500',
+        other_4_name: 'コカ・コーラ', other_4_name_en: 'COKE', other_4_name_ko: '콜라', other_4_name_zh: '可口可楽', other_4_price: '500',
+        other_5_name: '炭酸水', other_5_name_en: 'SPARKLING WATER', other_5_name_ko: '탄산수', other_5_name_zh: '単酸水', other_5_price: '500'
     }
 };
 
@@ -148,7 +190,7 @@ interface InlineEditableTextProps {
     placeholder?: string;
 }
 
-function InlineEditableText({ value, onChange, isEditing, className = '', style, multiline = false, placeholder = '' }: InlineEditableTextProps) {
+export function InlineEditableText({ value, onChange, isEditing, className = '', style, multiline = false, placeholder = '' }: InlineEditableTextProps) {
     const [isFocused, setIsFocused] = useState(false);
     const editorRef = useRef<HTMLDivElement>(null);
 
@@ -210,9 +252,9 @@ function InlineEditableText({ value, onChange, isEditing, className = '', style,
                 suppressContentEditableWarning
                 onFocus={() => setIsFocused(true)}
                 onBlur={handleBlur}
-                className={`${className} outline-none transition-all duration-200 min-h-[1em] min-w-[20px] 
+                className={`${className} outline - none transition - all duration - 200 min - h - [1em] min - w - [20px] 
                     ${isFocused ? 'ring-2 ring-blue-500/50 bg-white/5 rounded-sm p-1 -m-1 shadow-inner relative z-30' : 'hover:bg-white/5 rounded-sm cursor-text'}
-                    ${multiline ? 'whitespace-pre-line block' : 'inline-block'}`}
+                    ${multiline ? 'whitespace-pre-line block' : 'inline-block'} `}
                 style={style}
             />
 
@@ -302,6 +344,136 @@ function InlineEditableText({ value, onChange, isEditing, className = '', style,
     );
 }
 
+// Helper component for editing translations in the menu
+function MenuTranslationsEditor({
+    sectionId,
+    category,
+    index,
+    textSettings,
+    onTextChange,
+    isEditing,
+    hasSubName = false,
+    isCompact = false
+}: {
+    sectionId: string;
+    category: string;
+    index: number;
+    textSettings: any;
+    onTextChange: any;
+    isEditing: boolean;
+    hasSubName?: boolean;
+    isCompact?: boolean;
+}) {
+    if (!isEditing) return null;
+
+    const prefix = `${category}_${index}_`;
+    const en = textSettings[sectionId]?.[`${prefix}name_en`] || '';
+    const ko = textSettings[sectionId]?.[`${prefix}name_ko`] || '';
+    const zh = textSettings[sectionId]?.[`${prefix}name_zh`] || '';
+    const sub = textSettings[sectionId]?.[`${prefix}name_sub`] || '';
+
+    if (isCompact) {
+        return (
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 opacity-70 border-t border-gray-100 pt-1 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-1 min-w-[60px]">
+                    <span className="text-[8px] font-bold text-gray-400 uppercase">EN:</span>
+                    <span className="text-[10px] text-gray-600">
+                        <InlineEditableText
+                            value={en}
+                            onChange={(val) => onTextChange?.(sectionId, `${prefix}name_en`, val)}
+                            isEditing={isEditing}
+                            placeholder="English"
+                        />
+                    </span>
+                </div>
+                <div className="flex items-center gap-1 min-w-[60px]">
+                    <span className="text-[8px] font-bold text-gray-400 uppercase">KO:</span>
+                    <span className="text-[10px] text-gray-600">
+                        <InlineEditableText
+                            value={ko}
+                            onChange={(val) => onTextChange?.(sectionId, `${prefix}name_ko`, val)}
+                            isEditing={isEditing}
+                            placeholder="Korean"
+                        />
+                    </span>
+                </div>
+                <div className="flex items-center gap-1 min-w-[60px]">
+                    <span className="text-[8px] font-bold text-gray-400 uppercase">ZH:</span>
+                    <span className="text-[10px] text-gray-600">
+                        <InlineEditableText
+                            value={zh}
+                            onChange={(val) => onTextChange?.(sectionId, `${prefix}name_zh`, val)}
+                            isEditing={isEditing}
+                            placeholder="Chinese"
+                        />
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-4 p-3 bg-gray-50/50 rounded-lg border border-gray-100 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-wider border-b border-gray-200/50 pb-1">
+                <Globe size={10} />
+                外国語表記 (Translations)
+            </div>
+            <div className="space-y-3">
+                <div className="group">
+                    <label className="text-[9px] font-bold text-gray-400 uppercase block mb-0.5 group-hover:text-gray-500">English (英語)</label>
+                    <div className="text-xs text-gray-700 bg-white/50 p-1 rounded border border-transparent group-hover:border-gray-200 transition-all">
+                        <InlineEditableText
+                            value={en}
+                            onChange={(val) => onTextChange?.(sectionId, `${prefix}name_en`, val)}
+                            isEditing={isEditing}
+                            placeholder="English Name"
+                        />
+                    </div>
+                </div>
+                {hasSubName && (
+                    <div className="group">
+                        <label className="text-[9px] font-bold text-gray-400 uppercase block mb-0.5 group-hover:text-gray-500">English Sub (英語補足/説明)</label>
+                        <div className="text-[11px] text-gray-500 italic bg-white/50 p-1 rounded border border-transparent group-hover:border-gray-200 transition-all">
+                            <InlineEditableText
+                                value={sub}
+                                onChange={(val) => onTextChange?.(sectionId, `${prefix}name_sub`, val)}
+                                isEditing={isEditing}
+                                placeholder="Optional description..."
+                            />
+                        </div>
+                    </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="group">
+                        <label className="text-[9px] font-bold text-gray-400 uppercase block mb-0.5 group-hover:text-gray-500">Korean (韓国語)</label>
+                        <div className="text-xs text-gray-700 bg-white/50 p-1 rounded border border-transparent group-hover:border-gray-200 transition-all">
+                            <InlineEditableText
+                                value={ko}
+                                onChange={(val) => onTextChange?.(sectionId, `${prefix}name_ko`, val)}
+                                isEditing={isEditing}
+                                placeholder="한국어"
+                            />
+                        </div>
+                    </div>
+                    <div className="group">
+                        <label className="text-[9px] font-bold text-gray-400 uppercase block mb-0.5 group-hover:text-gray-500">Chinese (中国語)</label>
+                        <div className="text-xs text-gray-700 bg-white/50 p-1 rounded border border-transparent group-hover:border-gray-200 transition-all">
+                            <InlineEditableText
+                                value={zh}
+                                onChange={(val) => onTextChange?.(sectionId, `${prefix}name_zh`, val)}
+                                isEditing={isEditing}
+                                placeholder="中文"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
 
 interface SectionToolbarProps {
     sectionId: string;
@@ -311,13 +483,13 @@ interface SectionToolbarProps {
     onBackgroundEdit: (id: string) => void;
 }
 
-const SectionToolbar = ({
+export function SectionToolbar({
     sectionId,
     layoutSettings,
     onLayoutChange,
     onSectionSelect,
     onBackgroundEdit
-}: SectionToolbarProps) => {
+}: SectionToolbarProps) {
     const [showLayout, setShowLayout] = useState(false);
     const config = layoutSettings?.[sectionId] || { width: 'normal', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true };
 
@@ -330,7 +502,7 @@ const SectionToolbar = ({
             <div className="relative">
                 <button
                     onClick={() => setShowLayout(!showLayout)}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-white rounded cursor-pointer transition-all border group shadow-md ${showLayout ? 'bg-[#2d2d2d] border-[#2d2d2d]' : 'bg-black/70 hover:bg-black/90 border-white/10'}`}
+                    className={`flex items - center gap - 2 px - 3 py - 1.5 text - white rounded cursor - pointer transition - all border group shadow - md ${showLayout ? 'bg-[#2d2d2d] border-[#2d2d2d]' : 'bg-black/70 hover:bg-black/90 border-white/10'} `}
                 >
                     <span className="text-[10px] font-bold">レイアウト</span>
                     <Layout size={12} className={showLayout ? 'text-white' : 'text-gray-300 group-hover:text-white'} />
@@ -374,21 +546,21 @@ const SectionToolbar = ({
                                 <div className="flex bg-[#1c1c1c] rounded p-0.5 border border-gray-700">
                                     <button
                                         onClick={() => onLayoutChange?.(sectionId, { alignment: 'top' })}
-                                        className={`flex-1 flex items-center justify-center py-1 rounded-sm transition-colors ${config.alignment === 'top' ? 'bg-[#3d3d3d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+                                        className={`flex - 1 flex items - center justify - center py - 1 rounded - sm transition - colors ${config.alignment === 'top' ? 'bg-[#3d3d3d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'} `}
                                         title="上揃え"
                                     >
                                         <ArrowUpToLine size={14} />
                                     </button>
                                     <button
                                         onClick={() => onLayoutChange?.(sectionId, { alignment: 'center' })}
-                                        className={`flex-1 flex items-center justify-center py-1 rounded-sm transition-colors ${config.alignment === 'center' ? 'bg-[#3d3d3d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+                                        className={`flex - 1 flex items - center justify - center py - 1 rounded - sm transition - colors ${config.alignment === 'center' ? 'bg-[#3d3d3d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'} `}
                                         title="中央揃え"
                                     >
                                         <AlignCenterVertical size={14} />
                                     </button>
                                     <button
                                         onClick={() => onLayoutChange?.(sectionId, { alignment: 'bottom' })}
-                                        className={`flex-1 flex items-center justify-center py-1 rounded-sm transition-colors ${config.alignment === 'bottom' ? 'bg-[#3d3d3d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+                                        className={`flex - 1 flex items - center justify - center py - 1 rounded - sm transition - colors ${config.alignment === 'bottom' ? 'bg-[#3d3d3d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'} `}
                                         title="下揃え"
                                     >
                                         <ArrowDownToLine size={14} />
@@ -402,27 +574,27 @@ const SectionToolbar = ({
                                     <span className="text-[11px] text-gray-300">フルハイト</span>
                                     <button
                                         onClick={() => onLayoutChange?.(sectionId, { fullHeight: !config.fullHeight })}
-                                        className={`w-8 h-4 rounded-full relative transition-colors ${config.fullHeight ? 'bg-[#88c057]' : 'bg-gray-600'}`}
+                                        className={`w - 8 h - 4 rounded - full relative transition - colors ${config.fullHeight ? 'bg-[#88c057]' : 'bg-gray-600'} `}
                                     >
-                                        <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.fullHeight ? 'left-4.5 translate-x-3.5' : 'left-0.5'}`} />
+                                        <div className={`absolute top - 0.5 w - 3 h - 3 bg - white rounded - full transition - transform ${config.fullHeight ? 'left-4.5 translate-x-3.5' : 'left-0.5'} `} />
                                     </button>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[11px] text-gray-300">上のスペース</span>
                                     <button
                                         onClick={() => onLayoutChange?.(sectionId, { topSpace: !config.topSpace })}
-                                        className={`w-8 h-4 rounded-full relative transition-colors ${config.topSpace ? 'bg-[#88c057]' : 'bg-gray-600'}`}
+                                        className={`w - 8 h - 4 rounded - full relative transition - colors ${config.topSpace ? 'bg-[#88c057]' : 'bg-gray-600'} `}
                                     >
-                                        <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.topSpace ? 'left-4.5 translate-x-3.5' : 'left-0.5'}`} />
+                                        <div className={`absolute top - 0.5 w - 3 h - 3 bg - white rounded - full transition - transform ${config.topSpace ? 'left-4.5 translate-x-3.5' : 'left-0.5'} `} />
                                     </button>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[11px] text-gray-300">下のスペース</span>
                                     <button
                                         onClick={() => onLayoutChange?.(sectionId, { bottomSpace: !config.bottomSpace })}
-                                        className={`w-8 h-4 rounded-full relative transition-colors ${config.bottomSpace ? 'bg-[#88c057]' : 'bg-gray-600'}`}
+                                        className={`w - 8 h - 4 rounded - full relative transition - colors ${config.bottomSpace ? 'bg-[#88c057]' : 'bg-gray-600'} `}
                                     >
-                                        <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${config.bottomSpace ? 'left-4.5 translate-x-3.5' : 'left-0.5'}`} />
+                                        <div className={`absolute top - 0.5 w - 3 h - 3 bg - white rounded - full transition - transform ${config.bottomSpace ? 'left-4.5 translate-x-3.5' : 'left-0.5'} `} />
                                     </button>
                                 </div>
                             </div>
@@ -504,6 +676,36 @@ function MenuItemDeleteButton({ onDelete }: MenuItemDeleteButtonProps) {
     );
 }
 
+interface MenuItemControlsProps {
+    onDelete: () => void;
+    isSoldOut: boolean;
+    onToggleSoldOut: () => void;
+    isHidden: boolean;
+    onToggleHidden: () => void;
+}
+
+export function MenuItemControls({ onDelete, isSoldOut, onToggleSoldOut, isHidden, onToggleHidden }: MenuItemControlsProps) {
+    return (
+        <div className="absolute top-2 left-2 z-20 flex gap-2 pointer-events-auto">
+            <button
+                onClick={(e) => { e.stopPropagation(); onToggleSoldOut(); }}
+                className={`editor-control-button ${isSoldOut ? 'active-sold-out' : ''}`}
+                title={isSoldOut ? "売り切れ解除" : "売り切れに設定"}
+            >
+                <Ban size={14} />
+            </button>
+            <button
+                onClick={(e) => { e.stopPropagation(); onToggleHidden(); }}
+                className={`editor-control-button ${isHidden ? 'active-hidden' : ''}`}
+                title={isHidden ? "表示する" : "非表示にする"}
+            >
+                <EyeOff size={14} />
+            </button>
+            <MenuItemDeleteButton onDelete={onDelete} />
+        </div>
+    );
+}
+
 export function LandingPage({
     isEditing = false,
     onSectionSelect,
@@ -531,7 +733,15 @@ export function LandingPage({
     // Merge with defaults to ensure new defaults (like images) are used if not explicitly overridden in local state
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
     const layoutSettings = propLayoutSettings || (localLayoutSettings ? { ...DEFAULT_LAYOUT_SETTINGS, ...localLayoutSettings } : DEFAULT_LAYOUT_SETTINGS);
-    const textSettings = propTextSettings || (localTextSettings ? { ...DEFAULT_TEXT_SETTINGS, ...localTextSettings } : DEFAULT_TEXT_SETTINGS);
+    const textSettings = propTextSettings || (() => {
+        const base = { ...DEFAULT_TEXT_SETTINGS };
+        if (localTextSettings) {
+            Object.keys(localTextSettings).forEach(sectionId => {
+                base[sectionId] = { ...base[sectionId], ...localTextSettings[sectionId] };
+            });
+        }
+        return base;
+    })();
 
     // Load settings from localStorage if on public page
     useEffect(() => {
@@ -927,7 +1137,7 @@ export function LandingPage({
                             <div key={i} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow">
                                 <ImageWithFallback
                                     src={src}
-                                    alt={`Gallery ${i + 1}`}
+                                    alt={`Gallery ${i + 1} `}
                                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                 />
                             </div>
@@ -1110,7 +1320,6 @@ export function LandingPage({
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {(() => {
-                                // Get all nigiri item indices dynamically
                                 const nigiriIndices = Object.keys(textSettings.menu || {})
                                     .filter(key => key.startsWith('nigiri_') && key.endsWith('_name'))
                                     .map(key => parseInt(key.split('_')[1]))
@@ -1120,39 +1329,53 @@ export function LandingPage({
                                 return nigiriIndices.map(index => {
                                     const name = textSettings.menu?.[`nigiri_${index}_name`] || '';
                                     const price = textSettings.menu?.[`nigiri_${index}_price`] || '';
-                                    const image = textSettings.menu?.[`nigiri_${index}_image`] || "https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80";
+                                    const image = textSettings.menu?.[`nigiri_${index}_image`];
                                     const note = textSettings.menu?.[`nigiri_${index}_note`] || '';
+                                    const isSoldOut = textSettings.menu?.[`nigiri_${index}_soldOut`] === 'true';
+                                    const isHidden = textSettings.menu?.[`nigiri_${index}_hidden`] === 'true';
 
-                                    if (!name) return null;
+                                    if (!isEditing && isHidden) return null;
 
                                     return (
-                                        <div key={index} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative">
+                                        <div
+                                            key={index}
+                                            className={`bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                        >
                                             {isEditing && (
-                                                <MenuItemDeleteButton
-                                                    onDelete={() => onDeleteMenuItem?.('menu', 'nigiri', index)}
-                                                />
+                                                <>
+                                                    {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
+                                                    <MenuItemControls
+                                                        onDelete={() => onDeleteMenuItem?.('menu', 'nigiri', index)}
+                                                        isSoldOut={isSoldOut}
+                                                        onToggleSoldOut={() => onTextChange?.('menu', `nigiri_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                        isHidden={isHidden}
+                                                        onToggleHidden={() => onTextChange?.('menu', `nigiri_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                    />
+                                                </>
                                             )}
-                                            <div className="relative group">
-                                                <ImageWithFallback
-                                                    src={image}
-                                                    alt={name}
-                                                    className="w-full h-48 object-cover rounded mb-3"
-                                                />
-                                                {isEditing && (
-                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onMenuImageEdit?.('menu', 'nigiri', index);
-                                                            }}
-                                                            className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
-                                                        >
-                                                            <ImageIcon size={14} />
-                                                            編集
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            {image && (
+                                                <div className="relative group">
+                                                    <ImageWithFallback
+                                                        src={image}
+                                                        alt={name}
+                                                        className="w-full h-48 object-cover rounded mb-3"
+                                                    />
+                                                    {isEditing && (
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onMenuImageEdit?.('menu', 'nigiri', index);
+                                                                }}
+                                                                className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
+                                                            >
+                                                                <ImageIcon size={14} />
+                                                                編集
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                             <h4
                                                 style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
                                                 className="font-bold text-lg text-[#1C1C1C]"
@@ -1174,6 +1397,15 @@ export function LandingPage({
                                                     isEditing={isEditing}
                                                 />
                                             </div>
+                                            <MenuTranslationsEditor
+                                                sectionId="menu"
+                                                category="nigiri"
+                                                index={index}
+                                                textSettings={textSettings}
+                                                onTextChange={onTextChange}
+                                                isEditing={isEditing}
+                                                hasSubName={true}
+                                            />
                                             {(note || isEditing) && (
                                                 <div
                                                     className="text-sm text-gray-600 mt-2"
@@ -1228,7 +1460,6 @@ export function LandingPage({
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {(() => {
-                                // Get all makimono item indices dynamically
                                 const makimonoIndices = Object.keys(textSettings.menu || {})
                                     .filter(key => key.startsWith('makimono_') && key.endsWith('_name'))
                                     .map(key => parseInt(key.split('_')[1]))
@@ -1238,39 +1469,53 @@ export function LandingPage({
                                 return makimonoIndices.map(index => {
                                     const name = textSettings.menu?.[`makimono_${index}_name`] || '';
                                     const price = textSettings.menu?.[`makimono_${index}_price`] || '';
-                                    const image = textSettings.menu?.[`makimono_${index}_image`] || "https://images.unsplash.com/photo-1712725214706-e564b8dd1bbe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80";
+                                    const image = textSettings.menu?.[`makimono_${index}_image`];
                                     const note = textSettings.menu?.[`makimono_${index}_note`] || '';
+                                    const isSoldOut = textSettings.menu?.[`makimono_${index}_soldOut`] === 'true';
+                                    const isHidden = textSettings.menu?.[`makimono_${index}_hidden`] === 'true';
 
-                                    if (!name) return null;
+                                    if (!isEditing && isHidden) return null;
 
                                     return (
-                                        <div key={index} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative">
+                                        <div
+                                            key={index}
+                                            className={`bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                        >
                                             {isEditing && (
-                                                <MenuItemDeleteButton
-                                                    onDelete={() => onDeleteMenuItem?.('menu', 'makimono', index)}
-                                                />
+                                                <>
+                                                    {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
+                                                    <MenuItemControls
+                                                        onDelete={() => onDeleteMenuItem?.('menu', 'makimono', index)}
+                                                        isSoldOut={isSoldOut}
+                                                        onToggleSoldOut={() => onTextChange?.('menu', `makimono_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                        isHidden={isHidden}
+                                                        onToggleHidden={() => onTextChange?.('menu', `makimono_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                    />
+                                                </>
                                             )}
-                                            <div className="relative group">
-                                                <ImageWithFallback
-                                                    src={image}
-                                                    alt={name}
-                                                    className="w-full h-48 object-cover rounded mb-3"
-                                                />
-                                                {isEditing && (
-                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onMenuImageEdit?.('menu', 'makimono', index);
-                                                            }}
-                                                            className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
-                                                        >
-                                                            <ImageIcon size={14} />
-                                                            編集
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            {image && (
+                                                <div className="relative group">
+                                                    <ImageWithFallback
+                                                        src={image}
+                                                        alt={name}
+                                                        className="w-full h-48 object-cover rounded mb-3"
+                                                    />
+                                                    {isEditing && (
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onMenuImageEdit?.('menu', 'makimono', index);
+                                                                }}
+                                                                className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
+                                                            >
+                                                                <ImageIcon size={14} />
+                                                                編集
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                             <h4
                                                 style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
                                                 className="font-bold text-lg text-[#1C1C1C]"
@@ -1292,6 +1537,14 @@ export function LandingPage({
                                                     isEditing={isEditing}
                                                 />
                                             </div>
+                                            <MenuTranslationsEditor
+                                                sectionId="menu"
+                                                category="makimono"
+                                                index={index}
+                                                textSettings={textSettings}
+                                                onTextChange={onTextChange}
+                                                isEditing={isEditing}
+                                            />
                                             {(note || isEditing) && (
                                                 <div
                                                     className="text-sm text-gray-600 mt-2"
@@ -1346,7 +1599,6 @@ export function LandingPage({
 
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {(() => {
-                                // Get all ippin item indices dynamically
                                 const ippinIndices = Object.keys(textSettings.menu || {})
                                     .filter(key => key.startsWith('ippin_') && key.endsWith('_name'))
                                     .map(key => parseInt(key.split('_')[1]))
@@ -1356,17 +1608,29 @@ export function LandingPage({
                                 return ippinIndices.map(index => {
                                     const name = textSettings.menu?.[`ippin_${index}_name`] || '';
                                     const price = textSettings.menu?.[`ippin_${index}_price`] || '';
-                                    const image = textSettings.menu?.[`ippin_${index}_image`] || '';
+                                    const image = textSettings.menu?.[`ippin_${index}_image`];
                                     const note = textSettings.menu?.[`ippin_${index}_note`] || '';
+                                    const isSoldOut = textSettings.menu?.[`ippin_${index}_soldOut`] === 'true';
+                                    const isHidden = textSettings.menu?.[`ippin_${index}_hidden`] === 'true';
 
-                                    if (!name) return null;
+                                    if (!isEditing && isHidden) return null;
 
                                     return (
-                                        <div key={index} className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative">
+                                        <div
+                                            key={index}
+                                            className={`bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                        >
                                             {isEditing && (
-                                                <MenuItemDeleteButton
-                                                    onDelete={() => onDeleteMenuItem?.('menu', 'ippin', index)}
-                                                />
+                                                <>
+                                                    {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
+                                                    <MenuItemControls
+                                                        onDelete={() => onDeleteMenuItem?.('menu', 'ippin', index)}
+                                                        isSoldOut={isSoldOut}
+                                                        onToggleSoldOut={() => onTextChange?.('menu', `ippin_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                        isHidden={isHidden}
+                                                        onToggleHidden={() => onTextChange?.('menu', `ippin_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                    />
+                                                </>
                                             )}
                                             {image && (
                                                 <div className="relative group">
@@ -1412,6 +1676,14 @@ export function LandingPage({
                                                     isEditing={isEditing}
                                                 />
                                             </div>
+                                            <MenuTranslationsEditor
+                                                sectionId="menu"
+                                                category="ippin"
+                                                index={index}
+                                                textSettings={textSettings}
+                                                onTextChange={onTextChange}
+                                                isEditing={isEditing}
+                                            />
                                             {(note || isEditing) && (
                                                 <div
                                                     className="text-sm text-gray-600"
@@ -1448,118 +1720,374 @@ export function LandingPage({
 
 
                     {/* DRINK Section */}
-                    <div>
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">Drink</h3>
-                        <p className="text-center text-gray-600 mb-8">お飲み物</p>
+                    <div id="drink" className="mt-20">
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">
+                            <InlineEditableText
+                                value={textSettings.drink?.title || 'Drink'}
+                                onChange={(val) => onTextChange?.('drink', 'title', val)}
+                                isEditing={isEditing}
+                            />
+                        </h3>
+                        <p className="text-center text-gray-600 mb-8">
+                            <InlineEditableText
+                                value={textSettings.drink?.subtitle || 'お飲み物'}
+                                onChange={(val) => onTextChange?.('drink', 'subtitle', val)}
+                                isEditing={isEditing}
+                            />
+                        </p>
 
                         <div className="max-w-4xl mx-auto space-y-8">
                             {/* Sake Section */}
                             <div className="bg-white rounded-lg shadow-lg p-6">
-                                <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">日本酒（１合）</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {[
-                                        { name: '写楽 福島', price: '2000', image: '/assets/drink_sharaku.jpg' },
-                                        { name: '三井の寿 福岡', price: '1500', image: '/assets/drink_miinokotobuki.jpg' },
-                                        { name: '日高見 宮城', price: '1500', image: '/assets/drink_hitakami.jpg' },
-                                        { name: 'ゼブラ 山形', price: '2000', image: '/assets/drink_zebra.jpg' },
-                                    ].map((item, index) => (
-                                        <div key={index} className="flex flex-col items-center">
-                                            <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm">
-                                                <ImageWithFallback
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="font-bold text-sm text-[#1C1C1C]">{item.name}</p>
-                                                <p className="text-[#deb55a] font-bold text-sm">¥{item.price}</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">
+                                    <InlineEditableText
+                                        value={textSettings.drink?.nihonshu_title || '日本酒（１合）'}
+                                        onChange={(val) => onTextChange?.('drink', 'nihonshu_title', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {(() => {
+                                        const nihonshuIndices = Object.keys(textSettings.drink || {})
+                                            .filter(key => key.startsWith('nihonshu_') && key.endsWith('_name'))
+                                            .map(key => parseInt(key.split('_')[1]))
+                                            .filter(num => !isNaN(num))
+                                            .sort((a, b) => a - b);
+
+                                        return nihonshuIndices.map(index => {
+                                            const name = textSettings.drink?.[`nihonshu_${index}_name`] || '';
+                                            const price = textSettings.drink?.[`nihonshu_${index}_price`] || '';
+                                            const image = textSettings.drink?.[`nihonshu_${index}_image`];
+                                            const isSoldOut = textSettings.drink?.[`nihonshu_${index}_soldOut`] === 'true';
+                                            const isHidden = textSettings.drink?.[`nihonshu_${index}_hidden`] === 'true';
+
+                                            if (!isEditing && isHidden) return null;
+
+                                            return (
+                                                <div key={index} className={`flex flex-col items-center relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}>
+                                                    {isEditing && (
+                                                        <MenuItemControls
+                                                            onDelete={() => onDeleteMenuItem?.('drink', 'nihonshu', index)}
+                                                            isSoldOut={isSoldOut}
+                                                            onToggleSoldOut={() => onTextChange?.('drink', `nihonshu_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                            isHidden={isHidden}
+                                                            onToggleHidden={() => onTextChange?.('drink', `nihonshu_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                        />
+                                                    )}
+                                                    <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
+                                                        <ImageWithFallback
+                                                            src={image || '/assets/placeholder.jpg'}
+                                                            alt={name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        {isEditing && (
+                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center pointer-events-none">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        onMenuImageEdit?.('drink', 'nihonshu', index);
+                                                                    }}
+                                                                    className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
+                                                                >
+                                                                    <ImageIcon size={14} />
+                                                                    編集
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-center w-full">
+                                                        <div className="font-bold text-sm text-[#1C1C1C]">
+                                                            <InlineEditableText
+                                                                value={name}
+                                                                onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_name`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </div>
+                                                        <div className="text-[#deb55a] font-bold text-sm">
+                                                            ¥<InlineEditableText
+                                                                value={price}
+                                                                onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_price`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </div>
+                                                        <MenuTranslationsEditor
+                                                            sectionId="drink"
+                                                            category="nihonshu"
+                                                            index={index}
+                                                            textSettings={textSettings}
+                                                            onTextChange={onTextChange}
+                                                            isEditing={isEditing}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        });
+                                    })()}
+                                    {isEditing && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'nihonshu' as any); }}
+                                            className="w-full aspect-[3/4] bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300"
+                                        >
+                                            <div className="text-gray-400 font-bold">+ 追加</div>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-8">
                                 {/* Alcohol Section */}
                                 <div className="bg-white rounded-lg shadow-lg p-6">
-                                    <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">アルコール</h4>
-                                    <div className="space-y-4 text-sm">
-                                        <ul className="space-y-2">
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">サントリー プレミアムモルツ生</span><span className="text-[#deb55a] font-bold">／880</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">サッポロラガー中瓶</span><span className="text-[#deb55a] font-bold">／900</span></li>
-                                        </ul>
+                                    <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">
+                                        <InlineEditableText
+                                            value={textSettings.drink?.alcohol_title || 'アルコール'}
+                                            onChange={(val) => onTextChange?.('drink', 'alcohol_title', val)}
+                                            isEditing={isEditing}
+                                        />
+                                    </h4>
+                                    <div className="space-y-4">
+                                        {(() => {
+                                            const alcoholIndices = Object.keys(textSettings.drink || {})
+                                                .filter(key => key.startsWith('alcohol_') && key.endsWith('_name'))
+                                                .map(key => parseInt(key.split('_')[1]))
+                                                .filter(num => !isNaN(num))
+                                                .sort((a, b) => a - b);
 
-                                        <ul className="space-y-2 border-t pt-4">
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">角ハイボール</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">知多</span><span className="text-[#deb55a] font-bold">／1600</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">白州</span><span className="text-[#deb55a] font-bold">／1800</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">山﨑</span><span className="text-[#deb55a] font-bold">／1800</span></li>
-                                        </ul>
+                                            return alcoholIndices.map(index => {
+                                                const name = textSettings.drink?.[`alcohol_${index}_name`] || '';
+                                                const price = textSettings.drink?.[`alcohol_${index}_price`] || '';
+                                                const isSoldOut = textSettings.drink?.[`alcohol_${index}_soldOut`] === 'true';
+                                                const isHidden = textSettings.drink?.[`alcohol_${index}_hidden`] === 'true';
 
-                                        <ul className="space-y-2 border-t pt-4">
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">ガリサワー</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">レモンサワー</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">濃厚緑茶ハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">さんぴん茶ハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">ウーロンハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">コーン茶ハイ</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                        </ul>
+                                                if (!isEditing && isHidden) return null;
 
-                                        <div className="border-t pt-4">
-                                            <p className="font-bold text-[#1C1C1C] mb-2 text-xs">グラスワイン</p>
-                                            <li className="flex justify-between list-none"><span className="text-[#1C1C1C]">赤・白</span><span className="text-[#deb55a] font-bold">／1000〜1300</span></li>
-                                        </div>
-
-                                        <div className="border-t pt-4">
-                                            <p className="font-bold text-[#1C1C1C] mb-2 text-xs">ボトルワイン</p>
-                                            <li className="flex justify-between list-none"><span className="text-[#1C1C1C]">白・ヴェルメンティーノ・グアド・アル・タッソ</span><span className="text-[#deb55a] font-bold">／10000</span></li>
-                                        </div>
-
-                                        <div className="border-t pt-4">
-                                            <p className="font-bold text-[#1C1C1C] mb-2 text-xs">シャンパン</p>
-                                            <li className="flex justify-between list-none"><span className="text-[#1C1C1C]">ペリエ ジュエ グラン ブリュット</span><span className="text-[#deb55a] font-bold">／25000</span></li>
-                                        </div>
+                                                return (
+                                                    <div key={index} className={`flex justify-between items-center relative group p-1 -mx-1 rounded ${isSoldOut ? 'opacity-50 line-through' : ''} ${isEditing && isHidden ? 'bg-gray-50' : ''}`}>
+                                                        <div className="flex-1">
+                                                            <InlineEditableText
+                                                                value={name}
+                                                                onChange={(val) => onTextChange?.('drink', `alcohol_${index}_name`, val)}
+                                                                isEditing={isEditing}
+                                                                className="text-[#1C1C1C]"
+                                                            />
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="text-[#deb55a] font-bold">
+                                                                ／<InlineEditableText
+                                                                    value={price}
+                                                                    onChange={(val) => onTextChange?.('drink', `alcohol_${index}_price`, val)}
+                                                                    isEditing={isEditing}
+                                                                />
+                                                            </div>
+                                                            {isEditing && (
+                                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <MenuItemControls
+                                                                        onDelete={() => onDeleteMenuItem?.('drink', 'alcohol', index)}
+                                                                        isSoldOut={isSoldOut}
+                                                                        onToggleSoldOut={() => onTextChange?.('drink', `alcohol_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                                        isHidden={isHidden}
+                                                                        onToggleHidden={() => onTextChange?.('drink', `alcohol_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <MenuTranslationsEditor
+                                                            sectionId="drink"
+                                                            category="alcohol"
+                                                            index={index}
+                                                            textSettings={textSettings}
+                                                            onTextChange={onTextChange}
+                                                            isEditing={isEditing}
+                                                            isCompact={true}
+                                                        />
+                                                        {isSoldOut && <span className="absolute left-0 right-0 top-1/2 border-t border-red-500 pointer-events-none"></span>}
+                                                    </div>
+                                                );
+                                            });
+                                        })()}
+                                        {isEditing && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'alcohol' as any); }}
+                                                className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold"
+                                            >
+                                                + 項目を追加
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div className="space-y-8">
                                     {/* Shochu Section */}
                                     <div className="bg-white rounded-lg shadow-lg p-6">
-                                        <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">焼酎・泡盛・ハブ酒</h4>
-                                        <ul className="space-y-2 text-sm">
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">富乃宝山(芋)</span><span className="text-[#deb55a] font-bold">／880</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">吉四六(麦)</span><span className="text-[#deb55a] font-bold">／880</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">鳥飼(米)</span><span className="text-[#deb55a] font-bold">／880</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">残波白（泡盛)</span><span className="text-[#deb55a] font-bold">／770</span></li>
-                                            <li className="flex justify-between"><span className="text-[#1C1C1C]">ハブ酒ショット</span><span className="text-[#deb55a] font-bold">／1000</span></li>
-                                        </ul>
+                                        <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">
+                                            <InlineEditableText
+                                                value={textSettings.drink?.shochu_title || '焼酎・泡盛・ハブ酒'}
+                                                onChange={(val) => onTextChange?.('drink', 'shochu_title', val)}
+                                                isEditing={isEditing}
+                                            />
+                                        </h4>
+                                        <div className="space-y-4">
+                                            {(() => {
+                                                const shochuIndices = Object.keys(textSettings.drink || {})
+                                                    .filter(key => key.startsWith('shochu_') && key.endsWith('_name'))
+                                                    .map(key => parseInt(key.split('_')[1]))
+                                                    .filter(num => !isNaN(num))
+                                                    .sort((a, b) => a - b);
+
+                                                return shochuIndices.map(index => {
+                                                    const name = textSettings.drink?.[`shochu_${index}_name`] || '';
+                                                    const price = textSettings.drink?.[`shochu_${index}_price`] || '';
+                                                    const isSoldOut = textSettings.drink?.[`shochu_${index}_soldOut`] === 'true';
+                                                    const isHidden = textSettings.drink?.[`shochu_${index}_hidden`] === 'true';
+
+                                                    if (!isEditing && isHidden) return null;
+
+                                                    return (
+                                                        <div key={index} className={`flex justify-between items-center relative group p-1 -mx-1 rounded ${isSoldOut ? 'opacity-50 line-through' : ''} ${isEditing && isHidden ? 'bg-gray-50' : ''}`}>
+                                                            <div className="flex-1">
+                                                                <InlineEditableText
+                                                                    value={name}
+                                                                    onChange={(val) => onTextChange?.('drink', `shochu_${index}_name`, val)}
+                                                                    isEditing={isEditing}
+                                                                    className="text-[#1C1C1C]"
+                                                                />
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="text-[#deb55a] font-bold">
+                                                                    ／<InlineEditableText
+                                                                        value={price}
+                                                                        onChange={(val) => onTextChange?.('drink', `shochu_${index}_price`, val)}
+                                                                        isEditing={isEditing}
+                                                                    />
+                                                                </div>
+                                                                {isEditing && (
+                                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <MenuItemControls
+                                                                            onDelete={() => onDeleteMenuItem?.('drink', 'shochu', index)}
+                                                                            isSoldOut={isSoldOut}
+                                                                            onToggleSoldOut={() => onTextChange?.('drink', `shochu_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                                            isHidden={isHidden}
+                                                                            onToggleHidden={() => onTextChange?.('drink', `shochu_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <MenuTranslationsEditor
+                                                                sectionId="drink"
+                                                                category="shochu"
+                                                                index={index}
+                                                                textSettings={textSettings}
+                                                                onTextChange={onTextChange}
+                                                                isEditing={isEditing}
+                                                                isCompact={true}
+                                                            />
+                                                            {isSoldOut && <span className="absolute left-0 right-0 top-1/2 border-t border-red-500 pointer-events-none"></span>}
+                                                        </div>
+                                                    );
+                                                });
+                                            })()}
+                                            {isEditing && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'shochu' as any); }}
+                                                    className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold"
+                                                >
+                                                    + 項目を追加
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Others Section */}
                                     <div className="bg-white rounded-lg shadow-lg p-6">
-                                        <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">その他</h4>
-                                        <ul className="space-y-2 text-sm">
-                                            <li className="flex justify-between">
-                                                <span className="text-[#1C1C1C]">さんぴん茶、ウーロン茶、緑茶、<br />コーン茶、コカ・コーラ、炭酸水</span>
-                                                <span className="text-[#deb55a] font-bold whitespace-nowrap">各種 ¥500</span>
-                                            </li>
-                                        </ul>
+                                        <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]">
+                                            <InlineEditableText
+                                                value={textSettings.drink?.other_title || 'その他'}
+                                                onChange={(val) => onTextChange?.('drink', 'other_title', val)}
+                                                isEditing={isEditing}
+                                            />
+                                        </h4>
+                                        <div className="space-y-4">
+                                            {(() => {
+                                                const otherIndices = Object.keys(textSettings.drink || {})
+                                                    .filter(key => key.startsWith('other_') && key.endsWith('_name'))
+                                                    .map(key => parseInt(key.split('_')[1]))
+                                                    .filter(num => !isNaN(num))
+                                                    .sort((a, b) => a - b);
+
+                                                return otherIndices.map(index => {
+                                                    const name = textSettings.drink?.[`other_${index}_name`] || '';
+                                                    const price = textSettings.drink?.[`other_${index}_price`] || '';
+                                                    const isSoldOut = textSettings.drink?.[`other_${index}_soldOut`] === 'true';
+                                                    const isHidden = textSettings.drink?.[`other_${index}_hidden`] === 'true';
+
+                                                    if (!isEditing && isHidden) return null;
+
+                                                    return (
+                                                        <div key={index} className={`flex justify-between items-center relative group p-1 -mx-1 rounded ${isSoldOut ? 'opacity-50 line-through' : ''} ${isEditing && isHidden ? 'bg-gray-50' : ''}`}>
+                                                            <div className="flex-1">
+                                                                <InlineEditableText
+                                                                    value={name}
+                                                                    onChange={(val) => onTextChange?.('drink', `other_${index}_name`, val)}
+                                                                    isEditing={isEditing}
+                                                                    className="text-[#1C1C1C]"
+                                                                />
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="text-[#deb55a] font-bold">
+                                                                    <InlineEditableText
+                                                                        value={price}
+                                                                        onChange={(val) => onTextChange?.('drink', `other_${index}_price`, val)}
+                                                                        isEditing={isEditing}
+                                                                    />
+                                                                </div>
+                                                                {isEditing && (
+                                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <MenuItemControls
+                                                                            onDelete={() => onDeleteMenuItem?.('drink', 'other', index)}
+                                                                            isSoldOut={isSoldOut}
+                                                                            onToggleSoldOut={() => onTextChange?.('drink', `other_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                                            isHidden={isHidden}
+                                                                            onToggleHidden={() => onTextChange?.('drink', `other_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <MenuTranslationsEditor
+                                                                sectionId="drink"
+                                                                category="other"
+                                                                index={index}
+                                                                textSettings={textSettings}
+                                                                onTextChange={onTextChange}
+                                                                isEditing={isEditing}
+                                                                isCompact={true}
+                                                            />
+                                                            {isSoldOut && <span className="absolute left-0 right-0 top-1/2 border-t border-red-500 pointer-events-none"></span>}
+                                                        </div>
+                                                    );
+                                                });
+                                            })()}
+                                            {isEditing && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'other' as any); }}
+                                                    className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold"
+                                                >
+                                                    + 項目を追加
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section >
+            </section>
 
             {/* Affiliated Store Section */}
-            < section
-                id="affiliated"
-                onClick={() => isEditing && onSectionSelect?.('affiliated')
-                }
-                className={`py-20 bg-cover bg-center relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated' ? 'ring-4 ring-[#deb55a]' : ''}`}
-                style={getBackgroundStyle('affiliated')}
+            <section
+                id="affiliated-store"
+                onClick={() => isEditing && onSectionSelect?.('affiliated-store')}
+                className={`flex flex-col relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated-store' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                style={getBackgroundStyle('affiliated-store')}
             >
                 {renderBackgroundContent('affiliated')}
                 {isEditing && (
@@ -1683,16 +2211,25 @@ export function LandingPage({
                         />
                     </div>
                 </div>
-            </section >
+            </section>
+
             {/* Footer */}
-            < footer
+            <footer
                 id="footer"
                 onClick={() => isEditing && onSectionSelect?.('footer')}
-                className={`text-[#e8eaec] border-t border-[#deb55a]/20 flex flex-col relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'footer' ? 'ring-4 ring-[#deb55a]' : ''} ${getLayoutStyle('footer')}`}
+                className={`py-12 border-t border-[#deb55a]/20 relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'footer' ? 'ring-4 ring-[#deb55a]' : ''}`}
                 style={getBackgroundStyle('footer')}
             >
                 {renderBackgroundContent('footer')}
-                {isEditing && <SectionToolbar sectionId="footer" />}
+                {isEditing && (
+                    <SectionToolbar
+                        sectionId="footer"
+                        layoutSettings={layoutSettings}
+                        onLayoutChange={onLayoutChange!}
+                        onSectionSelect={onSectionSelect!}
+                        onBackgroundEdit={onBackgroundEdit!}
+                    />
+                )}
                 <div className={`mx-auto text-center ${getContainerWidthClass('footer')}`}>
                     <div className="flex justify-center gap-6 mb-8">
                         <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
@@ -1728,7 +2265,7 @@ export function LandingPage({
                         </div>
                     </div>
                 </div>
-            </footer >
-        </div >
+            </footer>
+        </div>
     );
 }

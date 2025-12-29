@@ -23,10 +23,11 @@ import {
     Trash2,
     Save
 } from 'lucide-react';
-import { LandingPage } from '../../pages/LandingPage';
+import { LandingPage, DEFAULT_TEXT_SETTINGS } from '../../pages/LandingPage';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
 import AddSectionModal from '../components/editor/AddSectionModal';
+import TextEditorModal from '../components/editor/TextEditorModal';
 
 export type BackgroundType = 'color' | 'image' | 'video';
 
@@ -60,6 +61,13 @@ export default function EditorPage() {
     const [showImageEditor, setShowImageEditor] = useState(false);
     const [showAddSectionModal, setShowAddSectionModal] = useState(false);
     const [editingImage, setEditingImage] = useState<string>('');
+    const [showTextEditor, setShowTextEditor] = useState(false);
+    const [textEditSection, setTextEditSection] = useState<string | null>(null);
+    const [editingMenuImage, setEditingMenuImage] = useState<{
+        sectionId: string;
+        category: string;
+        index: number;
+    } | null>(null);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -83,6 +91,83 @@ export default function EditorPage() {
         footer: { width: 'wide', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true }
     });
 
+    // Text settings state
+    const [textSettings, setTextSettings] = useState<Record<string, Record<string, string>>>(DEFAULT_TEXT_SETTINGS);
+
+    // History state for Undo/Redo
+    const [past, setPast] = useState<any[]>([]);
+    const [future, setFuture] = useState<any[]>([]);
+
+    const pushToHistory = () => {
+        const currentState = {
+            backgroundSettings,
+            layoutSettings,
+            textSettings: { ...textSettings }
+        };
+        // Use a functional update to avoid stale state in history
+        setPast(prev => {
+            const newPast = [...prev, JSON.parse(JSON.stringify(currentState))];
+            // Limit history to 50 items to prevent memory issues
+            if (newPast.length > 50) newPast.shift();
+            return newPast;
+        });
+        setFuture([]); // Clear future on new action
+    };
+
+    const undo = () => {
+        if (past.length === 0) return;
+
+        const currentState = {
+            backgroundSettings,
+            layoutSettings,
+            textSettings: { ...textSettings }
+        };
+
+        const previousState = past[past.length - 1];
+        const newPast = past.slice(0, past.length - 1);
+
+        setFuture(prev => [JSON.parse(JSON.stringify(currentState)), ...prev]);
+        setPast(newPast);
+
+        // Restore state
+        setBackgroundSettings(previousState.backgroundSettings);
+        setLayoutSettings(previousState.layoutSettings);
+        setTextSettings(previousState.textSettings);
+
+        // Persist to localStorage
+        localStorage.setItem('site_background_settings', JSON.stringify(previousState.backgroundSettings));
+        localStorage.setItem('site_layout_settings', JSON.stringify(previousState.layoutSettings));
+        localStorage.setItem('site_text_settings', JSON.stringify(previousState.textSettings));
+        window.dispatchEvent(new Event('storage'));
+    };
+
+    const redo = () => {
+        if (future.length === 0) return;
+
+        const currentState = {
+            backgroundSettings,
+            layoutSettings,
+            textSettings: { ...textSettings }
+        };
+
+        const nextState = future[0];
+        const newFuture = future.slice(1);
+
+        setPast(prev => [...prev, JSON.parse(JSON.stringify(currentState))]);
+        setFuture(newFuture);
+
+        // Restore state
+        setBackgroundSettings(nextState.backgroundSettings);
+        setLayoutSettings(nextState.layoutSettings);
+        setTextSettings(nextState.textSettings);
+
+        // Persist to localStorage
+        localStorage.setItem('site_background_settings', JSON.stringify(nextState.backgroundSettings));
+        localStorage.setItem('site_layout_settings', JSON.stringify(nextState.layoutSettings));
+        localStorage.setItem('site_text_settings', JSON.stringify(nextState.textSettings));
+        window.dispatchEvent(new Event('storage'));
+    };
+
 
     const menuItems = [
         { id: 'styles', icon: Palette, label: 'スタイル' },
@@ -101,6 +186,7 @@ export default function EditorPage() {
     };
 
     const updateBackground = (sectionId: string, config: Partial<BackgroundConfig>) => {
+        pushToHistory();
         setBackgroundSettings(prev => ({
             ...prev,
             [sectionId]: {
@@ -111,7 +197,11 @@ export default function EditorPage() {
     };
 
     const handleImageSelect = (url: string) => {
-        if (backgroundEditSection) {
+        if (editingMenuImage) {
+            const { sectionId, category, index } = editingMenuImage;
+            handleInlineTextChange(sectionId, `${category}_${index}_image`, url);
+            setEditingMenuImage(null);
+        } else if (backgroundEditSection) {
             updateBackground(backgroundEditSection, {
                 type: 'image',
                 value: url,
@@ -157,10 +247,116 @@ export default function EditorPage() {
         }
     };
 
+    const handleTextEdit = (sectionId: string) => {
+        setTextEditSection(sectionId);
+        setShowTextEditor(true);
+    };
+
+    const handleTextSave = (content: Record<string, string>) => {
+        if (textEditSection) {
+            pushToHistory();
+            setTextSettings(prev => ({
+                ...prev,
+                [textEditSection]: content
+            }));
+            setShowTextEditor(false);
+        }
+    };
+
+    const handleInlineTextChange = (sectionId: string, field: string, value: string) => {
+        pushToHistory();
+        setTextSettings(prev => {
+            const currentSectionText = prev[sectionId] || {};
+            return {
+                ...prev,
+                [sectionId]: {
+                    ...currentSectionText,
+                    [field]: value
+                }
+            };
+        });
+    };
+
+    const handleTextReset = (sectionId: string) => {
+        setTextSettings(prev => {
+            const defaultSectionText = DEFAULT_TEXT_SETTINGS[sectionId] || {};
+            return {
+                ...prev,
+                [sectionId]: defaultSectionText
+            };
+        });
+    };
+
+    const handleAddMenuItem = (sectionId: string, category: string) => {
+        pushToHistory();
+
+        setTextSettings(prev => {
+            const currentSection = prev[sectionId] || {};
+
+            // Find next available index
+            const existingIndices = Object.keys(currentSection)
+                .filter(key => key.startsWith(`${category}_`) && key.endsWith('_name'))
+                .map(key => parseInt(key.split('_')[1]))
+                .filter(num => !isNaN(num));
+
+            const nextIndex = existingIndices.length > 0
+                ? Math.max(...existingIndices) + 1
+                : 0;
+
+            return {
+                ...prev,
+                [sectionId]: {
+                    ...currentSection,
+                    [`${category}_${nextIndex}_name`]: '新しいメニュー',
+                    [`${category}_${nextIndex}_name_en`]: 'New Menu Item',
+                    [`${category}_${nextIndex}_name_ko`]: '새 메뉴',
+                    [`${category}_${nextIndex}_name_zh`]: '新菜单',
+                    [`${category}_${nextIndex}_price`]: '0',
+                    [`${category}_${nextIndex}_image`]: 'https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80',
+                    [`${category}_${nextIndex}_note`]: '',
+                    [`${category}_${nextIndex}_soldOut`]: 'false',
+                    [`${category}_${nextIndex}_hidden`]: 'false'
+                }
+            };
+        });
+    };
+
+    const handleDeleteMenuItem = (sectionId: string, category: string, index: number) => {
+        console.log('handleDeleteMenuItem called', sectionId, category, index);
+        // if (!confirm('このメニューアイテムを削除しますか？')) return;
+
+        pushToHistory();
+
+        setTextSettings(prev => {
+            const currentSection = { ...prev[sectionId] };
+
+            // Create a NEW object without all fields associated with this category and index
+            const prefix = `${category}_${index}_`;
+            const updatedSection = Object.keys(currentSection).reduce((acc, key) => {
+                if (!key.startsWith(prefix)) {
+                    acc[key] = currentSection[key];
+                }
+                return acc;
+            }, {} as Record<string, string>);
+
+            return {
+                ...prev,
+                [sectionId]: updatedSection
+            };
+        });
+    };
+
+
+    const handleMenuImageEdit = (sectionId: string, category: string, index: number) => {
+        setEditingMenuImage({ sectionId, category, index });
+        setShowAssetLibrary(true);
+    };
+
     const handleSaveBackground = () => {
         // Save settings to localStorage
         localStorage.setItem('site_background_settings', JSON.stringify(backgroundSettings));
         localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
+        localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
 
         // Show success message or feedback if needed (optional, existing UI has a static "Saved" indicator)
         // For now just close the panel
@@ -174,29 +370,64 @@ export default function EditorPage() {
         // This is a mock interaction since the UI is static
     };
 
+    const handlePublish = () => {
+        handleSaveBackground();
+        alert('公開しました！');
+    };
+
     // Initialize from localStorage on mount
+    const [isInitialized, setIsInitialized] = useState(false);
     useEffect(() => {
         const savedBackgrounds = localStorage.getItem('site_background_settings');
         const savedLayouts = localStorage.getItem('site_layout_settings');
+        const savedText = localStorage.getItem('site_text_settings');
 
         if (savedBackgrounds) {
-            try {
-                setBackgroundSettings(JSON.parse(savedBackgrounds));
-            } catch (e) {
-                console.error('Failed to parse saved background settings', e);
-            }
+            try { setBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { console.error(e); }
         }
-
         if (savedLayouts) {
-            try {
-                setLayoutSettings(JSON.parse(savedLayouts));
-            } catch (e) {
-                console.error('Failed to parse saved layout settings', e);
-            }
+            try { setLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { console.error(e); }
         }
+        if (savedText) {
+            try {
+                let parsed = JSON.parse(savedText);
+                // Proactive correction for "reversed text" issue
+                if (parsed && typeof parsed === 'object') {
+                    Object.keys(parsed).forEach(sectionId => {
+                        const section = parsed[sectionId];
+                        if (section && typeof section === 'object') {
+                            Object.keys(section).forEach(field => {
+                                const val = section[field];
+                                if (typeof val === 'string' && (val.toLowerCase().includes('ihsus enilni') || val.toLowerCase().includes('ih su s enilni'))) {
+                                    parsed[sectionId][field] = DEFAULT_TEXT_SETTINGS?.[sectionId]?.[field] || val;
+                                }
+                            });
+                        }
+                    });
+                }
+                const mergedText = { ...DEFAULT_TEXT_SETTINGS };
+                if (parsed && typeof parsed === 'object') {
+                    Object.keys(parsed).forEach(sectionId => {
+                        mergedText[sectionId] = { ...(mergedText[sectionId] || {}), ...parsed[sectionId] };
+                    });
+                }
+                setTextSettings(mergedText);
+            } catch (e) { console.error(e); }
+        }
+        setIsInitialized(true);
     }, []);
 
+    // Central persistence effect
+    useEffect(() => {
+        if (!isInitialized) return;
+        localStorage.setItem('site_background_settings', JSON.stringify(backgroundSettings));
+        localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
+        localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
+        window.dispatchEvent(new Event('storage'));
+    }, [backgroundSettings, layoutSettings, textSettings, isInitialized]);
+
     const handleLayoutChange = (sectionId: string, config: Partial<LayoutConfig>) => {
+        pushToHistory();
         setLayoutSettings(prev => ({
             ...prev,
             [sectionId]: { ...prev[sectionId], ...config }
@@ -564,11 +795,48 @@ export default function EditorPage() {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 mr-2">
+                            <button
+                                onClick={undo}
+                                disabled={past.length === 0}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${past.length > 0 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
+                                title="元に戻す (Undo)"
+                            >
+                                <Undo size={16} />
+                                <span className="text-[11px] font-bold">戻る</span>
+                            </button>
+                            <button
+                                onClick={redo}
+                                disabled={future.length === 0}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${future.length > 0 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
+                                title="やり直す (Redo)"
+                            >
+                                <span className="text-[11px] font-bold">進む</span>
+                                <Redo size={16} />
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                localStorage.setItem('site_background_settings', JSON.stringify(backgroundSettings));
+                                localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
+                                localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
+                                window.dispatchEvent(new Event('storage'));
+                                alert('保存しました!');
+                            }}
+                            className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
+                        >
+                            保存
+                        </button>
+
                         <span className="text-[10px] text-gray-400 italic">最終保存: たった今</span>
                         <button className="px-5 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded border border-gray-300 transition-colors bg-white">
                             プレビュー
                         </button>
-                        <button className="px-6 py-1.5 text-xs font-bold text-white bg-[#88c057] hover:bg-[#7ab04a] rounded shadow-[0_2px_4px_rgba(136,192,87,0.3)] transition-all">
+                        <button
+                            onClick={handlePublish}
+                            className="px-6 py-1.5 text-xs font-bold text-white bg-[#88c057] hover:bg-[#7ab04a] rounded shadow-[0_2px_4px_rgba(136,192,87,0.3)] transition-all"
+                        >
                             公開する
                         </button>
                     </div>
@@ -577,7 +845,7 @@ export default function EditorPage() {
                 {/* Preview Canvas */}
                 <div className="flex-1 overflow-hidden relative flex justify-center bg-[#e0e0e0] p-8">
                     <div
-                        className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden ${device === 'mobile'
+                        className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden relative ${device === 'mobile'
                             ? 'w-[375px] h-[667px] rounded-3xl border-8 border-gray-800'
                             : 'w-full h-full rounded-lg border border-gray-300'
                             }`}
@@ -588,14 +856,21 @@ export default function EditorPage() {
                           For this demo, we'll just render it inside a scrolling container.
                         */}
                         <div className="w-full h-full overflow-y-auto scrollbar-hide">
-                            <div className={device === 'desktop' ? '' : 'pointer-events-none select-none'}>
+                            <div>
                                 <LandingPage
                                     isEditing={true}
                                     onSectionSelect={(id) => setActiveSection(id)}
                                     onBackgroundEdit={handleBackgroundEdit}
+                                    onTextEdit={handleTextEdit}
+                                    onTextChange={handleInlineTextChange}
+                                    onTextReset={handleTextReset}
+                                    onAddMenuItem={handleAddMenuItem}
+                                    onDeleteMenuItem={handleDeleteMenuItem}
+                                    onMenuImageEdit={handleMenuImageEdit}
                                     activeSection={activeSection || undefined}
                                     backgroundSettings={backgroundSettings}
                                     layoutSettings={layoutSettings}
+                                    textSettings={textSettings}
                                     onLayoutChange={handleLayoutChange}
                                 />
                             </div>
@@ -616,6 +891,16 @@ export default function EditorPage() {
                 onClose={() => setShowImageEditor(false)}
                 imageUrl={editingImage}
                 onSave={handleImageSave}
+            />
+
+            {/* Text Editor Modal */}
+            <TextEditorModal
+                isOpen={showTextEditor}
+                onClose={() => setShowTextEditor(false)}
+                onSave={handleTextSave}
+                sectionId={textEditSection || ''}
+                currentContent={textEditSection ? textSettings[textEditSection] || {} : {}}
+                sectionLabel={textEditSection ? sections.find(s => s.id === textEditSection)?.label || textEditSection : ''}
             />
 
             {/* Add Section Modal */}
