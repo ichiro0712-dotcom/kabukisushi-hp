@@ -1088,7 +1088,7 @@ export function LandingPage({
                         <a
                             href="/traveler"
                             style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                            className="inline-block px-6 py-2 text-sm text-[#e8eaec] hover:text-[#deb55a] transition-colors border border-[#e8eaec]/30 rounded hover:border-[#deb55a]"
+                            className="inline-block px-6 py-2 text-sm text-[#e8eaec] hover:text-[#deb55a] transition-colors border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a]"
                         >
                             Languages: English · 中文 · 한국어
                         </a>
@@ -1096,7 +1096,7 @@ export function LandingPage({
                             <button
                                 onClick={() => scrollToSection('menu')}
                                 style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                className="px-12 py-4 bg-[#deb55a] text-[#1C1C1C] rounded-lg hover:bg-[#fcebc5] transition-colors font-bold text-lg"
+                                className="px-12 py-4 bg-[#deb55a] text-[#1C1C1C] rounded-full hover:bg-[#fcebc5] transition-colors font-bold text-lg"
                             >
                                 メニュー
                             </button>
@@ -1107,7 +1107,7 @@ export function LandingPage({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                className="px-8 py-3 text-[#886107] hover:text-[#1C1C1C] bg-white/90 hover:bg-white rounded transition-colors font-semibold"
+                                className="px-8 py-3 text-[#886107] hover:text-[#1C1C1C] bg-white/90 hover:bg-white rounded-full transition-colors font-semibold"
                             >
                                 予約はこちら
                             </a>
@@ -1116,16 +1116,16 @@ export function LandingPage({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                className="px-8 py-3 text-[#e8eaec] hover:text-[#deb55a] border-2 border-[#e8eaec] hover:border-[#deb55a] rounded transition-colors font-semibold"
+                                className="px-8 py-3 text-[#e8eaec] hover:text-[#deb55a] border-2 border-[#e8eaec] hover:border-[#deb55a] rounded-full transition-colors font-semibold"
                             >
                                 Google Maps
                             </a>
                         </div>
                         <div className="flex flex-wrap gap-4 justify-center">
-                            <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded hover:border-[#deb55a] transition-colors">Instagram</a>
-                            <a href="https://www.tiktok.com/@kabukisushi1001?_t=8kzjmGapCuP&_r=1" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded hover:border-[#deb55a] transition-colors">Tik Tok</a>
-                            <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded hover:border-[#deb55a] transition-colors">YouTube</a>
-                            <a href="https://www.facebook.com/profile.php?id=100064940143541" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded hover:border-[#deb55a] transition-colors">Facebook</a>
+                            <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">Instagram</a>
+                            <a href="https://www.tiktok.com/@kabukisushi1001?_t=8kzjmGapCuP&_r=1" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">Tik Tok</a>
+                            <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">YouTube</a>
+                            <a href="https://www.facebook.com/profile.php?id=100064940143541" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">Facebook</a>
                         </div>
                     </div>
                 </div>
@@ -1281,7 +1281,7 @@ export function LandingPage({
                         onBackgroundEdit={onBackgroundEdit!}
                     />
                 )}
-                {(!backgroundSettings?.['access']?.overlayOpacity) && <div className="absolute inset-0 bg-white/90"></div>}
+                {(!backgroundSettings?.['access']?.overlayOpacity) && <div className="absolute inset-0 bg-white/55"></div>}
                 <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C]">
                         <InlineEditableText
@@ -1295,21 +1295,21 @@ export function LandingPage({
                             <div className="flex items-start space-x-3">
                                 <MapPin className="w-6 h-6 text-[#deb55a] flex-shrink-0 mt-1" />
                                 <div>
-                                    <p className="font-bold text-lg">
+                                    <p className="font-bold text-lg text-[#1C1C1C]">
                                         <InlineEditableText
                                             value={textSettings.access?.zip || '〒160-0021'}
                                             onChange={(val) => onTextChange?.('access', 'zip', val)}
                                             isEditing={isEditing}
                                         />
                                     </p>
-                                    <p className="text-gray-700">
+                                    <p className="text-[#1C1C1C]">
                                         <InlineEditableText
                                             value={textSettings.access?.address || '東京都新宿区歌舞伎町2丁目45−16'}
                                             onChange={(val) => onTextChange?.('access', 'address', val)}
                                             isEditing={isEditing}
                                         />
                                     </p>
-                                    <p className="text-gray-700">
+                                    <p className="text-[#1C1C1C]">
                                         <InlineEditableText
                                             value={textSettings.access?.building || 'GEST34ビル4F'}
                                             onChange={(val) => onTextChange?.('access', 'building', val)}
@@ -1320,7 +1320,7 @@ export function LandingPage({
                             </div>
                             <div className="flex items-center space-x-3">
                                 <Phone className="w-6 h-6 text-[#deb55a]" />
-                                <div className="text-lg">
+                                <div className="text-lg text-[#1C1C1C]">
                                     <InlineEditableText
                                         value={textSettings.access?.phone || '03-6302-1477'}
                                         onChange={(val) => onTextChange?.('access', 'phone', val)}
@@ -1330,7 +1330,7 @@ export function LandingPage({
                             </div>
                             <div className="flex items-center space-x-3">
                                 <Clock className="w-6 h-6 text-[#deb55a]" />
-                                <div className="text-lg">
+                                <div className="text-lg text-[#1C1C1C]">
                                     <InlineEditableText
                                         value={textSettings.access?.hours || 'OPEN : 18:00-24:00'}
                                         onChange={(val) => onTextChange?.('access', 'hours', val)}
