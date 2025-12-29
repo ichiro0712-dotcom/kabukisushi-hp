@@ -21,13 +21,16 @@ import {
     Image as ImageIcon,
     Video,
     Trash2,
-    Save
+    Save,
+    Globe
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS } from '../../pages/LandingPage';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
 import AddSectionModal from '../components/editor/AddSectionModal';
 import TextEditorModal from '../components/editor/TextEditorModal';
+import { TravelerPage } from '../../pages/TravelerPage';
+import HelpModal from '../components/editor/HelpModal';
 
 export type BackgroundType = 'color' | 'image' | 'video';
 
@@ -68,6 +71,8 @@ export default function EditorPage() {
         category: string;
         index: number;
     } | null>(null);
+    const [editPage, setEditPage] = useState<'landing' | 'traveler'>('landing');
+    const [showHelpModal, setShowHelpModal] = useState(false);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -204,7 +209,8 @@ export default function EditorPage() {
     const handleImageSelect = (url: string) => {
         if (editingMenuImage) {
             const { sectionId, category, index } = editingMenuImage;
-            handleInlineTextChange(sectionId, `${category}_${index}_image`, url);
+            const field = sectionId === 'gallery' ? `${category}_${index}` : `${category}_${index}_image`;
+            handleInlineTextChange(sectionId, field, url);
             setEditingMenuImage(null);
         } else if (backgroundEditSection) {
             updateBackground(backgroundEditSection, {
@@ -299,54 +305,72 @@ export default function EditorPage() {
             const currentSection = prev[sectionId] || {};
 
             // Find next available index
-            const existingIndices = Object.keys(currentSection)
-                .filter(key => key.startsWith(`${category}_`) && key.endsWith('_name'))
-                .map(key => parseInt(key.split('_')[1]))
-                .filter(num => !isNaN(num));
+            let nextIndex = 0;
+            if (sectionId === 'gallery' && category === 'image') {
+                const existingIndices = Object.keys(currentSection)
+                    .filter(key => key.startsWith('image_'))
+                    .map(key => parseInt(key.replace('image_', '')))
+                    .filter(num => !isNaN(num));
+                nextIndex = existingIndices.length > 0 ? Math.max(...existingIndices) + 1 : 0;
 
-            const nextIndex = existingIndices.length > 0
-                ? Math.max(...existingIndices) + 1
-                : 0;
+                return {
+                    ...prev,
+                    [sectionId]: {
+                        ...currentSection,
+                        [`image_${nextIndex}`]: 'https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800&h=800&auto=format&q=80',
+                    }
+                };
+            } else {
+                const existingIndices = Object.keys(currentSection)
+                    .filter(key => key.startsWith(`${category}_`) && key.endsWith('_name'))
+                    .map(key => parseInt(key.split('_')[1]))
+                    .filter(num => !isNaN(num));
+                nextIndex = existingIndices.length > 0 ? Math.max(...existingIndices) + 1 : 0;
 
-            return {
-                ...prev,
-                [sectionId]: {
-                    ...currentSection,
-                    [`${category}_${nextIndex}_name`]: '新しいメニュー',
-                    [`${category}_${nextIndex}_name_en`]: 'New Menu Item',
-                    [`${category}_${nextIndex}_name_ko`]: '새 메뉴',
-                    [`${category}_${nextIndex}_name_zh`]: '新菜单',
-                    [`${category}_${nextIndex}_price`]: '0',
-                    [`${category}_${nextIndex}_image`]: 'https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80',
-                    [`${category}_${nextIndex}_note`]: '',
-                    [`${category}_${nextIndex}_soldOut`]: 'false',
-                    [`${category}_${nextIndex}_hidden`]: 'false'
-                }
-            };
+                return {
+                    ...prev,
+                    [sectionId]: {
+                        ...currentSection,
+                        [`${category}_${nextIndex}_name`]: '新しいメニュー',
+                        [`${category}_${nextIndex}_name_en`]: 'New Menu Item',
+                        [`${category}_${nextIndex}_name_ko`]: '새 메뉴',
+                        [`${category}_${nextIndex}_name_zh`]: '新菜单',
+                        [`${category}_${nextIndex}_price`]: '0',
+                        [`${category}_${nextIndex}_image`]: 'https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80',
+                        [`${category}_${nextIndex}_note`]: '',
+                        [`${category}_${nextIndex}_soldOut`]: 'false',
+                        [`${category}_${nextIndex}_hidden`]: 'false'
+                    }
+                };
+            }
         });
     };
 
     const handleDeleteMenuItem = (sectionId: string, category: string, index: number) => {
         console.log('handleDeleteMenuItem called', sectionId, category, index);
-        // if (!confirm('このメニューアイテムを削除しますか？')) return;
 
         pushToHistory();
 
         setTextSettings(prev => {
             const currentSection = { ...prev[sectionId] };
 
-            // Create a NEW object without all fields associated with this category and index
-            const prefix = `${category}_${index}_`;
-            const updatedSection = Object.keys(currentSection).reduce((acc, key) => {
-                if (!key.startsWith(prefix)) {
-                    acc[key] = currentSection[key];
-                }
-                return acc;
-            }, {} as Record<string, string>);
+            if (sectionId === 'gallery' && category === 'image') {
+                // Delete both possible key formats to handle migration from old bugs
+                delete currentSection[`image_${index}`];
+                delete currentSection[`image_${index}_image`];
+            } else {
+                // Create a NEW object without all fields associated with this category and index
+                const prefix = `${category}_${index}_`;
+                Object.keys(currentSection).forEach(key => {
+                    if (key.startsWith(prefix)) {
+                        delete currentSection[key];
+                    }
+                });
+            }
 
             return {
                 ...prev,
-                [sectionId]: updatedSection
+                [sectionId]: currentSection
             };
         });
     };
@@ -413,7 +437,33 @@ export default function EditorPage() {
                 const mergedText = { ...DEFAULT_TEXT_SETTINGS };
                 if (parsed && typeof parsed === 'object') {
                     Object.keys(parsed).forEach(sectionId => {
-                        mergedText[sectionId] = { ...(mergedText[sectionId] || {}), ...parsed[sectionId] };
+                        const savedSection = parsed[sectionId];
+                        const defaultSection = DEFAULT_TEXT_SETTINGS[sectionId] || {};
+
+                        // Logic: If the saved section has ANY dynamic items (keys starting with image_ or category_),
+                        // we treat the saved dynamic items as the source of truth for that section.
+                        const isDynamicKey = (k: string) =>
+                            (k.startsWith('image_') ||
+                                ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
+                            !k.includes('_content'); // _content fields are not considered dynamic items for this check
+
+                        const hasSavedDynamic = Object.keys(savedSection).some(isDynamicKey);
+
+                        if (hasSavedDynamic) {
+                            // Start with default static fields
+                            const sectionWithStaticDefaults: Record<string, string> = {};
+                            Object.keys(defaultSection).forEach(k => {
+                                if (!isDynamicKey(k)) { // Copy non-dynamic fields from default
+                                    sectionWithStaticDefaults[k] = defaultSection[k];
+                                }
+                            });
+
+                            // Merge with saved section, allowing saved dynamic items and _content fields to override
+                            mergedText[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
+                        } else {
+                            // No dynamic items in saved section, merge default and saved
+                            mergedText[sectionId] = { ...defaultSection, ...savedSection };
+                        }
                     });
                 }
                 setTextSettings(mergedText);
@@ -705,7 +755,7 @@ export default function EditorPage() {
                                         className="aspect-video rounded border border-dashed border-gray-700 flex flex-col items-center justify-center gap-1 hover:border-gray-500 bg-white/5 group"
                                     >
                                         <Plus size={14} className="text-gray-500 group-hover:text-gray-300" />
-                                        <span className="text-[10px] text-gray-500">その他</span>
+                                        <span className="10px] text-gray-500">その他</span>
                                     </button>
                                 </div>
 
@@ -783,24 +833,52 @@ export default function EditorPage() {
                             <span className="text-xs font-bold text-gray-900">KABUKI寿司 1番通り店</span>
                         </div>
                         <div className="h-4 w-px bg-gray-300" />
-                        <div className="flex bg-gray-100 rounded-lg p-1">
-                            <button
-                                onClick={() => setDevice('desktop')}
-                                className={`p-1.5 rounded ${device === 'desktop' ? 'bg-white shadow-sm text-[#4db8e5]' : 'text-gray-500 hover:text-gray-700'}`}
-                            >
-                                <Monitor size={16} />
-                            </button>
-                            <button
-                                onClick={() => setDevice('mobile')}
-                                className={`p-1.5 rounded ${device === 'mobile' ? 'bg-white shadow-sm text-[#4db8e5]' : 'text-gray-500 hover:text-gray-700'}`}
-                            >
-                                <Smartphone size={16} />
-                            </button>
+                        <div className="flex items-center gap-4">
+                            <div className="flex bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => setEditPage('landing')}
+                                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${editPage === 'landing' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    <FileText size={14} />
+                                    日本語
+                                </button>
+                                <button
+                                    onClick={() => setEditPage('traveler')}
+                                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${editPage === 'traveler' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    <Globe size={14} />
+                                    Foreign (English)
+                                </button>
+                            </div>
+
+                            <div className="flex bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => setDevice('desktop')}
+                                    className={`p-1.5 rounded-md transition-all ${device === 'desktop' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
+                                >
+                                    <Monitor size={18} />
+                                </button>
+                                <button
+                                    onClick={() => setDevice('mobile')}
+                                    className={`p-1.5 rounded-md transition-all ${device === 'mobile' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
+                                >
+                                    <Smartphone size={18} />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 mr-2">
+                        <button
+                            onClick={() => setShowHelpModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#deb55a] to-[#c9a347] text-[#1C1C1C] rounded-md hover:from-[#c9a347] to-[#b89236] transition-all shadow-md font-bold text-sm"
+                            title="使い方ガイド"
+                        >
+                            <HelpCircle size={18} />
+                            使い方
+                        </button>
+
+                        <div className="flex items-center gap-2 bg-gray-50 rounded-md p-1">
                             <button
                                 onClick={undo}
                                 disabled={past.length === 0}
@@ -856,22 +934,39 @@ export default function EditorPage() {
                         */}
                         <div className="w-full h-full overflow-y-auto scrollbar-hide">
                             <div>
-                                <LandingPage
-                                    isEditing={true}
-                                    onSectionSelect={(id) => setActiveSection(id)}
-                                    onBackgroundEdit={handleBackgroundEdit}
-                                    onTextEdit={handleTextEdit}
-                                    onTextChange={handleInlineTextChange}
-                                    onTextReset={handleTextReset}
-                                    onAddMenuItem={handleAddMenuItem}
-                                    onDeleteMenuItem={handleDeleteMenuItem}
-                                    onMenuImageEdit={handleMenuImageEdit}
-                                    activeSection={activeSection || undefined}
-                                    backgroundSettings={backgroundSettings}
-                                    layoutSettings={layoutSettings}
-                                    textSettings={textSettings}
-                                    onLayoutChange={handleLayoutChange}
-                                />
+                                {editPage === 'landing' ? (
+                                    <LandingPage
+                                        isEditing={true}
+                                        onSectionSelect={setActiveSection}
+                                        onBackgroundEdit={handleBackgroundEdit}
+                                        onTextEdit={handleTextEdit}
+                                        onTextChange={handleInlineTextChange}
+                                        onTextReset={handleTextReset}
+                                        onAddMenuItem={handleAddMenuItem}
+                                        onDeleteMenuItem={handleDeleteMenuItem}
+                                        onMenuImageEdit={handleMenuImageEdit}
+                                        onLayoutChange={handleLayoutChange}
+                                        activeSection={activeSection}
+                                        backgroundSettings={backgroundSettings}
+                                        layoutSettings={layoutSettings}
+                                        textSettings={textSettings}
+                                    />
+                                ) : (
+                                    <TravelerPage
+                                        isEditing={true}
+                                        onSectionSelect={setActiveSection}
+                                        onBackgroundEdit={handleBackgroundEdit}
+                                        activeSection={activeSection || undefined}
+                                        backgroundSettings={backgroundSettings}
+                                        layoutSettings={layoutSettings}
+                                        onLayoutChange={handleLayoutChange}
+                                        textSettings={textSettings}
+                                        onTextChange={handleInlineTextChange}
+                                        onMenuImageEdit={handleMenuImageEdit}
+                                        onAddMenuItem={handleAddMenuItem}
+                                        onDeleteMenuItem={handleDeleteMenuItem}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -910,6 +1005,12 @@ export default function EditorPage() {
                     console.log('Add section:', category, type);
                     setShowAddSectionModal(false);
                 }}
+            />
+
+            {/* Help Modal */}
+            <HelpModal
+                isOpen={showHelpModal}
+                onClose={() => setShowHelpModal(false)}
             />
         </div>
     );

@@ -64,7 +64,27 @@ export function TravelerPage({
         const base = { ...DEFAULT_TEXT_SETTINGS };
         if (localTextSettings) {
             Object.keys(localTextSettings).forEach(sectionId => {
-                base[sectionId] = { ...base[sectionId], ...localTextSettings[sectionId] };
+                const savedSection = localTextSettings[sectionId];
+                const defaultSection = base[sectionId] || {};
+
+                const isDynamicKey = (k: string) =>
+                    (k.startsWith('image_') ||
+                        ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
+                    !k.includes('_content');
+
+                const hasSavedDynamic = Object.keys(savedSection).some(isDynamicKey);
+
+                if (hasSavedDynamic) {
+                    const sectionWithStaticDefaults: Record<string, string> = {};
+                    Object.keys(defaultSection).forEach(k => {
+                        if (!isDynamicKey(k)) {
+                            sectionWithStaticDefaults[k] = defaultSection[k];
+                        }
+                    });
+                    base[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
+                } else {
+                    base[sectionId] = { ...defaultSection, ...savedSection };
+                }
             });
         }
         return base;
@@ -816,84 +836,13 @@ export function TravelerPage({
                             <div>
                                 <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8">ALCOHOL</h3>
                                 <div className="space-y-8">
-                                    {(() => {
-                                        const section = textSettings.drink || {};
-                                        const indices = Object.keys(section)
-                                            .filter(key => key.startsWith('alcohol_') && key.endsWith('_name'))
-                                            .map(key => parseInt(key.split('_')[1]))
-                                            .filter((val, i, arr) => arr.indexOf(val) === i)
-                                            .sort((a, b) => a - b);
-
-                                        return indices.map(index => {
-                                            const name_en = section[`alcohol_${index}_name_en`] || section[`alcohol_${index}_name`] || '';
-                                            const name_ko = section[`alcohol_${index}_name_ko`] || '';
-                                            const name_zh = section[`alcohol_${index}_name_zh`] || '';
-                                            const price = section[`alcohol_${index}_price`] || '0';
-                                            const isSoldOut = section[`alcohol_${index}_soldOut`] === 'true';
-                                            const isHidden = section[`alcohol_${index}_hidden`] === 'true';
-
-                                            if (!isEditing && isHidden) return null;
-
-                                            return (
-                                                <div key={index} className={`flex justify-between items-start border-b border-white/5 pb-4 relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}>
-                                                    {isEditing && (
-                                                        <div className="absolute -left-12 top-0">
-                                                            <MenuItemControls
-                                                                onDelete={() => onDeleteMenuItem?.('drink', 'alcohol', index)}
-                                                                isSoldOut={isSoldOut}
-                                                                onToggleSoldOut={() => onTextChange?.('drink', `alcohol_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                                isHidden={isHidden}
-                                                                onToggleHidden={() => onTextChange?.('drink', `alcohol_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    <div className="space-y-1">
-                                                        <h4 className="font-bold flex items-center gap-2">
-                                                            <InlineEditableText
-                                                                value={name_en}
-                                                                onChange={(val) => onTextChange?.('drink', `alcohol_${index}_name_en`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                            {isSoldOut && <span className="bg-[#d4183d] text-white text-[10px] px-1.5 py-0.5 rounded uppercase">Sold Out</span>}
-                                                            {isEditing && isHidden && <EyeOff size={12} className="text-gray-400" />}
-                                                        </h4>
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <p className="text-xs text-gray-400 font-medium">
-                                                                <InlineEditableText
-                                                                    value={name_ko}
-                                                                    onChange={(val) => onTextChange?.('drink', `alcohol_${index}_name_ko`, val)}
-                                                                    isEditing={isEditing}
-                                                                />
-                                                            </p>
-                                                            <p className="text-xs text-gray-400 font-medium opacity-80">
-                                                                <InlineEditableText
-                                                                    value={name_zh}
-                                                                    onChange={(val) => onTextChange?.('drink', `alcohol_${index}_name_zh`, val)}
-                                                                    isEditing={isEditing}
-                                                                />
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-[#deb55a] font-bold text-right ml-4">
-                                                        ¥<InlineEditableText
-                                                            value={price}
-                                                            onChange={(val) => onTextChange?.('drink', `alcohol_${index}_price`, val)}
-                                                            isEditing={isEditing}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            );
-                                        });
-                                    })()}
-                                    {isEditing && (
-                                        <button
-                                            onClick={() => onAddMenuItem?.('drink', 'alcohol')}
-                                            className="w-full h-12 flex items-center justify-center border-2 border-dashed border-[#deb55a]/30 rounded-lg hover:border-[#deb55a]/60 hover:bg-[#deb55a]/5 transition-all text-[#deb55a]"
-                                        >
-                                            <Plus size={20} strokeWidth={1} />
-                                            <span className="text-sm font-bold ml-2">項目を追加</span>
-                                        </button>
-                                    )}
+                                    <InlineEditableText
+                                        value={textSettings.drink?.alcohol_content_en || textSettings.drink?.alcohol_content || ''}
+                                        onChange={(val) => onTextChange?.('drink', 'alcohol_content_en', val)}
+                                        isEditing={isEditing}
+                                        multiline={true}
+                                        className="text-[#e8eaec] text-lg"
+                                    />
                                 </div>
                             </div>
 
@@ -901,84 +850,13 @@ export function TravelerPage({
                             <div>
                                 <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8">SHOCHU</h3>
                                 <div className="space-y-8">
-                                    {(() => {
-                                        const section = textSettings.drink || {};
-                                        const indices = Object.keys(section)
-                                            .filter(key => key.startsWith('shochu_') && key.endsWith('_name'))
-                                            .map(key => parseInt(key.split('_')[1]))
-                                            .filter((val, i, arr) => arr.indexOf(val) === i)
-                                            .sort((a, b) => a - b);
-
-                                        return indices.map(index => {
-                                            const name_en = section[`shochu_${index}_name_en`] || section[`shochu_${index}_name`] || '';
-                                            const name_ko = section[`shochu_${index}_name_ko`] || '';
-                                            const name_zh = section[`shochu_${index}_name_zh`] || '';
-                                            const price = section[`shochu_${index}_price`] || '0';
-                                            const isSoldOut = section[`shochu_${index}_soldOut`] === 'true';
-                                            const isHidden = section[`shochu_${index}_hidden`] === 'true';
-
-                                            if (!isEditing && isHidden) return null;
-
-                                            return (
-                                                <div key={index} className={`flex justify-between items-start border-b border-white/5 pb-4 relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}>
-                                                    {isEditing && (
-                                                        <div className="absolute -left-12 top-0">
-                                                            <MenuItemControls
-                                                                onDelete={() => onDeleteMenuItem?.('drink', 'shochu', index)}
-                                                                isSoldOut={isSoldOut}
-                                                                onToggleSoldOut={() => onTextChange?.('drink', `shochu_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                                isHidden={isHidden}
-                                                                onToggleHidden={() => onTextChange?.('drink', `shochu_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    <div className="space-y-1">
-                                                        <h4 className="font-bold flex items-center gap-2">
-                                                            <InlineEditableText
-                                                                value={name_en}
-                                                                onChange={(val) => onTextChange?.('drink', `shochu_${index}_name_en`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                            {isSoldOut && <span className="bg-[#d4183d] text-white text-[10px] px-1.5 py-0.5 rounded uppercase">Sold Out</span>}
-                                                            {isEditing && isHidden && <EyeOff size={12} className="text-gray-400" />}
-                                                        </h4>
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <p className="text-xs text-gray-400 font-medium">
-                                                                <InlineEditableText
-                                                                    value={name_ko}
-                                                                    onChange={(val) => onTextChange?.('drink', `shochu_${index}_name_ko`, val)}
-                                                                    isEditing={isEditing}
-                                                                />
-                                                            </p>
-                                                            <p className="text-xs text-gray-400 font-medium opacity-80">
-                                                                <InlineEditableText
-                                                                    value={name_zh}
-                                                                    onChange={(val) => onTextChange?.('drink', `shochu_${index}_name_zh`, val)}
-                                                                    isEditing={isEditing}
-                                                                />
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-[#deb55a] font-bold text-right ml-4">
-                                                        ¥<InlineEditableText
-                                                            value={price}
-                                                            onChange={(val) => onTextChange?.('drink', `shochu_${index}_price`, val)}
-                                                            isEditing={isEditing}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            );
-                                        });
-                                    })()}
-                                    {isEditing && (
-                                        <button
-                                            onClick={() => onAddMenuItem?.('drink', 'shochu')}
-                                            className="w-full h-12 flex items-center justify-center border-2 border-dashed border-[#deb55a]/30 rounded-lg hover:border-[#deb55a]/60 hover:bg-[#deb55a]/5 transition-all text-[#deb55a]"
-                                        >
-                                            <Plus size={20} strokeWidth={1} />
-                                            <span className="text-sm font-bold ml-2">項目を追加</span>
-                                        </button>
-                                    )}
+                                    <InlineEditableText
+                                        value={textSettings.drink?.shochu_content_en || textSettings.drink?.shochu_content || ''}
+                                        onChange={(val) => onTextChange?.('drink', 'shochu_content_en', val)}
+                                        isEditing={isEditing}
+                                        multiline={true}
+                                        className="text-[#e8eaec] text-lg"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -986,85 +864,14 @@ export function TravelerPage({
                         {/* OTHER */}
                         <div>
                             <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8">SOFT DRINKS</h3>
-                            <div className="grid md:grid-cols-2 gap-x-16 gap-y-8">
-                                {(() => {
-                                    const section = textSettings.drink || {};
-                                    const indices = Object.keys(section)
-                                        .filter(key => key.startsWith('other_') && key.endsWith('_name'))
-                                        .map(key => parseInt(key.split('_')[1]))
-                                        .filter((val, i, arr) => arr.indexOf(val) === i)
-                                        .sort((a, b) => a - b);
-
-                                    return indices.map(index => {
-                                        const name_en = section[`other_${index}_name_en`] || section[`other_${index}_name`] || '';
-                                        const name_ko = section[`other_${index}_name_ko`] || '';
-                                        const name_zh = section[`other_${index}_name_zh`] || '';
-                                        const price = section[`other_${index}_price`] || '0';
-                                        const isSoldOut = section[`other_${index}_soldOut`] === 'true';
-                                        const isHidden = section[`other_${index}_hidden`] === 'true';
-
-                                        if (!isEditing && isHidden) return null;
-
-                                        return (
-                                            <div key={index} className={`flex justify-between items-start border-b border-white/5 pb-4 relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}>
-                                                {isEditing && (
-                                                    <div className="absolute -left-12 top-0">
-                                                        <MenuItemControls
-                                                            onDelete={() => onDeleteMenuItem?.('drink', 'other', index)}
-                                                            isSoldOut={isSoldOut}
-                                                            onToggleSoldOut={() => onTextChange?.('drink', `other_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                            isHidden={isHidden}
-                                                            onToggleHidden={() => onTextChange?.('drink', `other_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                        />
-                                                    </div>
-                                                )}
-                                                <div className="space-y-1">
-                                                    <h4 className="font-bold flex items-center gap-2">
-                                                        <InlineEditableText
-                                                            value={name_en}
-                                                            onChange={(val) => onTextChange?.('drink', `other_${index}_name_en`, val)}
-                                                            isEditing={isEditing}
-                                                        />
-                                                        {isSoldOut && <span className="bg-[#d4183d] text-white text-[10px] px-1.5 py-0.5 rounded uppercase">Sold Out</span>}
-                                                        {isEditing && isHidden && <EyeOff size={12} className="text-gray-400" />}
-                                                    </h4>
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <p className="text-xs text-gray-400 font-medium">
-                                                            <InlineEditableText
-                                                                value={name_ko}
-                                                                onChange={(val) => onTextChange?.('drink', `other_${index}_name_ko`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 font-medium opacity-80">
-                                                            <InlineEditableText
-                                                                value={name_zh}
-                                                                onChange={(val) => onTextChange?.('drink', `other_${index}_name_zh`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="text-[#deb55a] font-bold text-right ml-4">
-                                                    ¥<InlineEditableText
-                                                        value={price}
-                                                        onChange={(val) => onTextChange?.('drink', `other_${index}_price`, val)}
-                                                        isEditing={isEditing}
-                                                    />
-                                                </div>
-                                            </div>
-                                        );
-                                    });
-                                })()}
-                                {isEditing && (
-                                    <button
-                                        onClick={() => onAddMenuItem?.('drink', 'other')}
-                                        className="w-full h-12 flex items-center justify-center border-2 border-dashed border-[#deb55a]/30 rounded-lg hover:border-[#deb55a]/60 hover:bg-[#deb55a]/5 transition-all text-[#deb55a]"
-                                    >
-                                        <Plus size={20} strokeWidth={1} />
-                                        <span className="text-sm font-bold ml-2">項目を追加</span>
-                                    </button>
-                                )}
+                            <div className="space-y-8">
+                                <InlineEditableText
+                                    value={textSettings.drink?.other_content_en || textSettings.drink?.other_content || ''}
+                                    onChange={(val) => onTextChange?.('drink', 'other_content_en', val)}
+                                    isEditing={isEditing}
+                                    multiline={true}
+                                    className="text-[#e8eaec] text-lg"
+                                />
                             </div>
                         </div>
                     </div>

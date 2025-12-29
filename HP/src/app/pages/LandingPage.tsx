@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText, Trash2, EyeOff, Ban, Globe } from 'lucide-react';
+import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText, Trash2, EyeOff, Ban, Globe, Plus } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 
@@ -10,7 +10,7 @@ interface LandingPageProps {
     onTextEdit?: (id: string) => void;
     onTextChange?: (sectionId: string, field: string, value: string) => void;
     onTextReset?: (sectionId: string) => void;
-    onAddMenuItem?: (sectionId: string, category: 'nigiri' | 'makimono' | 'ippin') => void;
+    onAddMenuItem?: (sectionId: string, category: string) => void;
     onDeleteMenuItem?: (sectionId: string, category: string, index: number) => void;
     activeSection?: string;
     backgroundSettings?: Record<string, BackgroundConfig>;
@@ -53,7 +53,18 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
     },
     gallery: {
         title: 'Gallery',
-        subtitle: 'Photos from our restaurant.'
+        subtitle: 'Photos from our restaurant.',
+        image_0: '/assets/gallery_2.jpg',
+        image_1: '/assets/gallery_4.jpg',
+        image_2: '/assets/gallery_3.jpg',
+        image_3: '/assets/gallery_5.jpg',
+        image_4: '/assets/gallery_1.jpg',
+        image_5: '/assets/gallery_6.jpg',
+        image_6: '/assets/gallery_7.jpg',
+        image_7: '/assets/gallery_8.jpg',
+        image_8: '/assets/gallery_9.jpg',
+        image_9: '/assets/gallery_10.jpg',
+        image_10: '/assets/gallery_11.jpg',
     },
     access: {
         title: 'ACCESS',
@@ -149,34 +160,20 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         nihonshu_2_name: '日高見 宮城', nihonshu_2_name_en: 'HITAKAMI (MIYAGI)', nihonshu_2_name_ko: '히타카미', nihonshu_2_name_zh: '日高見', nihonshu_2_price: '1500', nihonshu_2_image: '/assets/drink_hitakami.jpg',
         nihonshu_3_name: 'ゼブラ 山形', nihonshu_3_name_en: 'ZEBRA (YAMAGATA)', nihonshu_3_name_ko: '제브라', nihonshu_3_name_zh: 'ZEBRA', nihonshu_3_price: '2000', nihonshu_3_image: '/assets/drink_zebra.jpg',
         // Alcohol items
-        alcohol_0_name: 'サントリー プレミアムモルツ生', alcohol_0_name_en: 'DRAFT BEER (SUNTORY THE PREMIUM MALTS)', alcohol_0_name_ko: '생맥주 (산토리 프리미엄 몰츠)', alcohol_0_name_zh: '生啤酒', alcohol_0_price: '880',
-        alcohol_1_name: 'サッポロラガー中瓶', alcohol_1_name_en: 'BOTTLED BEER (SAPPORO LAGER BEER 500ml)', alcohol_1_name_ko: '병맥주 (삿포로 라거)', alcohol_1_name_zh: '瓶装啤酒', alcohol_1_price: '900',
-        alcohol_2_name: '角ハイボール', alcohol_2_name_en: 'HIGHBALL (SUNTORY Kaku)', alcohol_2_name_ko: '가쿠 하이볼', alcohol_2_name_zh: '角高球酒', alcohol_2_price: '770',
-        alcohol_3_name: '知多', alcohol_3_name_en: 'Chita', alcohol_3_name_ko: '치타', alcohol_3_name_zh: '知多', alcohol_3_price: '1600',
-        alcohol_4_name: '白州', alcohol_4_name_en: 'Hakushu', alcohol_4_name_ko: '하쿠슈', alcohol_4_name_zh: '白州', alcohol_4_price: '1800',
-        alcohol_5_name: '山﨑', alcohol_5_name_en: 'Yamazaki', alcohol_5_name_ko: '야마자키', alcohol_5_name_zh: '山崎', alcohol_5_price: '1800',
-        alcohol_6_name: 'ガリサワー', alcohol_6_name_en: 'GARI SOUR', alcohol_6_name_ko: '가리 사와', alcohol_6_name_zh: '姜片沙瓦', alcohol_6_price: '770',
-        alcohol_7_name: 'レモンサワー', alcohol_7_name_en: 'LEMON SOUR', alcohol_7_name_ko: '레몬 사와', alcohol_7_name_zh: '檸檬沙瓦', alcohol_7_price: '770',
-        alcohol_8_name: '濃厚緑茶ハイ', alcohol_8_name_en: 'GREEN TEA HIGH', alcohol_8_name_ko: '녹차 하이', alcohol_8_name_zh: '緑茶高球酒', alcohol_8_price: '770',
-        alcohol_9_name: 'さんぴん茶ハイ', alcohol_9_name_en: 'JASMINE TEA HIGH', alcohol_9_name_ko: '자스민차 하이', alcohol_9_name_zh: '茉莉花茶高球酒', alcohol_9_price: '770',
-        alcohol_10_name: 'ウーロンハイ', alcohol_10_name_en: 'OOLONG TEA HIGH', alcohol_10_name_ko: '우롱차 하이', alcohol_10_name_zh: '烏龍茶高球酒', alcohol_10_price: '770',
-        alcohol_11_name: 'コーン茶ハイ', alcohol_11_name_en: 'CORN TEA HIGH', alcohol_11_name_ko: '옥수수차 하이', alcohol_11_name_zh: '玉米茶高球酒', alcohol_11_price: '770',
-        alcohol_12_name: '赤・白ワイン（グラス）', alcohol_12_name_en: 'GLASS OF WINE (Red/White)', alcohol_12_name_ko: '와인 (레드/화이트)', alcohol_12_name_zh: '紅・白酒（杯装）', alcohol_12_price: '1000〜1300',
-        alcohol_13_name: '白・ヴェルメンティーノ（ボトル）', alcohol_13_name_en: 'BOTTLE OF WHITE WINE (Vermentino)', alcohol_13_name_ko: '화이트 와인 (보틀)', alcohol_13_name_zh: '白・維蒙蒂諾（瓶装）', alcohol_13_price: '10000',
-        alcohol_14_name: 'ペリエ ジュエ（シャンパン）', alcohol_14_name_en: 'BOTTLE OF CHAMPAGNE (Perrier Jouët)', alcohol_14_name_ko: '샴페인 (페리에 주에)', alcohol_14_name_zh: '巴黎之花（香檳）', alcohol_14_price: '25000',
+        alcohol_content: 'サントリー　プレミアムモルツ生／880\nサッポロラガー中瓶／ 900\n\n角ハイボール／770\n知多／1600\n白州／1800\n山﨑／1800\n\nガリサワー／770\nレモンサワー／770\n濃厚緑茶ハイ／770\nさんぴん茶ハイ／770\nウーロンハイ／770\nコーン茶ハイ／770\n\nグラスワイン\n赤・白／1000～1300\n\nボトルワイン\n白・ヴェルメンティーノ・グアド・アル・タッソ／10000\n\nシャンパン\nペリエ　ジュエ　グラン　ブリュット/25000',
+        alcohol_content_en: 'Suntory Premium Malt\'s Draught / 880\nSapporo Lager Bottle / 900\n\nKaku Highball / 770\nChita / 1600\nHakushu / 1800\nYamazaki / 1800\n\nGari (Ginger) Sour / 770\nLemon Sour / 770\nGreen Tea High / 770\nSanpin Tea High / 770\nOolong High / 770\nCorn Tea High / 770\n\nGlass Wine\nRed/White / 1000-1300\n\nBottle Wine\nWhite Vermentino / 10000\n\nChampagne\nPerrier Jouet / 25000',
+        alcohol_content_ko: '산토리 프리미엄 몰츠 생맥주 / 880\n삿포로 라거 병맥주 / 900\n\n카쿠 하이볼 / 770\n치타 / 1600\n하쿠슈 / 1800\n야마자키 / 1800\n\n가리(생강) 사와 / 770\n레몬 사와 / 770\n녹차 하이 / 770\n산핀차 하이 / 770\n우롱 하이 / 770\n옥수수차 하이 / 770',
+        alcohol_content_zh: '三得利顶极啤酒 生啤 / 880\n札幌拉格 瓶装 / 900\n\n角瓶嗨棒 / 770\n知多 / 1600\n白州 / 1800\n山崎 / 1800\n\n姜片沙瓦 / 770\n柠檬沙瓦 / 770\n绿茶兑酒 / 770\n香片茶兑酒 / 770\n乌龙茶兑酒 / 770\n玉米茶兑酒 / 770',
         // Shochu items
-        shochu_0_name: '富乃宝山(芋)', shochu_0_name_en: 'SWEET POTATO SHOCHU (Tomino Houzan)', shochu_0_name_ko: '고구마 소주 (토미노 호우잔)', shochu_0_name_zh: '地瓜焼酒', shochu_0_price: '880',
-        shochu_1_name: '吉四六(麦)', shochu_1_name_en: 'BARLEY SHOCHU (Kitchomu)', shochu_1_name_ko: '보리 소주 (킷쵸무)', shochu_1_name_zh: '麦焼酒', shochu_1_price: '880',
-        shochu_2_name: '鳥飼(米)', shochu_2_name_en: 'RICE SHOCHU (Torikai)', shochu_2_name_ko: '쌀 소주 (토리카이)', shochu_2_name_zh: '米焼酒', shochu_2_price: '880',
-        shochu_3_name: '残波白（泡盛)', shochu_3_name_en: 'AWAMORI (Zanpa White)', shochu_3_name_ko: '아와모리 (잔파 화이트)', shochu_3_name_zh: '泡盛', shochu_3_price: '770',
-        shochu_4_name: 'ハブ酒ショット', shochu_4_name_en: 'SNAKE WINE SHOT', shochu_4_name_ko: '하부자케 (뱀술)', shochu_4_name_zh: '蛇酒', shochu_4_price: '1000',
+        shochu_content: '富乃宝山(芋)／880\n吉四六(麦)／880\n鳥飼(米)／880\n残波白（泡盛)／770\nハブ酒ショット／1000',
+        shochu_content_en: 'Tomi no Houzan (Sweet Potato) / 880\nKitchomu (Barley) / 880\nTorikai (Rice) / 880\nZanpa White (Awamori) / 770\nHabu Sake Shot / 1000',
+        shochu_content_ko: '토미노호우잔 (고구마) / 880\n킷쵸무 (보리) / 880\n토리카이 (쌀) / 880\n잔파 시로 (아와모리) / 770\n하부술 샷 / 1000',
+        shochu_content_zh: '富乃宝山 (芋) / 880\n吉四六 (麦) / 880\n鸟饲 (米) / 880\n残波白 (泡盛) / 770\n蛇酒 Shot / 1000',
         // Other items
-        other_0_name: 'さんぴん茶', other_0_name_en: 'JASMINE TEA', other_0_name_ko: '자스민차', other_0_name_zh: '茉莉花茶', other_0_price: '500',
-        other_1_name: 'ウーロン茶', other_1_name_en: 'OOLONG TEA', other_1_name_ko: '우롱차', other_1_name_zh: '烏龍茶', other_1_price: '500',
-        other_2_name: '緑茶', other_2_name_en: 'GREEN TEA', other_2_name_ko: '녹차', other_2_name_zh: '緑茶', other_2_price: '500',
-        other_3_name: 'コーン茶', other_3_name_en: 'CORN TEA', other_3_name_ko: '옥수수차', other_3_name_zh: '玉米茶', other_3_price: '500',
-        other_4_name: 'コカ・コーラ', other_4_name_en: 'COKE', other_4_name_ko: '콜라', other_4_name_zh: '可口可楽', other_4_price: '500',
-        other_5_name: '炭酸水', other_5_name_en: 'SPARKLING WATER', other_5_name_ko: '탄산수', other_5_name_zh: '単酸水', other_5_price: '500'
+        other_content: 'さんぴん茶／500\nウーロン茶／500\n緑茶／500\nコーン茶／500\nコカ・コーラ／500\n炭酸水／500',
+        other_content_en: 'Sanpin Tea / 500\nOolong Tea / 500\nGreen Tea / 500\nCorn Tea / 500\nCoca Cola / 500\nSparkling Water / 500',
+        other_content_ko: '산핀차 / 500\n우롱차 / 500\n녹차 / 500\n옥수수차 / 500\n코카콜라 / 500\n탄산수 / 500',
+        other_content_zh: '香片茶 / 500\n乌龙茶 / 500\n绿茶 / 500\n玉米茶 / 500\n可口可乐 / 500\n苏打水 / 500'
     }
 };
 
@@ -706,6 +703,78 @@ export function MenuItemControls({ onDelete, isSoldOut, onToggleSoldOut, isHidde
     );
 }
 
+interface MultiLanguageTextEditorProps {
+    baseFieldName: string;
+    sectionId: string;
+    textSettings: Record<string, Record<string, string>>;
+    onTextChange?: (sectionId: string, field: string, value: string) => void;
+    isEditing: boolean;
+    className?: string;
+}
+
+function MultiLanguageTextEditor({
+    baseFieldName,
+    sectionId,
+    textSettings,
+    onTextChange,
+    isEditing,
+    className = ''
+}: MultiLanguageTextEditorProps) {
+    const [activeLanguage, setActiveLanguage] = useState<'jp' | 'en' | 'ko' | 'zh'>('jp');
+
+    const languages = [
+        { code: 'jp' as const, label: '日本語', suffix: '' },
+        { code: 'en' as const, label: 'English', suffix: '_en' },
+        { code: 'ko' as const, label: '한국어', suffix: '_ko' },
+        { code: 'zh' as const, label: '中文', suffix: '_zh' }
+    ];
+
+    const currentFieldName = `${baseFieldName}${languages.find(l => l.code === activeLanguage)?.suffix || ''}`;
+    const currentValue = textSettings[sectionId]?.[currentFieldName] || '';
+
+    if (!isEditing) {
+        // When not editing, show only Japanese version
+        return (
+            <InlineEditableText
+                value={textSettings[sectionId]?.[baseFieldName] || ''}
+                onChange={() => { }}
+                isEditing={false}
+                multiline={true}
+                className={className}
+            />
+        );
+    }
+
+    return (
+        <div className="space-y-3">
+            {/* Language Tabs */}
+            <div className="flex gap-2 border-b border-gray-700 pb-2">
+                {languages.map(lang => (
+                    <button
+                        key={lang.code}
+                        onClick={() => setActiveLanguage(lang.code)}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-t transition-all ${activeLanguage === lang.code
+                            ? 'bg-[#deb55a] text-[#1C1C1C]'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+                            }`}
+                    >
+                        {lang.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Editor for Current Language */}
+            <InlineEditableText
+                value={currentValue}
+                onChange={(val) => onTextChange?.(sectionId, currentFieldName, val)}
+                isEditing={isEditing}
+                multiline={true}
+                className={className}
+            />
+        </div>
+    );
+}
+
 export function LandingPage({
     isEditing = false,
     onSectionSelect,
@@ -737,7 +806,28 @@ export function LandingPage({
         const base = { ...DEFAULT_TEXT_SETTINGS };
         if (localTextSettings) {
             Object.keys(localTextSettings).forEach(sectionId => {
-                base[sectionId] = { ...base[sectionId], ...localTextSettings[sectionId] };
+                const savedSection = localTextSettings[sectionId];
+                const defaultSection = base[sectionId] || {};
+
+                const hasSavedDynamic = Object.keys(savedSection).some(k =>
+                    (k.startsWith('image_') ||
+                        ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
+                    !k.includes('_content')
+                );
+
+                if (hasSavedDynamic) {
+                    const sectionWithStaticDefaults = { ...defaultSection };
+                    Object.keys(sectionWithStaticDefaults).forEach(k => {
+                        if ((k.startsWith('image_') ||
+                            ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
+                            !k.includes('_content')) {
+                            delete sectionWithStaticDefaults[k];
+                        }
+                    });
+                    base[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
+                } else {
+                    base[sectionId] = { ...defaultSection, ...savedSection };
+                }
             });
         }
         return base;
@@ -1121,27 +1211,55 @@ export function LandingPage({
                         />
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {[
-                            '/assets/gallery_2.jpg',
-                            '/assets/gallery_4.jpg',
-                            '/assets/gallery_3.jpg',
-                            '/assets/gallery_5.jpg',
-                            '/assets/gallery_1.jpg',
-                            '/assets/gallery_6.jpg',
-                            '/assets/gallery_7.jpg',
-                            '/assets/gallery_8.jpg',
-                            '/assets/gallery_9.jpg',
-                            '/assets/gallery_10.jpg',
-                            '/assets/gallery_11.jpg',
-                        ].map((src, i) => (
-                            <div key={i} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                                <ImageWithFallback
-                                    src={src}
-                                    alt={`Gallery ${i + 1} `}
-                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                />
-                            </div>
-                        ))}
+                        {Object.keys(textSettings.gallery || {})
+                            .filter(key => key.startsWith('image_'))
+                            .map(key => ({ key, index: parseInt(key.split('_')[1]) }))
+                            .sort((a, b) => a.index - b.index)
+                            .map(({ key, index }) => (
+                                <div key={key} className="group relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                                    <ImageWithFallback
+                                        src={textSettings.gallery![key]}
+                                        alt={`Gallery ${index + 1}`}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                    {isEditing && (
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onMenuImageEdit?.('gallery', 'image', index);
+                                                }}
+                                                className="p-2 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                                title="画像を変更"
+                                            >
+                                                <ImageIcon size={16} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onDeleteMenuItem?.('gallery', 'image', index);
+                                                }}
+                                                className="p-2 bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
+                                                title="削除"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        {isEditing && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onAddMenuItem?.('gallery', 'image');
+                                }}
+                                className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-[#deb55a] hover:bg-[#deb55a]/5 transition-all text-gray-400 hover:text-[#deb55a]"
+                            >
+                                <Plus size={24} />
+                                <span className="text-xs font-bold">項目を追加</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </section>
@@ -1845,73 +1963,14 @@ export function LandingPage({
                                         />
                                     </h4>
                                     <div className="space-y-4">
-                                        {(() => {
-                                            const alcoholIndices = Object.keys(textSettings.drink || {})
-                                                .filter(key => key.startsWith('alcohol_') && key.endsWith('_name'))
-                                                .map(key => parseInt(key.split('_')[1]))
-                                                .filter(num => !isNaN(num))
-                                                .sort((a, b) => a - b);
-
-                                            return alcoholIndices.map(index => {
-                                                const name = textSettings.drink?.[`alcohol_${index}_name`] || '';
-                                                const price = textSettings.drink?.[`alcohol_${index}_price`] || '';
-                                                const isSoldOut = textSettings.drink?.[`alcohol_${index}_soldOut`] === 'true';
-                                                const isHidden = textSettings.drink?.[`alcohol_${index}_hidden`] === 'true';
-
-                                                if (!isEditing && isHidden) return null;
-
-                                                return (
-                                                    <div key={index} className={`flex justify-between items-center relative group p-1 -mx-1 rounded ${isSoldOut ? 'opacity-50 line-through' : ''} ${isEditing && isHidden ? 'bg-gray-50' : ''}`}>
-                                                        <div className="flex-1">
-                                                            <InlineEditableText
-                                                                value={name}
-                                                                onChange={(val) => onTextChange?.('drink', `alcohol_${index}_name`, val)}
-                                                                isEditing={isEditing}
-                                                                className="text-[#1C1C1C]"
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="text-[#deb55a] font-bold">
-                                                                ／<InlineEditableText
-                                                                    value={price}
-                                                                    onChange={(val) => onTextChange?.('drink', `alcohol_${index}_price`, val)}
-                                                                    isEditing={isEditing}
-                                                                />
-                                                            </div>
-                                                            {isEditing && (
-                                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <MenuItemControls
-                                                                        onDelete={() => onDeleteMenuItem?.('drink', 'alcohol', index)}
-                                                                        isSoldOut={isSoldOut}
-                                                                        onToggleSoldOut={() => onTextChange?.('drink', `alcohol_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                                        isHidden={isHidden}
-                                                                        onToggleHidden={() => onTextChange?.('drink', `alcohol_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <MenuTranslationsEditor
-                                                            sectionId="drink"
-                                                            category="alcohol"
-                                                            index={index}
-                                                            textSettings={textSettings}
-                                                            onTextChange={onTextChange}
-                                                            isEditing={isEditing}
-                                                            isCompact={true}
-                                                        />
-                                                        {isSoldOut && <span className="absolute left-0 right-0 top-1/2 border-t border-red-500 pointer-events-none"></span>}
-                                                    </div>
-                                                );
-                                            });
-                                        })()}
-                                        {isEditing && (
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'alcohol' as any); }}
-                                                className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold"
-                                            >
-                                                + 項目を追加
-                                            </button>
-                                        )}
+                                        <MultiLanguageTextEditor
+                                            baseFieldName="alcohol_content"
+                                            sectionId="drink"
+                                            textSettings={textSettings}
+                                            onTextChange={onTextChange}
+                                            isEditing={isEditing}
+                                            className="text-[#1C1C1C] text-lg"
+                                        />
                                     </div>
                                 </div>
 
@@ -1926,73 +1985,14 @@ export function LandingPage({
                                             />
                                         </h4>
                                         <div className="space-y-4">
-                                            {(() => {
-                                                const shochuIndices = Object.keys(textSettings.drink || {})
-                                                    .filter(key => key.startsWith('shochu_') && key.endsWith('_name'))
-                                                    .map(key => parseInt(key.split('_')[1]))
-                                                    .filter(num => !isNaN(num))
-                                                    .sort((a, b) => a - b);
-
-                                                return shochuIndices.map(index => {
-                                                    const name = textSettings.drink?.[`shochu_${index}_name`] || '';
-                                                    const price = textSettings.drink?.[`shochu_${index}_price`] || '';
-                                                    const isSoldOut = textSettings.drink?.[`shochu_${index}_soldOut`] === 'true';
-                                                    const isHidden = textSettings.drink?.[`shochu_${index}_hidden`] === 'true';
-
-                                                    if (!isEditing && isHidden) return null;
-
-                                                    return (
-                                                        <div key={index} className={`flex justify-between items-center relative group p-1 -mx-1 rounded ${isSoldOut ? 'opacity-50 line-through' : ''} ${isEditing && isHidden ? 'bg-gray-50' : ''}`}>
-                                                            <div className="flex-1">
-                                                                <InlineEditableText
-                                                                    value={name}
-                                                                    onChange={(val) => onTextChange?.('drink', `shochu_${index}_name`, val)}
-                                                                    isEditing={isEditing}
-                                                                    className="text-[#1C1C1C]"
-                                                                />
-                                                            </div>
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="text-[#deb55a] font-bold">
-                                                                    ／<InlineEditableText
-                                                                        value={price}
-                                                                        onChange={(val) => onTextChange?.('drink', `shochu_${index}_price`, val)}
-                                                                        isEditing={isEditing}
-                                                                    />
-                                                                </div>
-                                                                {isEditing && (
-                                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <MenuItemControls
-                                                                            onDelete={() => onDeleteMenuItem?.('drink', 'shochu', index)}
-                                                                            isSoldOut={isSoldOut}
-                                                                            onToggleSoldOut={() => onTextChange?.('drink', `shochu_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                                            isHidden={isHidden}
-                                                                            onToggleHidden={() => onTextChange?.('drink', `shochu_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <MenuTranslationsEditor
-                                                                sectionId="drink"
-                                                                category="shochu"
-                                                                index={index}
-                                                                textSettings={textSettings}
-                                                                onTextChange={onTextChange}
-                                                                isEditing={isEditing}
-                                                                isCompact={true}
-                                                            />
-                                                            {isSoldOut && <span className="absolute left-0 right-0 top-1/2 border-t border-red-500 pointer-events-none"></span>}
-                                                        </div>
-                                                    );
-                                                });
-                                            })()}
-                                            {isEditing && (
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'shochu' as any); }}
-                                                    className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold"
-                                                >
-                                                    + 項目を追加
-                                                </button>
-                                            )}
+                                            <MultiLanguageTextEditor
+                                                baseFieldName="shochu_content"
+                                                sectionId="drink"
+                                                textSettings={textSettings}
+                                                onTextChange={onTextChange}
+                                                isEditing={isEditing}
+                                                className="text-[#1C1C1C] text-lg"
+                                            />
                                         </div>
                                     </div>
 
@@ -2006,73 +2006,14 @@ export function LandingPage({
                                             />
                                         </h4>
                                         <div className="space-y-4">
-                                            {(() => {
-                                                const otherIndices = Object.keys(textSettings.drink || {})
-                                                    .filter(key => key.startsWith('other_') && key.endsWith('_name'))
-                                                    .map(key => parseInt(key.split('_')[1]))
-                                                    .filter(num => !isNaN(num))
-                                                    .sort((a, b) => a - b);
-
-                                                return otherIndices.map(index => {
-                                                    const name = textSettings.drink?.[`other_${index}_name`] || '';
-                                                    const price = textSettings.drink?.[`other_${index}_price`] || '';
-                                                    const isSoldOut = textSettings.drink?.[`other_${index}_soldOut`] === 'true';
-                                                    const isHidden = textSettings.drink?.[`other_${index}_hidden`] === 'true';
-
-                                                    if (!isEditing && isHidden) return null;
-
-                                                    return (
-                                                        <div key={index} className={`flex justify-between items-center relative group p-1 -mx-1 rounded ${isSoldOut ? 'opacity-50 line-through' : ''} ${isEditing && isHidden ? 'bg-gray-50' : ''}`}>
-                                                            <div className="flex-1">
-                                                                <InlineEditableText
-                                                                    value={name}
-                                                                    onChange={(val) => onTextChange?.('drink', `other_${index}_name`, val)}
-                                                                    isEditing={isEditing}
-                                                                    className="text-[#1C1C1C]"
-                                                                />
-                                                            </div>
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="text-[#deb55a] font-bold">
-                                                                    <InlineEditableText
-                                                                        value={price}
-                                                                        onChange={(val) => onTextChange?.('drink', `other_${index}_price`, val)}
-                                                                        isEditing={isEditing}
-                                                                    />
-                                                                </div>
-                                                                {isEditing && (
-                                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <MenuItemControls
-                                                                            onDelete={() => onDeleteMenuItem?.('drink', 'other', index)}
-                                                                            isSoldOut={isSoldOut}
-                                                                            onToggleSoldOut={() => onTextChange?.('drink', `other_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                                            isHidden={isHidden}
-                                                                            onToggleHidden={() => onTextChange?.('drink', `other_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <MenuTranslationsEditor
-                                                                sectionId="drink"
-                                                                category="other"
-                                                                index={index}
-                                                                textSettings={textSettings}
-                                                                onTextChange={onTextChange}
-                                                                isEditing={isEditing}
-                                                                isCompact={true}
-                                                            />
-                                                            {isSoldOut && <span className="absolute left-0 right-0 top-1/2 border-t border-red-500 pointer-events-none"></span>}
-                                                        </div>
-                                                    );
-                                                });
-                                            })()}
-                                            {isEditing && (
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'other' as any); }}
-                                                    className="w-full py-2 bg-gray-50 hover:bg-gray-100 rounded border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold"
-                                                >
-                                                    + 項目を追加
-                                                </button>
-                                            )}
+                                            <MultiLanguageTextEditor
+                                                baseFieldName="other_content"
+                                                sectionId="drink"
+                                                textSettings={textSettings}
+                                                onTextChange={onTextChange}
+                                                isEditing={isEditing}
+                                                className="text-[#1C1C1C] text-lg"
+                                            />
                                         </div>
                                     </div>
                                 </div>
