@@ -22,7 +22,8 @@ import {
     Video,
     Trash2,
     Save,
-    Globe
+    Globe,
+    BarChart3
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS } from '../../pages/LandingPage';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
@@ -869,6 +870,15 @@ export default function EditorPage() {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/admin/analytics')}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md font-bold text-sm"
+                            title="アクセス解析"
+                        >
+                            <BarChart3 size={18} />
+                            Analytics
+                        </button>
+
                         <button
                             onClick={() => setShowHelpModal(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#deb55a] to-[#c9a347] text-[#1C1C1C] rounded-md hover:from-[#c9a347] to-[#b89236] transition-all shadow-md font-bold text-sm"
