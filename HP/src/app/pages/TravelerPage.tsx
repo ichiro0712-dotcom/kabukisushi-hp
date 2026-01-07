@@ -148,10 +148,16 @@ export function TravelerPage({
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => !isEditing && scrollToSection('home')}
-                                style={{ fontFamily: "'Bad Script', cursive" }}
-                                className="text-xl text-[#fcebc5]"
+                                className="group transition-all duration-300 hover:opacity-80"
                             >
-                                KABUKI寿司 1番通り店
+                                <div className="flex items-baseline gap-1">
+                                    <span style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl tracking-wider text-[#fcebc5] font-medium">
+                                        KABUKI寿司
+                                    </span>
+                                    <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-widest text-[#deb55a]/80 font-light">
+                                        1番通り
+                                    </span>
+                                </div>
                             </button>
                         </div>
 
@@ -265,13 +271,12 @@ export function TravelerPage({
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
                 <div className={`relative z-10 text-center mx-auto ${getContainerWidthClass('home')}`}>
                     {/* Logo */}
-                    <div className="mb-8">
-                        <h1 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl md:text-6xl text-[#fcebc5] mb-2">
-                            KABUKI寿司
-                        </h1>
-                        <p style={{ fontFamily: "'Inter', sans-serif" }} className="text-xs tracking-[0.3em] text-[#e8eaec]/70 uppercase">
-                            1st Street
-                        </p>
+                    <div className="mb-12 flex justify-center">
+                        <ImageWithFallback
+                            src="/assets/logo.png"
+                            alt="KABUKI寿司 1番通り ロゴ"
+                            className="w-auto h-28 md:h-36 object-contain"
+                        />
                     </div>
 
                     {/* Tagline */}
@@ -1011,7 +1016,7 @@ export function TravelerPage({
             </section>
 
             {/* Affiliated Store Section */}
-            <section id="affiliated" className="py-20 bg-[#1C1C1C] relative overflow-hidden">
+            <section id="affiliated" className="pt-32 pb-20 bg-[#1C1C1C] relative overflow-hidden">
                 {isEditing && (
                     <SectionToolbar
                         sectionId="affiliated"

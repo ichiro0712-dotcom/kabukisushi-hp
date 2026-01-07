@@ -1928,14 +1928,14 @@ export function LandingPage({
 
                     {/* DRINK Section */}
                     <div id="drink" className="mt-20">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-white">
                             <InlineEditableText
                                 value={textSettings.drink?.title || 'Drink'}
                                 onChange={(val) => onTextChange?.('drink', 'title', val)}
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <p className="text-center text-gray-600 mb-8">
+                        <p className="text-center text-gray-300 mb-8">
                             <InlineEditableText
                                 value={textSettings.drink?.subtitle || 'お飲み物'}
                                 onChange={(val) => onTextChange?.('drink', 'subtitle', val)}
@@ -2116,7 +2116,7 @@ export function LandingPage({
             <section
                 id="affiliated-store"
                 onClick={() => isEditing && onSectionSelect?.('affiliated-store')}
-                className={`flex flex-col relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated-store' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                className={`flex flex-col relative transition-all duration-300 pt-32 pb-20 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated-store' ? 'ring-4 ring-[#deb55a]' : ''}`}
                 style={getBackgroundStyle('affiliated-store')}
             >
                 {renderBackgroundContent('affiliated')}
