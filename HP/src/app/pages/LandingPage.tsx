@@ -45,7 +45,7 @@ const DEFAULT_LAYOUT_SETTINGS: Record<string, LayoutConfig> = {
 export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
     home: {
         title: 'KABUKI寿司',
-        subtitle: '1番通り店'
+        subtitle: '1番通り'
     },
     about: {
         title: 'ABOUT US',
@@ -1003,53 +1003,113 @@ export function LandingPage({
     return (
         <div className="min-h-screen bg-[#1C1C1C] relative">
             {/* Navigation */}
-            <nav className={`${isEditing ? 'absolute' : 'fixed'} top-0 w-full bg-[#1C1C1C]/95 backdrop-blur-sm z-50 border-b border-[#deb55a]/20`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
+            <nav className={`${isEditing ? 'absolute' : 'fixed'} top-0 w-full bg-[#1C1C1C]/90 backdrop-blur-md z-50`}>
+                <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16">
+                        {/* Logo/Title */}
                         <button
                             onClick={() => !isEditing && scrollToSection('home')}
-                            style={{ fontFamily: "'Bad Script', cursive" }}
-                            className={`text-2xl text-[#fcebc5] transition-colors ${!isEditing ? 'hover:text-[#deb55a]' : ''}`}
+                            className={`group transition-all duration-300 ${!isEditing ? 'hover:opacity-80' : ''}`}
                         >
-                            <InlineEditableText
-                                value={textSettings.home?.title || 'KABUKI寿司'}
-                                onChange={(val) => onTextChange?.('home', 'title', val)}
-                                isEditing={isEditing}
-                            />
-                            {' '}
-                            <InlineEditableText
-                                value={textSettings.home?.subtitle || '1番通り店'}
-                                onChange={(val) => onTextChange?.('home', 'subtitle', val)}
-                                isEditing={isEditing}
-                            />
+                            <div className="flex items-baseline gap-1">
+                                <span style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl tracking-wider text-[#fcebc5] font-medium">
+                                    <InlineEditableText
+                                        value={textSettings.home?.title || 'KABUKI寿司'}
+                                        onChange={(val) => onTextChange?.('home', 'title', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </span>
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-widest text-[#deb55a]/80 font-light">
+                                    <InlineEditableText
+                                        value={textSettings.home?.subtitle || '1番通り'}
+                                        onChange={(val) => onTextChange?.('home', 'subtitle', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </span>
+                            </div>
                         </button>
 
                         {/* Desktop Menu */}
-                        <div className="hidden md:flex space-x-8">
-                            <button onClick={() => isEditing ? onSectionSelect?.('about') : scrollToSection('about')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">ABOUT</button>
-                            <button onClick={() => isEditing ? onSectionSelect?.('gallery') : scrollToSection('gallery')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">GALLERY</button>
-                            <button onClick={() => isEditing ? onSectionSelect?.('menu') : scrollToSection('menu')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">MENU</button>
-                            <button onClick={() => isEditing ? onSectionSelect?.('access') : scrollToSection('access')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-[#e8eaec] hover:text-[#deb55a] transition-colors">ACCESS</button>
+                        <div className="hidden md:flex items-center gap-6">
+                            {/* Social Icons */}
+                            <div className="flex items-center gap-3 mr-2">
+                                <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
+                                <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
+                                <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
+                                <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
+                            </div>
+
+                            <span className="text-[#e8eaec]/20">|</span>
+
+                            {/* Phone Button */}
+                            <a href="tel:0363021477" className="flex items-center gap-1 text-[#e8eaec]/70 hover:text-[#deb55a] transition-colors">
+                                <Phone size={12} />
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-wide">03-6302-1477</span>
+                            </a>
+
+                            <span className="text-[#e8eaec]/20">|</span>
+
+                            <button onClick={() => isEditing ? onSectionSelect?.('about') : scrollToSection('about')} style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-[0.15em] text-[#e8eaec]/70 hover:text-[#deb55a] transition-all duration-300 uppercase">About</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('gallery') : scrollToSection('gallery')} style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-[0.15em] text-[#e8eaec]/70 hover:text-[#deb55a] transition-all duration-300 uppercase">Gallery</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('menu') : scrollToSection('menu')} style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-[0.15em] text-[#e8eaec]/70 hover:text-[#deb55a] transition-all duration-300 uppercase">Menu</button>
+                            <button onClick={() => isEditing ? onSectionSelect?.('access') : scrollToSection('access')} style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-[0.15em] text-[#e8eaec]/70 hover:text-[#deb55a] transition-all duration-300 uppercase">Access</button>
+
+                            {/* Reserve Button */}
+                            <a
+                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontFamily: "'Inter', sans-serif" }}
+                                className="ml-2 px-4 py-1.5 text-[10px] tracking-[0.1em] text-[#1C1C1C] bg-[#deb55a] hover:bg-[#fcebc5] transition-all duration-300 uppercase font-medium"
+                            >
+                                Reserve
+                            </a>
                         </div>
 
                         {/* Mobile Menu Button */}
                         <button
-                            className="md:hidden text-[#e8eaec]"
+                            className="md:hidden text-[#e8eaec] p-2"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
-                            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
                     </div>
                 </div>
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden bg-[#1C1C1C] border-t border-[#deb55a]/20">
-                        <div className="px-4 py-4 space-y-3">
-                            <button onClick={() => isEditing ? onSectionSelect?.('about') : scrollToSection('about')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">ABOUT</button>
-                            <button onClick={() => isEditing ? onSectionSelect?.('gallery') : scrollToSection('gallery')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">GALLERY</button>
-                            <button onClick={() => isEditing ? onSectionSelect?.('menu') : scrollToSection('menu')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">MENU</button>
-                            <button onClick={() => isEditing ? onSectionSelect?.('access') : scrollToSection('access')} style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="block w-full text-left text-[#e8eaec] hover:text-[#deb55a] transition-colors py-2">ACCESS</button>
+                    <div className="md:hidden bg-[#1C1C1C]/95 backdrop-blur-md border-t border-white/5">
+                        <div className="px-6 py-6 space-y-4">
+                            {/* Phone Button - Mobile */}
+                            <a href="tel:0363021477" className="flex items-center gap-2 text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2">
+                                <Phone size={16} />
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-wide">03-6302-1477</span>
+                            </a>
+
+                            <div className="border-t border-white/10 my-3"></div>
+
+                            <button onClick={() => { scrollToSection('about'); setIsMobileMenuOpen(false); }} style={{ fontFamily: "'Inter', sans-serif" }} className="block w-full text-left text-xs tracking-[0.15em] text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2 uppercase">About</button>
+                            <button onClick={() => { scrollToSection('gallery'); setIsMobileMenuOpen(false); }} style={{ fontFamily: "'Inter', sans-serif" }} className="block w-full text-left text-xs tracking-[0.15em] text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2 uppercase">Gallery</button>
+                            <button onClick={() => { scrollToSection('menu'); setIsMobileMenuOpen(false); }} style={{ fontFamily: "'Inter', sans-serif" }} className="block w-full text-left text-xs tracking-[0.15em] text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2 uppercase">Menu</button>
+                            <button onClick={() => { scrollToSection('access'); setIsMobileMenuOpen(false); }} style={{ fontFamily: "'Inter', sans-serif" }} className="block w-full text-left text-xs tracking-[0.15em] text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2 uppercase">Access</button>
+
+                            {/* Social Icons - Mobile */}
+                            <div className="flex items-center gap-4 py-3">
+                                <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={18} /></a>
+                                <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={18} /></a>
+                                <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={18} /></a>
+                                <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={18} /></a>
+                            </div>
+
+                            <a
+                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontFamily: "'Inter', sans-serif" }}
+                                className="block w-full text-center mt-4 px-5 py-3 text-xs tracking-[0.1em] text-[#1C1C1C] bg-[#deb55a] hover:bg-[#fcebc5] transition-all duration-300 uppercase font-medium"
+                            >
+                                Reserve
+                            </a>
                         </div>
                     </div>
                 )}
@@ -1074,58 +1134,66 @@ export function LandingPage({
                 )}
 
                 {/* Original hardcoded overlay - conditionally render if no config overlay is active to preserve default look until edited */}
-                {(!backgroundSettings?.['home']?.overlayOpacity) && <div className="absolute inset-0 bg-black/60"></div>}
+                {(!backgroundSettings?.['home']?.overlayOpacity) && <div className="absolute inset-0 bg-black/50"></div>}
                 <div className={`relative z-10 text-center mx-auto ${getContainerWidthClass('home')}`}>
-                    <div className="mb-8 flex justify-center">
+                    {/* Logo */}
+                    <div className="mb-12 flex justify-center">
                         <ImageWithFallback
                             src="/assets/logo.png"
-                            alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || '1番通り店'} ロゴ`}
-                            className="w-auto h-32 md:h-40 object-contain"
+                            alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || '1番通り'} ロゴ`}
+                            className="w-auto h-28 md:h-36 object-contain"
                         />
                     </div>
-                    {/* Redundant text removed as requested: logo already contains store name */}
-                    <div className="space-y-6">
-                        <a
-                            href="/traveler"
-                            style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                            className="inline-block px-6 py-2 text-sm text-[#e8eaec] hover:text-[#deb55a] transition-colors border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a]"
-                        >
-                            Languages: English · 中文 · 한국어
-                        </a>
-                        <div>
+
+                    {/* Main CTA Buttons */}
+                    <div className="flex flex-col items-center gap-5">
+                        {/* Actions Row */}
+                        <div className="flex items-center gap-6">
                             <button
                                 onClick={() => scrollToSection('menu')}
-                                style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                className="px-12 py-4 bg-[#deb55a] text-[#1C1C1C] rounded-full hover:bg-[#fcebc5] transition-colors font-bold text-lg"
+                                style={{ fontFamily: "'Inter', sans-serif" }}
+                                className="text-xs tracking-[0.15em] text-[#e8eaec]/90 hover:text-[#deb55a] transition-all duration-300 uppercase border-b border-transparent hover:border-[#deb55a] pb-1"
                             >
-                                メニュー
+                                Menu
                             </button>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <span className="text-[#e8eaec]/30">|</span>
                             <a
                                 href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                className="px-8 py-3 text-[#886107] hover:text-[#1C1C1C] bg-white/90 hover:bg-white rounded-full transition-colors font-semibold"
+                                style={{ fontFamily: "'Inter', sans-serif" }}
+                                className="text-xs tracking-[0.15em] text-[#deb55a] hover:text-[#fcebc5] transition-all duration-300 uppercase border-b border-[#deb55a] hover:border-[#fcebc5] pb-1"
                             >
-                                予約はこちら
+                                Reserve
                             </a>
+                            <span className="text-[#e8eaec]/30">|</span>
                             <a
                                 href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                className="px-8 py-3 text-[#e8eaec] hover:text-[#deb55a] border-2 border-[#e8eaec] hover:border-[#deb55a] rounded-full transition-colors font-semibold"
+                                style={{ fontFamily: "'Inter', sans-serif" }}
+                                className="text-xs tracking-[0.15em] text-[#e8eaec]/90 hover:text-[#deb55a] transition-all duration-300 uppercase border-b border-transparent hover:border-[#deb55a] pb-1"
                             >
-                                Google Maps
+                                Access
                             </a>
                         </div>
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">Instagram</a>
-                            <a href="https://www.tiktok.com/@kabukisushi1001?_t=8kzjmGapCuP&_r=1" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">Tik Tok</a>
-                            <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">YouTube</a>
-                            <a href="https://www.facebook.com/profile.php?id=100064940143541" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="px-6 py-2 text-[#e8eaec] hover:text-[#deb55a] border border-[#e8eaec]/30 rounded-full hover:border-[#deb55a] transition-colors">Facebook</a>
+
+                        {/* Language Switcher - More Visible */}
+                        <a
+                            href="/traveler"
+                            style={{ fontFamily: "'Inter', sans-serif" }}
+                            className="mt-8 inline-flex items-center gap-2 px-6 py-2 border border-[#e8eaec]/40 text-xs tracking-[0.1em] text-[#e8eaec]/80 hover:text-[#deb55a] hover:border-[#deb55a] transition-all duration-300"
+                        >
+                            <Globe size={14} />
+                            <span>English · 中文 · 한국어</span>
+                        </a>
+
+                        {/* Social Icons */}
+                        <div className="flex items-center gap-3 mt-6">
+                            <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
+                            <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
+                            <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
+                            <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
                         </div>
                     </div>
                 </div>
@@ -1358,8 +1426,8 @@ export function LandingPage({
                         onSectionSelect?.('menu');
                     }
                 }}
-                className={`flex flex-col relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'menu' ? 'ring-4 ring-[#deb55a]' : ''} ${getLayoutStyle('menu')}`}
-                style={getBackgroundStyle('menu')}
+                className={`flex flex-col relative transition-all duration-300 bg-[#1C1C1C] ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'menu' ? 'ring-4 ring-[#deb55a]' : ''} ${getLayoutStyle('menu')}`}
+                style={{ backgroundColor: '#1C1C1C' }}
             >
                 {renderBackgroundContent('menu')}
                 {isEditing && (
@@ -1372,49 +1440,58 @@ export function LandingPage({
                     />
                 )}
                 <div className={`mx-auto ${getContainerWidthClass('menu')}`}>
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#1C1C1C]">
-                        <InlineEditableText
-                            value={textSettings.menu?.title || 'Menu'}
-                            onChange={(val) => onTextChange?.('menu', 'title', val)}
-                            isEditing={isEditing}
-                        />
-                    </h2>
-                    <div className="text-center text-xl mb-12" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
-                        <InlineEditableText
-                            value={textSettings.menu?.subtitle || 'Course'}
-                            onChange={(val) => onTextChange?.('menu', 'subtitle', val)}
-                            isEditing={isEditing}
-                        />
+                    <div className="py-8 px-4 -mx-4 bg-[#1C1C1C]">
+                        <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#e8eaec]">
+                            <InlineEditableText
+                                value={textSettings.menu?.title || 'Menu'}
+                                onChange={(val) => onTextChange?.('menu', 'title', val)}
+                                isEditing={isEditing}
+                            />
+                        </h2>
                     </div>
-                    <div className="text-center text-gray-600 mb-12">
-                        <InlineEditableText
-                            value={textSettings.menu?.description || 'まずは当店お勧めのコースからお選びください'}
-                            onChange={(val) => onTextChange?.('menu', 'description', val)}
-                            isEditing={isEditing}
-                        />
-                    </div>
+                    {/* Course Section */}
+                    <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
+                        <div className="text-center text-xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}>
+                            <InlineEditableText
+                                value={textSettings.menu?.subtitle || 'Course'}
+                                onChange={(val) => onTextChange?.('menu', 'subtitle', val)}
+                                isEditing={isEditing}
+                            />
+                        </div>
+                        <div className="text-center text-[#e8eaec]/70 mb-12">
+                            <InlineEditableText
+                                value={textSettings.menu?.description || 'まずは当店お勧めのコースからお選びください'}
+                                onChange={(val) => onTextChange?.('menu', 'description', val)}
+                                isEditing={isEditing}
+                            />
+                        </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 mb-16">
-                        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-                            <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#1C1C1C]">おまかせにぎり８貫</h3>
-                            <p className="text-3xl text-[#deb55a] font-bold mb-4">¥4,980</p>
-                            <p className="text-gray-600">お勧め握り８貫と本日の１品、お椀</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-                            <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#1C1C1C]">特選にぎり８貫</h3>
-                            <p className="text-3xl text-[#deb55a] font-bold mb-4">¥6,980</p>
-                            <p className="text-gray-600">贅沢なお勧め握り８貫と本日の１品、お椀</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-                            <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#1C1C1C]">特選にぎり１０貫</h3>
-                            <p className="text-3xl text-[#deb55a] font-bold mb-4">¥9,900</p>
-                            <p className="text-gray-600">贅沢なお勧め握り１０貫と本日の１品<br />厳選刺身５種盛り合わせ、お椀</p>
+                        <div className="grid md:grid-cols-3 gap-4">
+                            <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Standard</div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">おまかせにぎり８貫</h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥4,980</p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">お勧め握り８貫と本日の１品、お椀</p>
+                            </div>
+                            <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Premium</div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">特選にぎり８貫</h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥6,980</p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">贅沢なお勧め握り８貫と本日の１品、お椀</p>
+                            </div>
+                            <div className="group border border-[#deb55a]/40 p-6 hover:border-[#deb55a] transition-all duration-300 relative">
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}>Deluxe</div>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Special</div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">特選にぎり１０貫</h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥9,900</p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">贅沢なお勧め握り１０貫と本日の１品<br />厳選刺身５種盛り合わせ、お椀</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* NIGIRI Section */}
-                    <div className="mb-16">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">
+                    <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]">
                             <InlineEditableText
                                 value={textSettings.menu?.nigiri_title || 'NIGIRI'}
                                 onChange={(val) => onTextChange?.('menu', 'nigiri_title', val)}
@@ -1428,7 +1505,7 @@ export function LandingPage({
                                 isEditing={isEditing}
                             />
                         </div>
-                        <div className="text-center text-gray-600 mb-8">
+                        <div className="text-center text-[#e8eaec]/70 mb-8">
                             <InlineEditableText
                                 value={textSettings.menu?.nigiri_description || '季節の魚'}
                                 onChange={(val) => onTextChange?.('menu', 'nigiri_description', val)}
@@ -1436,7 +1513,7 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const nigiriIndices = Object.keys(textSettings.menu || {})
                                     .filter(key => key.startsWith('nigiri_') && key.endsWith('_name'))
@@ -1457,7 +1534,7 @@ export function LandingPage({
                                     return (
                                         <div
                                             key={index}
-                                            className={`bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                            className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
                                         >
                                             {isEditing && (
                                                 <>
@@ -1472,14 +1549,14 @@ export function LandingPage({
                                                 </>
                                             )}
                                             {image && (
-                                                <div className="relative group">
+                                                <div className="relative group aspect-square">
                                                     <ImageWithFallback
                                                         src={image}
                                                         alt={name}
-                                                        className="w-full h-48 object-cover rounded mb-3"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                     {isEditing && (
-                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -1492,29 +1569,33 @@ export function LandingPage({
                                                             </button>
                                                         </div>
                                                     )}
+                                                    {/* Overlay with name and price */}
+                                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
+                                                        <h4
+                                                            style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
+                                                            className="font-bold text-sm text-white"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <InlineEditableText
+                                                                value={name}
+                                                                onChange={(val) => onTextChange?.('menu', `nigiri_${index}_name`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </h4>
+                                                        <div
+                                                            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                                                            className="text-[#deb55a] font-bold text-xs"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            ¥<InlineEditableText
+                                                                value={price}
+                                                                onChange={(val) => onTextChange?.('menu', `nigiri_${index}_price`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
-                                            <h4
-                                                style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                                className="font-bold text-lg text-[#1C1C1C]"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <InlineEditableText
-                                                    value={name}
-                                                    onChange={(val) => onTextChange?.('menu', `nigiri_${index}_name`, val)}
-                                                    isEditing={isEditing}
-                                                />
-                                            </h4>
-                                            <div
-                                                className="text-[#deb55a] font-bold"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <InlineEditableText
-                                                    value={price}
-                                                    onChange={(val) => onTextChange?.('menu', `nigiri_${index}_price`, val)}
-                                                    isEditing={isEditing}
-                                                />
-                                            </div>
                                             <MenuTranslationsEditor
                                                 sectionId="menu"
                                                 category="nigiri"
@@ -1526,7 +1607,7 @@ export function LandingPage({
                                             />
                                             {(note || isEditing) && (
                                                 <div
-                                                    className="text-sm text-gray-600 mt-2"
+                                                    className="text-sm text-[#e8eaec]/60 mt-1 px-1"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <InlineEditableText
@@ -1547,11 +1628,11 @@ export function LandingPage({
                                         e.stopPropagation();
                                         onAddMenuItem?.('menu', 'nigiri');
                                     }}
-                                    className="bg-gray-800 hover:bg-gray-700 text-white rounded-lg shadow p-4 h-full min-h-[300px] flex items-center justify-center transition-colors border-2 border-dashed border-gray-600 hover:border-gray-500"
+                                    className="aspect-square bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white flex items-center justify-center transition-colors border border-dashed border-[#e8eaec]/30 hover:border-[#deb55a]"
                                 >
                                     <div className="text-center">
                                         <div className="text-3xl mb-2">+</div>
-                                        <div className="font-bold">項目を追加</div>
+                                        <div className="font-bold text-sm">項目を追加</div>
                                     </div>
                                 </button>
                             )}
@@ -1560,15 +1641,15 @@ export function LandingPage({
 
 
                     {/* MAKIMONO Section */}
-                    <div className="mb-16">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">
+                    <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]">
                             <InlineEditableText
                                 value={textSettings.menu?.makimono_title || 'MAKIMONO'}
                                 onChange={(val) => onTextChange?.('menu', 'makimono_title', val)}
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <div className="text-center text-gray-600 mb-8">
+                        <div className="text-center text-[#e8eaec]/70 mb-8">
                             <InlineEditableText
                                 value={textSettings.menu?.makimono_subtitle || '巻物'}
                                 onChange={(val) => onTextChange?.('menu', 'makimono_subtitle', val)}
@@ -1576,7 +1657,7 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const makimonoIndices = Object.keys(textSettings.menu || {})
                                     .filter(key => key.startsWith('makimono_') && key.endsWith('_name'))
@@ -1597,7 +1678,7 @@ export function LandingPage({
                                     return (
                                         <div
                                             key={index}
-                                            className={`bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                            className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
                                         >
                                             {isEditing && (
                                                 <>
@@ -1612,14 +1693,14 @@ export function LandingPage({
                                                 </>
                                             )}
                                             {image && (
-                                                <div className="relative group">
+                                                <div className="relative group aspect-square">
                                                     <ImageWithFallback
                                                         src={image}
                                                         alt={name}
-                                                        className="w-full h-48 object-cover rounded mb-3"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                     {isEditing && (
-                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -1632,29 +1713,33 @@ export function LandingPage({
                                                             </button>
                                                         </div>
                                                     )}
+                                                    {/* Overlay with name and price */}
+                                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
+                                                        <h4
+                                                            style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
+                                                            className="font-bold text-sm text-white"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <InlineEditableText
+                                                                value={name}
+                                                                onChange={(val) => onTextChange?.('menu', `makimono_${index}_name`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </h4>
+                                                        <div
+                                                            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                                                            className="text-[#deb55a] font-bold text-xs"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            ¥<InlineEditableText
+                                                                value={price}
+                                                                onChange={(val) => onTextChange?.('menu', `makimono_${index}_price`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
-                                            <h4
-                                                style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                                className="font-bold text-lg text-[#1C1C1C]"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <InlineEditableText
-                                                    value={name}
-                                                    onChange={(val) => onTextChange?.('menu', `makimono_${index}_name`, val)}
-                                                    isEditing={isEditing}
-                                                />
-                                            </h4>
-                                            <div
-                                                className="text-[#deb55a] font-bold"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <InlineEditableText
-                                                    value={price}
-                                                    onChange={(val) => onTextChange?.('menu', `makimono_${index}_price`, val)}
-                                                    isEditing={isEditing}
-                                                />
-                                            </div>
                                             <MenuTranslationsEditor
                                                 sectionId="menu"
                                                 category="makimono"
@@ -1665,7 +1750,7 @@ export function LandingPage({
                                             />
                                             {(note || isEditing) && (
                                                 <div
-                                                    className="text-sm text-gray-600 mt-2"
+                                                    className="text-sm text-[#e8eaec]/60 mt-1 px-1"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <InlineEditableText
@@ -1686,11 +1771,11 @@ export function LandingPage({
                                         e.stopPropagation();
                                         onAddMenuItem?.('menu', 'makimono');
                                     }}
-                                    className="bg-gray-800 hover:bg-gray-700 text-white rounded-lg shadow p-4 h-full min-h-[300px] flex items-center justify-center transition-colors border-2 border-dashed border-gray-600 hover:border-gray-500"
+                                    className="aspect-square bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white flex items-center justify-center transition-colors border border-dashed border-[#e8eaec]/30 hover:border-[#deb55a]"
                                 >
                                     <div className="text-center">
                                         <div className="text-3xl mb-2">+</div>
-                                        <div className="font-bold">項目を追加</div>
+                                        <div className="font-bold text-sm">項目を追加</div>
                                     </div>
                                 </button>
                             )}
@@ -1699,15 +1784,15 @@ export function LandingPage({
 
 
                     {/* IPPIN Section */}
-                    <div className="mb-16">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">
+                    <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]">
                             <InlineEditableText
                                 value={textSettings.menu?.ippin_title || 'IPPIN'}
                                 onChange={(val) => onTextChange?.('menu', 'ippin_title', val)}
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <div className="text-center text-gray-600 mb-8">
+                        <div className="text-center text-[#e8eaec]/70 mb-8">
                             <InlineEditableText
                                 value={textSettings.menu?.ippin_subtitle || '一品料理'}
                                 onChange={(val) => onTextChange?.('menu', 'ippin_subtitle', val)}
@@ -1715,7 +1800,7 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const ippinIndices = Object.keys(textSettings.menu || {})
                                     .filter(key => key.startsWith('ippin_') && key.endsWith('_name'))
@@ -1736,7 +1821,7 @@ export function LandingPage({
                                     return (
                                         <div
                                             key={index}
-                                            className={`bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                            className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
                                         >
                                             {isEditing && (
                                                 <>
@@ -1751,14 +1836,14 @@ export function LandingPage({
                                                 </>
                                             )}
                                             {image && (
-                                                <div className="relative group">
+                                                <div className="relative group aspect-square">
                                                     <ImageWithFallback
                                                         src={image}
                                                         alt={name}
-                                                        className="w-full h-48 object-cover rounded mb-3"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                     {isEditing && (
-                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center gap-2 pointer-events-none">
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -1771,29 +1856,33 @@ export function LandingPage({
                                                             </button>
                                                         </div>
                                                     )}
+                                                    {/* Overlay with name and price */}
+                                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
+                                                        <h4
+                                                            style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
+                                                            className="font-bold text-sm text-white"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <InlineEditableText
+                                                                value={name}
+                                                                onChange={(val) => onTextChange?.('menu', `ippin_${index}_name`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </h4>
+                                                        <div
+                                                            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                                                            className="text-[#deb55a] font-bold text-xs"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            ¥<InlineEditableText
+                                                                value={price}
+                                                                onChange={(val) => onTextChange?.('menu', `ippin_${index}_price`, val)}
+                                                                isEditing={isEditing}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
-                                            <h4
-                                                style={{ fontFamily: "'Archivo Narrow', sans-serif" }}
-                                                className="font-bold text-lg text-[#1C1C1C] mb-2"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <InlineEditableText
-                                                    value={name}
-                                                    onChange={(val) => onTextChange?.('menu', `ippin_${index}_name`, val)}
-                                                    isEditing={isEditing}
-                                                />
-                                            </h4>
-                                            <div
-                                                className="text-[#deb55a] font-bold mb-2"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <InlineEditableText
-                                                    value={price}
-                                                    onChange={(val) => onTextChange?.('menu', `ippin_${index}_price`, val)}
-                                                    isEditing={isEditing}
-                                                />
-                                            </div>
                                             <MenuTranslationsEditor
                                                 sectionId="menu"
                                                 category="ippin"
@@ -1804,7 +1893,7 @@ export function LandingPage({
                                             />
                                             {(note || isEditing) && (
                                                 <div
-                                                    className="text-sm text-gray-600"
+                                                    className="text-sm text-[#e8eaec]/60 mt-1 px-1"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <InlineEditableText
@@ -1825,11 +1914,11 @@ export function LandingPage({
                                         e.stopPropagation();
                                         onAddMenuItem?.('menu', 'ippin');
                                     }}
-                                    className="bg-gray-800 hover:bg-gray-700 text-white rounded-lg shadow p-4 h-full min-h-[300px] flex items-center justify-center transition-colors border-2 border-dashed border-gray-600 hover:border-gray-500"
+                                    className="aspect-square bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white flex items-center justify-center transition-colors border border-dashed border-[#e8eaec]/30 hover:border-[#deb55a]"
                                 >
                                     <div className="text-center">
                                         <div className="text-3xl mb-2">+</div>
-                                        <div className="font-bold">項目を追加</div>
+                                        <div className="font-bold text-sm">項目を追加</div>
                                     </div>
                                 </button>
                             )}
@@ -1839,14 +1928,14 @@ export function LandingPage({
 
                     {/* DRINK Section */}
                     <div id="drink" className="mt-20">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#1C1C1C]">
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-white">
                             <InlineEditableText
                                 value={textSettings.drink?.title || 'Drink'}
                                 onChange={(val) => onTextChange?.('drink', 'title', val)}
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <p className="text-center text-gray-600 mb-8">
+                        <p className="text-center text-gray-300 mb-8">
                             <InlineEditableText
                                 value={textSettings.drink?.subtitle || 'お飲み物'}
                                 onChange={(val) => onTextChange?.('drink', 'subtitle', val)}
@@ -2027,7 +2116,7 @@ export function LandingPage({
             <section
                 id="affiliated-store"
                 onClick={() => isEditing && onSectionSelect?.('affiliated-store')}
-                className={`flex flex-col relative transition-all duration-300 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated-store' ? 'ring-4 ring-[#deb55a]' : ''}`}
+                className={`flex flex-col relative transition-all duration-300 pt-32 pb-20 ${isEditing ? 'cursor-pointer hover:ring-4 hover:ring-[#deb55a]/50' : ''} ${activeSection === 'affiliated-store' ? 'ring-4 ring-[#deb55a]' : ''}`}
                 style={getBackgroundStyle('affiliated-store')}
             >
                 {renderBackgroundContent('affiliated')}
@@ -2176,24 +2265,24 @@ export function LandingPage({
                         <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Instagram size={20} />
                         </a>
-                        <a href="https://www.tiktok.com/@kabukisushi1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
-                            <Music2 size={20} />
-                        </a>
                         <a href="https://www.facebook.com/profile.php?id=100068484907117&locale=hi_IN" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Facebook size={20} />
+                        </a>
+                        <a href="https://www.tiktok.com/@kabukisushi1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                            <Music2 size={20} />
                         </a>
                         <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Youtube size={20} />
                         </a>
                         <a href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
-                            <LinkIcon size={20} />
+                            <MapPin size={20} />
                         </a>
                     </div>
 
                     <div className="flex flex-col items-center gap-4 mb-8">
                         <div className="flex items-center gap-2 text-[#e8eaec]">
                             <Phone size={18} className="text-[#deb55a]" />
-                            <span className="text-lg font-semibold">0363021477</span>
+                            <span className="text-lg font-semibold">03-6302-1477</span>
                         </div>
                     </div>
 
