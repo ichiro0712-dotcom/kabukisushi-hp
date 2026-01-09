@@ -6,9 +6,9 @@ import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 
 interface TravelerPageProps {
     isEditing?: boolean;
-    onSectionSelect?: (id: string | null) => void;
+    onSectionSelect?: (id: string | undefined) => void;
     onBackgroundEdit?: (id: string) => void;
-    activeSection?: string | null;
+    activeSection?: string | undefined;
     backgroundSettings?: Record<string, BackgroundConfig>;
     layoutSettings?: Record<string, LayoutConfig>;
     onLayoutChange?: (sectionId: string, config: Partial<LayoutConfig>) => void;

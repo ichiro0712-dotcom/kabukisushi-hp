@@ -5,14 +5,14 @@ import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 
 interface LandingPageProps {
     isEditing?: boolean;
-    onSectionSelect?: (id: string) => void;
+    onSectionSelect?: (id: string | undefined) => void;
     onBackgroundEdit?: (id: string) => void;
     onTextEdit?: (id: string) => void;
     onTextChange?: (sectionId: string, field: string, value: string) => void;
     onTextReset?: (sectionId: string) => void;
     onAddMenuItem?: (sectionId: string, category: string) => void;
     onDeleteMenuItem?: (sectionId: string, category: string, index: number) => void;
-    activeSection?: string;
+    activeSection?: string | undefined;
     backgroundSettings?: Record<string, BackgroundConfig>;
     layoutSettings?: Record<string, LayoutConfig>;
     textSettings?: Record<string, Record<string, string>>;

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
     Settings,
     Layout,
     Type,
     Palette,
     ShoppingBag,
-    ChevronLeft,
     Monitor,
     Smartphone,
     Undo,
@@ -22,7 +22,11 @@ import {
     Video,
     Trash2,
     Save,
-    Globe
+    Globe,
+    ExternalLink,
+    UserCog,
+    Lock,
+    LogOut
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS } from '../../pages/LandingPage';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
@@ -54,18 +58,24 @@ export interface LayoutConfig {
 
 export default function EditorPage() {
     const navigate = useNavigate();
+    const { logout, updateCredentials } = useAuth();
     const [activeTab, setActiveTab] = useState('sections');
-    const [activeSection, setActiveSection] = useState<string | null>('home');
+    const [activeSection, setActiveSection] = useState<string | undefined>('home');
     const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
     const [showBackgroundPanel, setShowBackgroundPanel] = useState(false);
-    const [backgroundEditSection, setBackgroundEditSection] = useState<string | null>(null);
+    const [backgroundEditSection, setBackgroundEditSection] = useState<string | undefined>(undefined);
     const [activeBackgroundTab, setActiveBackgroundTab] = useState<BackgroundType>('image');
     const [showAssetLibrary, setShowAssetLibrary] = useState(false);
     const [showImageEditor, setShowImageEditor] = useState(false);
     const [showAddSectionModal, setShowAddSectionModal] = useState(false);
     const [editingImage, setEditingImage] = useState<string>('');
     const [showTextEditor, setShowTextEditor] = useState(false);
-    const [textEditSection, setTextEditSection] = useState<string | null>(null);
+    const [showSecuritySettings, setShowSecuritySettings] = useState(false);
+    const [securityUsername, setSecurityUsername] = useState('');
+    const [securityPassword, setSecurityPassword] = useState('');
+    const [securityError, setSecurityError] = useState('');
+    const [securitySuccess, setSecuritySuccess] = useState('');
+    const [textEditSection, setTextEditSection] = useState<string | undefined>(undefined);
     const [editingMenuImage, setEditingMenuImage] = useState<{
         sectionId: string;
         category: string;
@@ -823,14 +833,31 @@ export default function EditorPage() {
                 {/* Top Bar */}
                 <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
                     <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 ml-2">
                             <button
-                                onClick={() => navigate('/admin/dashboard')}
-                                className="p-1 text-gray-400 hover:text-gray-900 transition-colors"
+                                onClick={() => window.open('https://kabuki-sushi.co.jp/', '_blank')}
+                                className="flex items-center gap-2 p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all group"
+                                title="公開サイトを確認 (新しいタブで開く)"
                             >
-                                <ChevronLeft size={20} />
+                                <ExternalLink size={18} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-xs font-bold">サイトを表示</span>
                             </button>
+                            <div className="h-4 w-px bg-gray-300 mx-1" />
                             <span className="text-xs font-bold text-gray-900">KABUKI寿司 1番通り店</span>
+                            <button
+                                onClick={() => {
+                                    setSecurityUsername('');
+                                    setSecurityPassword('');
+                                    setSecurityError('');
+                                    setSecuritySuccess('');
+                                    setShowSecuritySettings(true);
+                                }}
+                                className="ml-4 p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all flex items-center gap-1.5"
+                                title="アカウントセキュリティ設定"
+                            >
+                                <UserCog size={16} />
+                                <span className="text-[10px] font-bold">セキュリティー</span>
+                            </button>
                         </div>
                         <div className="h-4 w-px bg-gray-300" />
                         <div className="flex items-center gap-4">
@@ -911,6 +938,18 @@ export default function EditorPage() {
                             className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
                         >
                             保存
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                logout();
+                                navigate('/admin/login');
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                            title="ログアウト"
+                        >
+                            <LogOut size={16} />
+                            <span>終了</span>
                         </button>
 
                         <span className="text-[10px] text-gray-400 italic">
@@ -1012,6 +1051,90 @@ export default function EditorPage() {
                 isOpen={showHelpModal}
                 onClose={() => setShowHelpModal(false)}
             />
+            {/* Security Settings Modal */}
+            {showSecuritySettings && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                        <div className="bg-purple-600 p-6 text-white flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <Lock size={20} />
+                                <h3 className="text-lg font-bold">アカウントセキュリティ設定</h3>
+                            </div>
+                            <button onClick={() => setShowSecuritySettings(false)} className="hover:rotate-90 transition-transform">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <p className="text-sm text-gray-500">
+                                管理画面のユーザー名とパスワードを変更できます。
+                                <br />
+                                <span className="text-xs text-red-500">※ リセット用のリカバリーキーはソースコードをご確認ください。</span>
+                            </p>
+
+                            {securityError && (
+                                <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">
+                                    {securityError}
+                                </div>
+                            )}
+
+                            {securitySuccess && (
+                                <div className="bg-green-50 text-green-600 p-3 rounded-md text-sm border border-green-200">
+                                    {securitySuccess}
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase">新しいユーザー名</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                                    placeholder="新しいユーザー名を入力"
+                                    value={securityUsername}
+                                    onChange={(e) => setSecurityUsername(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase">新しいパスワード</label>
+                                <input
+                                    type="password"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                                    placeholder="新しいパスワードを入力"
+                                    value={securityPassword}
+                                    onChange={(e) => setSecurityPassword(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    onClick={() => setShowSecuritySettings(false)}
+                                    className="flex-1 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        if (!securityUsername || !securityPassword) {
+                                            setSecurityError('ユーザー名とパスワードを入力してください');
+                                            return;
+                                        }
+                                        const success = await updateCredentials(securityUsername, securityPassword);
+                                        if (success) {
+                                            setSecuritySuccess('更新しました。次回のログインから有効になります。');
+                                            setSecurityError('');
+                                        } else {
+                                            setSecurityError('更新に失敗しました');
+                                        }
+                                    }}
+                                    className="flex-1 py-2.5 bg-purple-600 text-white font-bold hover:bg-purple-700 rounded-lg shadow-md transition-all active:scale-95"
+                                >
+                                    設定を保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
