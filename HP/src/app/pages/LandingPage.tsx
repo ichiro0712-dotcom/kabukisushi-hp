@@ -2288,11 +2288,7 @@ export function LandingPage({
 
                     <div className="text-sm text-gray-400 space-y-4">
                         <p>Restaurant © 2019</p>
-                        <div>
-                            <a href="/admin/login" className="text-xs text-gray-600 hover:text-[#deb55a] transition-colors">
-                                管理画面へ
-                            </a>
-                        </div>
+
                     </div>
                 </div>
             </footer>
