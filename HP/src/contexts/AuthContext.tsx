@@ -7,46 +7,31 @@ interface AuthState {
   timestamp: number;
 }
 
-interface Credentials {
-  username: string;
-  password: string;
-}
+
 
 interface AuthContextType {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkAuth: () => boolean;
-  updateCredentials: (newUsername: string, newPassword: string) => Promise<boolean>;
-  resetCredentials: (recoveryKey: string, newUsername: string, newPassword: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // ヘルパー：最新の認証情報を取得
-const getLatestCredentials = (): Credentials => {
-  try {
-    const saved = getStorageItem<Credentials>(STORAGE_KEYS.ADMIN_CREDENTIALS);
-    if (saved && saved.username && saved.password) {
-      return saved;
-    }
-  } catch (e) {
-    console.error('Error reading credentials from storage:', e);
-  }
+// ヘルパー：最新の認証情報を取得（定数からのみ）
+const getLatestCredentials = () => {
   return { ...ADMIN_CREDENTIALS };
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [credentials, setCredentials] = useState<Credentials>(getLatestCredentials());
 
   // 初回マウント時に認証状態を確認
   useEffect(() => {
     const isValid = checkAuth();
     console.log('[Auth] Initial auth check:', isValid);
     setIsAuthenticated(isValid);
-    // マウント時にも最新の認証情報をロード
-    setCredentials(getLatestCredentials());
   }, []);
 
   // 認証状態をチェック
@@ -80,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setStorageItem(STORAGE_KEYS.AUTH, authState);
       setIsAuthenticated(true);
-      setCredentials(currentCreds);
       console.log('[Auth] Login successful');
       return true;
     }
@@ -89,29 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  // 認証情報の更新（ログイン中のみ）
-  const updateCredentials = async (newUsername: string, newPassword: string): Promise<boolean> => {
-    if (!isAuthenticated) return false;
 
-    const newCreds = { username: newUsername, password: newPassword };
-    setStorageItem(STORAGE_KEYS.ADMIN_CREDENTIALS, newCreds);
-    setCredentials(newCreds);
-    console.log('[Auth] Credentials updated');
-    return true;
-  };
-
-  // 認証情報のリセット（リカバリーキーを使用）
-  const resetCredentials = async (recoveryKey: string, newUsername: string, newPassword: string): Promise<boolean> => {
-    if (recoveryKey === RECOVERY_KEY) {
-      const newCreds = { username: newUsername, password: newPassword };
-      setStorageItem(STORAGE_KEYS.ADMIN_CREDENTIALS, newCreds);
-      setCredentials(newCreds);
-      console.log('[Auth] Credentials reset via recovery key');
-      return true;
-    }
-    console.warn('[Auth] Reset failed: invalid recovery key');
-    return false;
-  };
 
   // ログアウト処理
   const logout = () => {
@@ -121,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, checkAuth, updateCredentials, resetCredentials }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

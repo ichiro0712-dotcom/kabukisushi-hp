@@ -1,7 +1,7 @@
 // 認証情報（デモ用）
 export const ADMIN_CREDENTIALS = {
   username: 'admin',
-  password: 'kabuki2024',
+  password: 'kabukisushi2026',
 } as const;
 
 export const RECOVERY_KEY = 'KABUKI_RESET_2024'; // 初期リカバリーキー

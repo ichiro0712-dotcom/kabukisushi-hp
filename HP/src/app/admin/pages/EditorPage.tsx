@@ -36,6 +36,7 @@ import AddSectionModal from '../components/editor/AddSectionModal';
 import TextEditorModal from '../components/editor/TextEditorModal';
 import { TravelerPage } from '../../pages/TravelerPage';
 import HelpModal from '../components/editor/HelpModal';
+import MarketingTagGuideModal from '../components/editor/MarketingTagGuideModal';
 
 export type BackgroundType = 'color' | 'image' | 'video';
 
@@ -59,7 +60,7 @@ export interface LayoutConfig {
 
 export default function EditorPage() {
     const navigate = useNavigate();
-    const { logout, updateCredentials } = useAuth();
+    const { logout } = useAuth();
     const [activeTab, setActiveTab] = useState('sections');
     const [activeSection, setActiveSection] = useState<string | undefined>('home');
     const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
@@ -71,11 +72,7 @@ export default function EditorPage() {
     const [showAddSectionModal, setShowAddSectionModal] = useState(false);
     const [editingImage, setEditingImage] = useState<string>('');
     const [showTextEditor, setShowTextEditor] = useState(false);
-    const [showSecuritySettings, setShowSecuritySettings] = useState(false);
-    const [securityUsername, setSecurityUsername] = useState('');
-    const [securityPassword, setSecurityPassword] = useState('');
-    const [securityError, setSecurityError] = useState('');
-    const [securitySuccess, setSecuritySuccess] = useState('');
+
     const [textEditSection, setTextEditSection] = useState<string | undefined>(undefined);
     const [editingMenuImage, setEditingMenuImage] = useState<{
         sectionId: string;
@@ -84,6 +81,7 @@ export default function EditorPage() {
     } | null>(null);
     const [editPage, setEditPage] = useState<'landing' | 'traveler'>('landing');
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showMarketingTagGuide, setShowMarketingTagGuide] = useState(false);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -845,20 +843,7 @@ export default function EditorPage() {
                             </button>
                             <div className="h-4 w-px bg-gray-300 mx-1" />
                             <span className="text-xs font-bold text-gray-900">KABUKI寿司 1番通り店</span>
-                            <button
-                                onClick={() => {
-                                    setSecurityUsername('');
-                                    setSecurityPassword('');
-                                    setSecurityError('');
-                                    setSecuritySuccess('');
-                                    setShowSecuritySettings(true);
-                                }}
-                                className="ml-4 p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all flex items-center gap-1.5"
-                                title="アカウントセキュリティ設定"
-                            >
-                                <UserCog size={16} />
-                                <span className="text-[10px] font-bold">セキュリティー</span>
-                            </button>
+
                         </div>
                         <div className="h-4 w-px bg-gray-300" />
                         <div className="flex items-center gap-4">
@@ -898,21 +883,21 @@ export default function EditorPage() {
 
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => navigate('/admin/analytics')}
-                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md font-bold text-sm"
-                            title="アクセス解析"
-                        >
-                            <BarChart3 size={18} />
-                            Analytics
-                        </button>
-
-                        <button
                             onClick={() => setShowHelpModal(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#deb55a] to-[#c9a347] text-[#1C1C1C] rounded-md hover:from-[#c9a347] to-[#b89236] transition-all shadow-md font-bold text-sm"
                             title="使い方ガイド"
                         >
                             <HelpCircle size={18} />
                             使い方
+                        </button>
+
+                        <button
+                            onClick={() => setShowMarketingTagGuide(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md font-bold text-sm"
+                            title="タグ埋め込み指示書"
+                        >
+                            <FileText size={18} />
+                            タグ埋め込み指示書
                         </button>
 
                         <div className="flex items-center gap-2 bg-gray-50 rounded-md p-1">
@@ -1061,90 +1046,12 @@ export default function EditorPage() {
                 isOpen={showHelpModal}
                 onClose={() => setShowHelpModal(false)}
             />
-            {/* Security Settings Modal */}
-            {showSecuritySettings && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-                        <div className="bg-purple-600 p-6 text-white flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <Lock size={20} />
-                                <h3 className="text-lg font-bold">アカウントセキュリティ設定</h3>
-                            </div>
-                            <button onClick={() => setShowSecuritySettings(false)} className="hover:rotate-90 transition-transform">
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <p className="text-sm text-gray-500">
-                                管理画面のユーザー名とパスワードを変更できます。
-                                <br />
-                                <span className="text-xs text-red-500">※ リセット用のリカバリーキーはソースコードをご確認ください。</span>
-                            </p>
+            {/* Marketing Tag Guide Modal */}
+            <MarketingTagGuideModal
+                isOpen={showMarketingTagGuide}
+                onClose={() => setShowMarketingTagGuide(false)}
+            />
 
-                            {securityError && (
-                                <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">
-                                    {securityError}
-                                </div>
-                            )}
-
-                            {securitySuccess && (
-                                <div className="bg-green-50 text-green-600 p-3 rounded-md text-sm border border-green-200">
-                                    {securitySuccess}
-                                </div>
-                            )}
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-700 uppercase">新しいユーザー名</label>
-                                <input
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-                                    placeholder="新しいユーザー名を入力"
-                                    value={securityUsername}
-                                    onChange={(e) => setSecurityUsername(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-700 uppercase">新しいパスワード</label>
-                                <input
-                                    type="password"
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-                                    placeholder="新しいパスワードを入力"
-                                    value={securityPassword}
-                                    onChange={(e) => setSecurityPassword(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="pt-4 flex gap-3">
-                                <button
-                                    onClick={() => setShowSecuritySettings(false)}
-                                    className="flex-1 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition-colors"
-                                >
-                                    キャンセル
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (!securityUsername || !securityPassword) {
-                                            setSecurityError('ユーザー名とパスワードを入力してください');
-                                            return;
-                                        }
-                                        const success = await updateCredentials(securityUsername, securityPassword);
-                                        if (success) {
-                                            setSecuritySuccess('更新しました。次回のログインから有効になります。');
-                                            setSecurityError('');
-                                        } else {
-                                            setSecurityError('更新に失敗しました');
-                                        }
-                                    }}
-                                    className="flex-1 py-2.5 bg-purple-600 text-white font-bold hover:bg-purple-700 rounded-lg shadow-md transition-all active:scale-95"
-                                >
-                                    設定を保存
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
