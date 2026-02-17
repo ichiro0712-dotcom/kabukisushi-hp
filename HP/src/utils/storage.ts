@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   GALLERY_IMAGES: 'kabuki_gallery_images',
   SETTINGS: 'kabuki_settings',
   ANALYTICS: 'kabuki_analytics',
+  ADMIN_CREDENTIALS: 'kabuki_admin_credentials',
 } as const;
 
 // LocalStorageからデータを取得

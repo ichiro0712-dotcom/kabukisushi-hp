@@ -8,9 +8,9 @@ import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeCo
 interface TravelerPageProps {
     storeId?: StoreId;
     isEditing?: boolean;
-    onSectionSelect?: (id: string | null) => void;
+    onSectionSelect?: (id: string | undefined) => void;
     onBackgroundEdit?: (id: string) => void;
-    activeSection?: string | null;
+    activeSection?: string | undefined;
     backgroundSettings?: Record<string, BackgroundConfig>;
     layoutSettings?: Record<string, LayoutConfig>;
     onLayoutChange?: (sectionId: string, config: Partial<LayoutConfig>) => void;

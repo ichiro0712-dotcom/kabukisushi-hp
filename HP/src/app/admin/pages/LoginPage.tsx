@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Alert, AlertDescription } from '../../components/ui/alert';
 
 export function LoginPage() {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,11 +24,11 @@ export function LoginPage() {
     setIsLoading(true);
 
     try {
-      const success = await login(username, password);
+      const success = await login('admin', password);
       if (success) {
         navigate(from, { replace: true });
       } else {
-        setError('ユーザー名またはパスワードが正しくありません');
+        setError('パスワードが正しくありません');
       }
     } catch (err) {
       setError('ログインに失敗しました');
@@ -38,12 +37,14 @@ export function LoginPage() {
     }
   };
 
+
+
   return (
-    <Card className="border-0 shadow-lg">
+    <Card className="border-0 shadow-lg w-full max-w-md mx-auto">
       <CardHeader className="space-y-1 text-center pb-6">
         <div className="flex justify-center mb-4">
-          <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-3xl text-white font-bold">K</span>
+          <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center">
+            <span className="text-2xl text-white font-bold">K</span>
           </div>
         </div>
         <CardTitle className="text-2xl font-bold">管理画面</CardTitle>
@@ -56,19 +57,6 @@ export function LoginPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
-          <div className="space-y-2">
-            <Label htmlFor="username">ユーザー名</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="admin"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">パスワード</Label>
@@ -85,16 +73,13 @@ export function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-purple-700"
+            className="w-full bg-purple-600 hover:bg-purple-700 font-bold py-6 text-lg"
             disabled={isLoading}
           >
             {isLoading ? 'ログイン中...' : 'ログイン'}
           </Button>
 
-          <div className="text-center text-sm text-gray-500 mt-4">
-            <p>デモ用認証情報</p>
-            <p>ユーザー名: admin / パスワード: kabuki2024</p>
-          </div>
+
         </form>
       </CardContent>
     </Card>

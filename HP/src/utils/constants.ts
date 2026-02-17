@@ -1,8 +1,10 @@
 // 認証情報（デモ用）
 export const ADMIN_CREDENTIALS = {
   username: 'admin',
-  password: 'kabuki2024',
+  password: 'kabukisushi2026',
 } as const;
+
+export const RECOVERY_KEY = 'KABUKI_RESET_2024'; // 初期リカバリーキー
 
 // セッション有効期限（24時間）
 export const SESSION_EXPIRY = 24 * 60 * 60 * 1000;
@@ -25,7 +27,6 @@ export const IMAGE_CONSTRAINTS = {
 // 管理画面のルートパス
 export const ADMIN_ROUTES = {
   LOGIN: '/admin/login',
-  DASHBOARD: '/admin/dashboard',
   MENU: '/admin/menu',
   GALLERY: '/admin/gallery',
   SETTINGS: '/admin/settings',

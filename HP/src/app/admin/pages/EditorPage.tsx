@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
     Settings,
     Layout,
     Type,
     Palette,
     ShoppingBag,
-    ChevronLeft,
     Monitor,
     Smartphone,
     Undo,
@@ -23,6 +23,10 @@ import {
     Trash2,
     Save,
     Globe,
+    ExternalLink,
+    UserCog,
+    Lock,
+    LogOut,
     BarChart3
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
@@ -33,6 +37,7 @@ import AddSectionModal from '../components/editor/AddSectionModal';
 import TextEditorModal from '../components/editor/TextEditorModal';
 import { TravelerPage } from '../../pages/TravelerPage';
 import HelpModal from '../components/editor/HelpModal';
+import MarketingTagGuideModal from '../components/editor/MarketingTagGuideModal';
 
 export type BackgroundType = 'color' | 'image' | 'video';
 
@@ -56,18 +61,20 @@ export interface LayoutConfig {
 
 export default function EditorPage() {
     const navigate = useNavigate();
+    const { logout } = useAuth();
     const [activeTab, setActiveTab] = useState('sections');
-    const [activeSection, setActiveSection] = useState<string | null>('home');
+    const [activeSection, setActiveSection] = useState<string | undefined>('home');
     const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
     const [showBackgroundPanel, setShowBackgroundPanel] = useState(false);
-    const [backgroundEditSection, setBackgroundEditSection] = useState<string | null>(null);
+    const [backgroundEditSection, setBackgroundEditSection] = useState<string | undefined>(undefined);
     const [activeBackgroundTab, setActiveBackgroundTab] = useState<BackgroundType>('image');
     const [showAssetLibrary, setShowAssetLibrary] = useState(false);
     const [showImageEditor, setShowImageEditor] = useState(false);
     const [showAddSectionModal, setShowAddSectionModal] = useState(false);
     const [editingImage, setEditingImage] = useState<string>('');
     const [showTextEditor, setShowTextEditor] = useState(false);
-    const [textEditSection, setTextEditSection] = useState<string | null>(null);
+
+    const [textEditSection, setTextEditSection] = useState<string | undefined>(undefined);
     const [editingMenuImage, setEditingMenuImage] = useState<{
         sectionId: string;
         category: string;
@@ -77,6 +84,7 @@ export default function EditorPage() {
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [selectedStore, setSelectedStore] = useState<StoreId>('honten');
     const selectedStoreRef = useRef<StoreId>(selectedStore);
+    const [showMarketingTagGuide, setShowMarketingTagGuide] = useState(false);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -881,12 +889,14 @@ export default function EditorPage() {
                 {/* Top Bar */}
                 <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
                     <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 ml-2">
                             <button
-                                onClick={() => navigate('/admin/dashboard')}
-                                className="p-1 text-gray-400 hover:text-gray-900 transition-colors"
+                                onClick={() => window.open('https://kabuki-sushi.co.jp/', '_blank')}
+                                className="flex items-center gap-2 p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all group"
+                                title="公開サイトを確認 (新しいタブで開く)"
                             >
-                                <ChevronLeft size={20} />
+                                <ExternalLink size={18} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-xs font-bold">サイトを表示</span>
                             </button>
                             <select
                                 value={selectedStore}
@@ -938,21 +948,21 @@ export default function EditorPage() {
 
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => navigate('/admin/analytics')}
-                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md font-bold text-sm"
-                            title="アクセス解析"
-                        >
-                            <BarChart3 size={18} />
-                            Analytics
-                        </button>
-
-                        <button
                             onClick={() => setShowHelpModal(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#deb55a] to-[#c9a347] text-[#1C1C1C] rounded-md hover:from-[#c9a347] to-[#b89236] transition-all shadow-md font-bold text-sm"
                             title="使い方ガイド"
                         >
                             <HelpCircle size={18} />
                             使い方
+                        </button>
+
+                        <button
+                            onClick={() => setShowMarketingTagGuide(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md font-bold text-sm"
+                            title="タグ埋め込み指示書"
+                        >
+                            <FileText size={18} />
+                            タグ埋め込み指示書
                         </button>
 
                         <div className="flex items-center gap-2 bg-gray-50 rounded-md p-1">
@@ -989,6 +999,18 @@ export default function EditorPage() {
                             className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
                         >
                             保存
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                logout();
+                                navigate('/admin/login');
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                            title="ログアウト"
+                        >
+                            <LogOut size={16} />
+                            <span>終了</span>
                         </button>
 
                         <span className="text-[10px] text-gray-400 italic">
@@ -1092,6 +1114,12 @@ export default function EditorPage() {
                 isOpen={showHelpModal}
                 onClose={() => setShowHelpModal(false)}
             />
+            {/* Marketing Tag Guide Modal */}
+            <MarketingTagGuideModal
+                isOpen={showMarketingTagGuide}
+                onClose={() => setShowMarketingTagGuide(false)}
+            />
+
         </div>
     );
 }

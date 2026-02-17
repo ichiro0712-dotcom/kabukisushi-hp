@@ -7,14 +7,14 @@ import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeCo
 interface LandingPageProps {
     storeId?: StoreId;
     isEditing?: boolean;
-    onSectionSelect?: (id: string) => void;
+    onSectionSelect?: (id: string | undefined) => void;
     onBackgroundEdit?: (id: string) => void;
     onTextEdit?: (id: string) => void;
     onTextChange?: (sectionId: string, field: string, value: string) => void;
     onTextReset?: (sectionId: string) => void;
     onAddMenuItem?: (sectionId: string, category: string) => void;
     onDeleteMenuItem?: (sectionId: string, category: string, index: number) => void;
-    activeSection?: string;
+    activeSection?: string | undefined;
     backgroundSettings?: Record<string, BackgroundConfig>;
     layoutSettings?: Record<string, LayoutConfig>;
     textSettings?: Record<string, Record<string, string>>;
@@ -2305,11 +2305,7 @@ export function LandingPage({
 
                     <div className="text-sm text-gray-400 space-y-4">
                         <p>Restaurant © 2019</p>
-                        <div>
-                            <a href="/admin/login" className="text-xs text-gray-600 hover:text-[#deb55a] transition-colors">
-                                管理画面へ
-                            </a>
-                        </div>
+
                     </div>
                 </div>
             </footer>

@@ -1,0 +1,42 @@
+外部タグ・スクリプト追加 開発者用作業指示書
+
+本サイト（Vite + React構成）において、新しい計測タグや外部スクリプトを追加する際の開発者向け実装手順を以下にまとめます。
+
+1. システム構成と基本ルール
+本プロジェクトでは、フロントエンドに Vite を使用しています。
+・原則：可能な限り「Googleタグマネージャー (GTM)」の管理領域で完結させ、ソースコードへのハードコーディングを避ける。
+・例外：実行順序や依存関係の都合で直接記述が必要な場合のみ、以下の手順でファイルを編集する。
+
+2. 静的スクリプトの追加 (index.html)
+全ページ共通で読み込む必要があるスクリプトは、エントリポイントである index.html に記述します。
+・ファイルパス: ./index.html
+・実装位置（同期・優先読み込み）: <head> タグ内の既存の GTM スクリプト（13行目付近）の前後に記述。
+・実装位置（非同期・遅延読み込み）: </body> タグの直前に記述。
+
+※ 注意: GTM (GTM-PCWMP294) は既に index.html に組み込まれています。追加するタグが GTM のコンテナ内で管理可能な場合は、HTML 側の編集は不要です。
+
+3. Reactコンポーネント内でのイベント計測実装
+GTMの自動イベントトラッキング以外の方法で、特定のユーザーアクションをプログラムから明示的に発火させたい場合（dataLayer.pushなど）の手順です。
+
+・対象ファイル例: src/app/pages/LandingPage.tsx, src/app/pages/TravelerPage.tsx
+・実装例:
+  onClick ハンドラ等で dataLayer (GTM) へイベントを送信します。
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  (window as any).dataLayer.push({
+    'event': 'custom_button_click',
+    'button_name': 'reservation_button'
+  });
+
+4. 環境変数によるID管理（推奨）
+本番環境とテスト環境でタグ ID を切り替える必要がある場合は、.env ファイルおよび環境変数の仕組みを利用してください。
+・.env ファイルに VITE_GTM_ID=GTM-XXXXXX のように定義。
+・index.html 内で %VITE_GTM_ID% として参照（Vite の HTML プレースホルダ機能）。
+
+5. ビルドと反映の確認
+修正後は以下の手順で環境への反映を確認してください。
+・開発環境：npm run dev を実行し、ブラウザのデベロッパーツール（Networkタブ）で該当のドメイン（google-analytics.com 等）へのリクエストが飛んでいるか、dataLayer に値が入っているかを確認。
+・本番ビルド：npm run build を実行し、生成された dist/index.html に正しくコードが含まれているかを確認。
+
+---
+作成日: 2026年1月9日
+作成: Antigravity (AI Assistant)
