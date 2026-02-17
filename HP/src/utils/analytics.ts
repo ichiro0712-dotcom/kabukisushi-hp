@@ -1,6 +1,8 @@
 // Google Analytics 4 Event Tracking Utilities
 // GTM ID: GTM-PCWMP294
 
+import type { StoreId } from './storeConfig';
+
 declare global {
   interface Window {
     dataLayer: any[];
@@ -12,6 +14,14 @@ if (typeof window !== 'undefined' && !window.dataLayer) {
   window.dataLayer = [];
 }
 
+// Detect store from current URL path
+export const getStoreIdFromPath = (): StoreId => {
+  if (typeof window !== 'undefined') {
+    return window.location.pathname.startsWith('/ichiban-dori') ? 'ichiban' : 'honten';
+  }
+  return 'honten';
+};
+
 // Generic event tracking function
 export const trackEvent = (
   eventName: string,
@@ -20,6 +30,7 @@ export const trackEvent = (
   if (typeof window !== 'undefined' && window.dataLayer) {
     window.dataLayer.push({
       event: eventName,
+      store_id: getStoreIdFromPath(),
       ...params,
     });
   }
@@ -56,10 +67,10 @@ export const trackReservationClick = (location: string) => {
 };
 
 // Phone button click
-export const trackPhoneClick = (location: string) => {
+export const trackPhoneClick = (location: string, phoneNumber?: string) => {
   trackEvent('phone_click', {
     click_location: location,
-    phone_number: '03-6302-1477',
+    phone_number: phoneNumber || '',
   });
 };
 

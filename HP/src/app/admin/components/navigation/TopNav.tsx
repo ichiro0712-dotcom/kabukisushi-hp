@@ -12,7 +12,7 @@ export function TopNav() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gray-900">KABUKI寿司</h1>
-            <p className="text-xs text-gray-500">1番通り店 管理画面</p>
+            <p className="text-xs text-gray-500">管理画面</p>
           </div>
         </div>
 

@@ -104,7 +104,7 @@ const INITIAL_MENU_ITEMS: MenuItem[] = [
 
 // 初期設定データ
 const INITIAL_SETTINGS: Settings = {
-  storeName: 'KABUKI寿司 1番通り店',
+  storeName: 'KABUKI寿司',
   address: {
     postalCode: '160-0021',
     prefecture: '東京都',

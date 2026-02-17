@@ -17,8 +17,10 @@ import {
     Youtube,
     ExternalLink,
     Settings,
-    RefreshCw
+    RefreshCw,
+    ChevronDown
 } from 'lucide-react';
+import { type StoreId, STORE_CONFIGS } from '../../../utils/storeConfig';
 
 type TimeRange = 'today' | 'yesterday' | 'week' | 'month' | 'quarter';
 
@@ -76,10 +78,12 @@ const ActionMetric = ({ title, value, subValue, icon, color }: ActionMetricProps
 export default function AnalyticsPage() {
     const navigate = useNavigate();
     const [timeRange, setTimeRange] = useState<TimeRange>('week');
+    const [selectedStore, setSelectedStore] = useState<StoreId>('honten');
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Looker Studio embed URL (placeholder - replace with actual URL)
     const lookerStudioUrl = '';
+    const storeConfig = STORE_CONFIGS[selectedStore];
 
     const handleRefresh = () => {
         setIsRefreshing(true);
@@ -129,8 +133,21 @@ export default function AnalyticsPage() {
                                     <BarChart3 size={20} className="text-purple-600" />
                                 </div>
                                 <div>
-                                    <h1 className="text-lg font-bold text-gray-900">Analytics</h1>
-                                    <p className="text-xs text-gray-500">KABUKI寿司 1番通り店</p>
+                                    <p className="text-xs text-gray-500">Analytics</p>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedStore}
+                                            onChange={(e) => setSelectedStore(e.target.value as StoreId)}
+                                            className="appearance-none text-lg font-bold text-gray-900 bg-transparent pr-6 cursor-pointer hover:text-gray-700 focus:outline-none"
+                                        >
+                                            {Object.values(STORE_CONFIGS).map((config) => (
+                                                <option key={config.id} value={config.id}>
+                                                    {config.displayName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -301,29 +318,37 @@ export default function AnalyticsPage() {
                                 <tr className="hover:bg-gray-50">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-gray-900">/ (TOP - 日本語)</span>
-                                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">メイン</span>
+                                            <span className="text-sm font-medium text-gray-900">{storeConfig.basePath === '/' ? '/' : storeConfig.basePath} ({storeConfig.shortName} - 日本語)</span>
+                                            <span className={`px-2 py-0.5 text-xs rounded ${selectedStore === 'honten' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>{storeConfig.shortName}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-900 font-medium">2,955</td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-600">2:48</td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-600">38.5%</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-900 font-medium">{selectedStore === 'honten' ? '2,955' : '—'}</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-600">{selectedStore === 'honten' ? '2:48' : '—'}</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-600">{selectedStore === 'honten' ? '38.5%' : '—'}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className="text-green-600 text-sm font-medium">+8.2%</span>
+                                        {selectedStore === 'honten' ? (
+                                            <span className="text-green-600 text-sm font-medium">+8.2%</span>
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">データ収集中</span>
+                                        )}
                                     </td>
                                 </tr>
                                 <tr className="hover:bg-gray-50">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-gray-900">/traveler (English)</span>
+                                            <span className="text-sm font-medium text-gray-900">{storeConfig.travelerPath} ({storeConfig.shortName} - English)</span>
                                             <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">翻訳</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-900 font-medium">{demoMetrics.travelerPageViews.value}</td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-600">3:12</td>
-                                    <td className="px-6 py-4 text-right text-sm text-gray-600">32.1%</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-900 font-medium">{selectedStore === 'honten' ? demoMetrics.travelerPageViews.value : '—'}</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-600">{selectedStore === 'honten' ? '3:12' : '—'}</td>
+                                    <td className="px-6 py-4 text-right text-sm text-gray-600">{selectedStore === 'honten' ? '32.1%' : '—'}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className="text-green-600 text-sm font-medium">+{demoMetrics.travelerPageViews.change}%</span>
+                                        {selectedStore === 'honten' ? (
+                                            <span className="text-green-600 text-sm font-medium">+{demoMetrics.travelerPageViews.change}%</span>
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">データ収集中</span>
+                                        )}
                                     </td>
                                 </tr>
                             </tbody>

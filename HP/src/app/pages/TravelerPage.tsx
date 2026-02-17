@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, Globe, EyeOff, Ban, Plus } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { InlineEditableText, MenuItemControls, SectionToolbar, DEFAULT_TEXT_SETTINGS } from './LandingPage';
+import { InlineEditableText, MenuItemControls, SectionToolbar, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
+import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 
 interface TravelerPageProps {
+    storeId?: StoreId;
     isEditing?: boolean;
     onSectionSelect?: (id: string | null) => void;
     onBackgroundEdit?: (id: string) => void;
@@ -40,6 +42,7 @@ const DEFAULT_LAYOUT_SETTINGS: Record<string, LayoutConfig> = {
 };
 
 export function TravelerPage({
+    storeId = 'honten',
     isEditing = false,
     onSectionSelect,
     onBackgroundEdit,
@@ -54,6 +57,7 @@ export function TravelerPage({
     onDeleteMenuItem
 }: TravelerPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const links = STORE_CONFIGS[storeId].links;
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
     const [localLayoutSettings, setLocalLayoutSettings] = useState<Record<string, LayoutConfig> | undefined>(undefined);
     const [localTextSettings, setLocalTextSettings] = useState<Record<string, Record<string, string>> | undefined>(undefined);
@@ -61,7 +65,7 @@ export function TravelerPage({
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
     const layoutSettings = propLayoutSettings || (localLayoutSettings ? { ...DEFAULT_LAYOUT_SETTINGS, ...localLayoutSettings } : DEFAULT_LAYOUT_SETTINGS);
     const textSettings = propTextSettings || (() => {
-        const base = { ...DEFAULT_TEXT_SETTINGS };
+        const base = { ...getDefaultTextSettings(storeId) };
         if (localTextSettings) {
             Object.keys(localTextSettings).forEach(sectionId => {
                 const savedSection = localTextSettings[sectionId];
@@ -92,9 +96,10 @@ export function TravelerPage({
 
     useEffect(() => {
         if (!isEditing) {
-            const savedBackgrounds = localStorage.getItem('site_background_settings_traveler');
-            const savedLayouts = localStorage.getItem('site_layout_settings_traveler');
-            const savedText = localStorage.getItem('site_text_settings');
+            const keys = getStorageKeys(storeId);
+            const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
+            const savedLayouts = localStorage.getItem(keys.layoutSettings);
+            const savedText = localStorage.getItem(keys.textSettings);
             if (savedBackgrounds) try { setLocalBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { }
             if (savedLayouts) try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { }
             if (savedText) try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { }
@@ -152,10 +157,10 @@ export function TravelerPage({
                             >
                                 <div className="flex items-baseline gap-1">
                                     <span style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl tracking-wider text-[#fcebc5] font-medium">
-                                        KABUKI寿司
+                                        {textSettings.home?.title || 'KABUKI寿司'}
                                     </span>
                                     <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-widest text-[#deb55a]/80 font-light">
-                                        1番通り
+                                        {textSettings.home?.subtitle || '本店'}
                                     </span>
                                 </div>
                             </button>
@@ -165,18 +170,18 @@ export function TravelerPage({
                         <div className="hidden md:flex items-center gap-6">
                             {/* Social Icons */}
                             <div className="flex items-center gap-3 mr-2">
-                                <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
-                                <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
-                                <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
-                                <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
+                                <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
+                                <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
+                                <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
+                                <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
                             </div>
 
                             <span className="text-[#e8eaec]/20">|</span>
 
                             {/* Phone Button */}
-                            <a href="tel:0363021477" className="flex items-center gap-1 text-[#e8eaec]/70 hover:text-[#deb55a] transition-colors">
+                            <a href={`tel:${links.phone}`} className="flex items-center gap-1 text-[#e8eaec]/70 hover:text-[#deb55a] transition-colors">
                                 <Phone size={12} />
-                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-wide">03-6302-1477</span>
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-wide">{links.phoneDisplay}</span>
                             </a>
 
                             <span className="text-[#e8eaec]/20">|</span>
@@ -188,7 +193,7 @@ export function TravelerPage({
 
                             {/* Reserve Button */}
                             <a
-                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                href={links.reserveUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Inter', sans-serif" }}
@@ -199,7 +204,7 @@ export function TravelerPage({
 
                             <span className="text-[#e8eaec]/20">|</span>
 
-                            <a href="/" style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-[0.15em] text-[#fcebc5] hover:text-[#deb55a] transition-all duration-300 uppercase">
+                            <a href={STORE_CONFIGS[storeId].basePath} style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-[0.15em] text-[#fcebc5] hover:text-[#deb55a] transition-all duration-300 uppercase">
                                 日本語
                             </a>
                         </div>
@@ -215,9 +220,9 @@ export function TravelerPage({
                     <div className="md:hidden bg-[#1C1C1C]/95 backdrop-blur-md border-t border-white/5">
                         <div className="px-6 py-6 space-y-4">
                             {/* Phone Button - Mobile */}
-                            <a href="tel:0363021477" className="flex items-center gap-2 text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2">
+                            <a href={`tel:${links.phone}`} className="flex items-center gap-2 text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2">
                                 <Phone size={16} />
-                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-wide">03-6302-1477</span>
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-wide">{links.phoneDisplay}</span>
                             </a>
 
                             <div className="border-t border-white/10 my-3"></div>
@@ -229,14 +234,14 @@ export function TravelerPage({
 
                             {/* Social Icons - Mobile */}
                             <div className="flex items-center gap-4 py-3">
-                                <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={18} /></a>
-                                <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={18} /></a>
-                                <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={18} /></a>
-                                <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={18} /></a>
+                                <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={18} /></a>
+                                <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={18} /></a>
+                                <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={18} /></a>
+                                <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={18} /></a>
                             </div>
 
                             <a
-                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                href={links.reserveUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Inter', sans-serif" }}
@@ -245,7 +250,7 @@ export function TravelerPage({
                                 Reserve
                             </a>
 
-                            <a href="/" style={{ fontFamily: "'Inter', sans-serif" }} className="block w-full text-center py-2 text-xs tracking-[0.15em] text-[#fcebc5] hover:text-[#deb55a] transition-all duration-300 uppercase mt-2">
+                            <a href={STORE_CONFIGS[storeId].basePath} style={{ fontFamily: "'Inter', sans-serif" }} className="block w-full text-center py-2 text-xs tracking-[0.15em] text-[#fcebc5] hover:text-[#deb55a] transition-all duration-300 uppercase mt-2">
                                 日本語
                             </a>
                         </div>
@@ -274,7 +279,7 @@ export function TravelerPage({
                     <div className="mb-12 flex justify-center">
                         <ImageWithFallback
                             src="/assets/logo.png"
-                            alt="KABUKI寿司 1番通り ロゴ"
+                            alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || '本店'} ロゴ`}
                             className="w-auto h-28 md:h-36 object-contain"
                         />
                     </div>
@@ -289,7 +294,7 @@ export function TravelerPage({
                         <button onClick={() => scrollToSection('menu')} style={{ fontFamily: "'Inter', sans-serif" }} className="text-xs tracking-[0.15em] text-[#e8eaec]/90 hover:text-[#deb55a] transition-all duration-300 uppercase border-b border-transparent hover:border-[#deb55a] pb-1">Menu</button>
                         <span className="text-[#e8eaec]/30">|</span>
                         <a
-                            href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                            href={links.reserveUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ fontFamily: "'Inter', sans-serif" }}
@@ -299,7 +304,7 @@ export function TravelerPage({
                         </a>
                         <span className="text-[#e8eaec]/30">|</span>
                         <a
-                            href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA"
+                            href={links.mapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ fontFamily: "'Inter', sans-serif" }}
@@ -311,7 +316,7 @@ export function TravelerPage({
 
                     {/* Language Switcher */}
                     <a
-                        href="/"
+                        href={STORE_CONFIGS[storeId].basePath}
                         style={{ fontFamily: "'Inter', sans-serif" }}
                         className="mt-8 inline-flex items-center gap-2 px-6 py-2 border border-[#e8eaec]/40 text-xs tracking-[0.1em] text-[#e8eaec]/80 hover:text-[#deb55a] hover:border-[#deb55a] transition-all duration-300"
                     >
@@ -321,10 +326,10 @@ export function TravelerPage({
 
                     {/* Social Icons */}
                     <div className="flex items-center justify-center gap-3 mt-6">
-                        <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
-                        <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
-                        <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
-                        <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
+                        <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
+                        <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
+                        <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
+                        <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
                     </div>
                 </div>
             </section>
@@ -1000,13 +1005,13 @@ export function TravelerPage({
                             </div>
                             <div className="flex items-center gap-4">
                                 <Phone className="text-[#deb55a]" />
-                                <p>03-6302-1477</p>
+                                <p>{links.phoneDisplay}</p>
                             </div>
                             <div className="flex items-center gap-4">
                                 <Clock className="text-[#deb55a]" />
                                 <p>OPEN : 18:00 - 24:00</p>
                             </div>
-                            <a href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA" target="_blank" className="inline-block px-8 py-3 bg-[#1C1C1C] text-white rounded hover:bg-[#deb55a] transition-colors font-bold uppercase tracking-wider">Open in Google Maps</a>
+                            <a href={links.mapsUrl} target="_blank" className="inline-block px-8 py-3 bg-[#1C1C1C] text-white rounded hover:bg-[#deb55a] transition-colors font-bold uppercase tracking-wider">Open in Google Maps</a>
                         </div>
                         <div className="rounded-lg overflow-hidden shadow-2xl">
                             <ImageWithFallback src="/assets/access_map.jpg" alt="Map" className="w-full h-auto" />
@@ -1061,19 +1066,19 @@ export function TravelerPage({
             <footer className="bg-[#1C1C1C] py-16 border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <div className="flex justify-center gap-6 mb-8">
-                        <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Instagram size={20} />
                         </a>
-                        <a href="https://www.facebook.com/profile.php?id=100068484907117&locale=hi_IN" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Facebook size={20} />
                         </a>
-                        <a href="https://www.tiktok.com/@kabukisushi1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Music2 size={20} />
                         </a>
-                        <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Youtube size={20} />
                         </a>
-                        <a href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.mapsUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <MapPin size={20} />
                         </a>
                     </div>
@@ -1081,7 +1086,7 @@ export function TravelerPage({
                     <div className="flex flex-col items-center gap-4 mb-8">
                         <div className="flex items-center gap-2 text-[#e8eaec]">
                             <Phone size={18} className="text-[#deb55a]" />
-                            <span className="text-lg font-semibold">03-6302-1477</span>
+                            <span className="text-lg font-semibold">{links.phoneDisplay}</span>
                         </div>
                     </div>
 

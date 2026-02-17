@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Settings,
@@ -25,7 +25,8 @@ import {
     Globe,
     BarChart3
 } from 'lucide-react';
-import { LandingPage, DEFAULT_TEXT_SETTINGS } from '../../pages/LandingPage';
+import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
+import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
 import AddSectionModal from '../components/editor/AddSectionModal';
@@ -74,6 +75,8 @@ export default function EditorPage() {
     } | null>(null);
     const [editPage, setEditPage] = useState<'landing' | 'traveler'>('landing');
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const [selectedStore, setSelectedStore] = useState<StoreId>('honten');
+    const selectedStoreRef = useRef<StoreId>(selectedStore);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -98,7 +101,7 @@ export default function EditorPage() {
     });
 
     // Text settings state
-    const [textSettings, setTextSettings] = useState<Record<string, Record<string, string>>>(DEFAULT_TEXT_SETTINGS);
+    const [textSettings, setTextSettings] = useState<Record<string, Record<string, string>>>(getDefaultTextSettings('honten'));
 
     const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
     const updateLastSaved = () => setLastSavedTime(new Date());
@@ -144,9 +147,10 @@ export default function EditorPage() {
         setTextSettings(previousState.textSettings);
 
         // Persist to localStorage
-        localStorage.setItem('site_background_settings', JSON.stringify(previousState.backgroundSettings));
-        localStorage.setItem('site_layout_settings', JSON.stringify(previousState.layoutSettings));
-        localStorage.setItem('site_text_settings', JSON.stringify(previousState.textSettings));
+        const keys = getStorageKeys(selectedStore);
+        localStorage.setItem(keys.backgroundSettings, JSON.stringify(previousState.backgroundSettings));
+        localStorage.setItem(keys.layoutSettings, JSON.stringify(previousState.layoutSettings));
+        localStorage.setItem(keys.textSettings, JSON.stringify(previousState.textSettings));
         window.dispatchEvent(new Event('storage'));
         updateLastSaved();
     };
@@ -172,13 +176,62 @@ export default function EditorPage() {
         setTextSettings(nextState.textSettings);
 
         // Persist to localStorage
-        localStorage.setItem('site_background_settings', JSON.stringify(nextState.backgroundSettings));
-        localStorage.setItem('site_layout_settings', JSON.stringify(nextState.layoutSettings));
-        localStorage.setItem('site_text_settings', JSON.stringify(nextState.textSettings));
+        const redoKeys = getStorageKeys(selectedStore);
+        localStorage.setItem(redoKeys.backgroundSettings, JSON.stringify(nextState.backgroundSettings));
+        localStorage.setItem(redoKeys.layoutSettings, JSON.stringify(nextState.layoutSettings));
+        localStorage.setItem(redoKeys.textSettings, JSON.stringify(nextState.textSettings));
         window.dispatchEvent(new Event('storage'));
         updateLastSaved();
     };
 
+    // Default background/layout settings for resetting
+    const DEFAULT_BG: Record<string, BackgroundConfig> = {
+        home: { type: 'image', value: '/assets/home_hero_new.jpg' },
+        about: { type: 'color', value: '#ffffff', textTheme: 'dark' },
+        gallery: { type: 'color', value: '#E8EAEC' },
+        access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
+        menu: { type: 'color', value: '#f5f5f5' },
+        affiliated: { type: 'image', value: '/assets/honten_hero.jpg' },
+        footer: { type: 'color', value: '#1C1C1C' }
+    };
+    const DEFAULT_LAYOUT: Record<string, LayoutConfig> = {
+        home: { width: 'full', alignment: 'center', fullHeight: true, topSpace: false, bottomSpace: false },
+        about: { width: 'normal', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true },
+        gallery: { width: 'wide', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true },
+        access: { width: 'normal', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true },
+        menu: { width: 'normal', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true },
+        affiliated: { width: 'full', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true },
+        footer: { width: 'wide', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true }
+    };
+
+    const handleStoreSwitch = (newStoreId: StoreId) => {
+        // Save current store data
+        const currentKeys = getStorageKeys(selectedStore);
+        localStorage.setItem(currentKeys.backgroundSettings, JSON.stringify(backgroundSettings));
+        localStorage.setItem(currentKeys.layoutSettings, JSON.stringify(layoutSettings));
+        localStorage.setItem(currentKeys.textSettings, JSON.stringify(textSettings));
+
+        // Switch store
+        setSelectedStore(newStoreId);
+        selectedStoreRef.current = newStoreId;
+
+        // Load new store data
+        const newKeys = getStorageKeys(newStoreId);
+        const newDefaults = getDefaultTextSettings(newStoreId);
+
+        const savedBg = localStorage.getItem(newKeys.backgroundSettings);
+        const savedLayout = localStorage.getItem(newKeys.layoutSettings);
+        const savedText = localStorage.getItem(newKeys.textSettings);
+
+        setBackgroundSettings(savedBg ? JSON.parse(savedBg) : { ...DEFAULT_BG });
+        setLayoutSettings(savedLayout ? JSON.parse(savedLayout) : { ...DEFAULT_LAYOUT });
+        setTextSettings(savedText ? JSON.parse(savedText) : newDefaults);
+
+        // Clear undo/redo history
+        setPast([]);
+        setFuture([]);
+        setLastSavedTime(null);
+    };
 
     const menuItems = [
         { id: 'styles', icon: Palette, label: 'スタイル' },
@@ -384,9 +437,10 @@ export default function EditorPage() {
 
     const handleSaveBackground = () => {
         // Save settings to localStorage
-        localStorage.setItem('site_background_settings', JSON.stringify(backgroundSettings));
-        localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
-        localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
+        const saveKeys = getStorageKeys(selectedStore);
+        localStorage.setItem(saveKeys.backgroundSettings, JSON.stringify(backgroundSettings));
+        localStorage.setItem(saveKeys.layoutSettings, JSON.stringify(layoutSettings));
+        localStorage.setItem(saveKeys.textSettings, JSON.stringify(textSettings));
 
         // Show success message or feedback if needed (optional, existing UI has a static "Saved" indicator)
         // For now just close the panel
@@ -408,9 +462,10 @@ export default function EditorPage() {
     // Initialize from localStorage on mount
     const [isInitialized, setIsInitialized] = useState(false);
     useEffect(() => {
-        const savedBackgrounds = localStorage.getItem('site_background_settings');
-        const savedLayouts = localStorage.getItem('site_layout_settings');
-        const savedText = localStorage.getItem('site_text_settings');
+        const initKeys = getStorageKeys(selectedStore);
+        const savedBackgrounds = localStorage.getItem(initKeys.backgroundSettings);
+        const savedLayouts = localStorage.getItem(initKeys.layoutSettings);
+        const savedText = localStorage.getItem(initKeys.textSettings);
 
         if (savedBackgrounds) {
             try { setBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { console.error(e); }
@@ -422,6 +477,7 @@ export default function EditorPage() {
             try {
                 let parsed = JSON.parse(savedText);
                 // Proactive correction for "reversed text" issue
+                const storeDefaults = getDefaultTextSettings(selectedStore);
                 if (parsed && typeof parsed === 'object') {
                     Object.keys(parsed).forEach(sectionId => {
                         const section = parsed[sectionId];
@@ -429,17 +485,17 @@ export default function EditorPage() {
                             Object.keys(section).forEach(field => {
                                 const val = section[field];
                                 if (typeof val === 'string' && (val.toLowerCase().includes('ihsus enilni') || val.toLowerCase().includes('ih su s enilni'))) {
-                                    parsed[sectionId][field] = DEFAULT_TEXT_SETTINGS?.[sectionId]?.[field] || val;
+                                    parsed[sectionId][field] = storeDefaults?.[sectionId]?.[field] || val;
                                 }
                             });
                         }
                     });
                 }
-                const mergedText = { ...DEFAULT_TEXT_SETTINGS };
+                const mergedText = { ...storeDefaults };
                 if (parsed && typeof parsed === 'object') {
                     Object.keys(parsed).forEach(sectionId => {
                         const savedSection = parsed[sectionId];
-                        const defaultSection = DEFAULT_TEXT_SETTINGS[sectionId] || {};
+                        const defaultSection = storeDefaults[sectionId] || {};
 
                         // Logic: If the saved section has ANY dynamic items (keys starting with image_ or category_),
                         // we treat the saved dynamic items as the source of truth for that section.
@@ -473,12 +529,13 @@ export default function EditorPage() {
         setIsInitialized(true);
     }, []);
 
-    // Central persistence effect
+    // Central persistence effect - uses ref to avoid stale store on rapid switching
     useEffect(() => {
         if (!isInitialized) return;
-        localStorage.setItem('site_background_settings', JSON.stringify(backgroundSettings));
-        localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
-        localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
+        const persistKeys = getStorageKeys(selectedStoreRef.current);
+        localStorage.setItem(persistKeys.backgroundSettings, JSON.stringify(backgroundSettings));
+        localStorage.setItem(persistKeys.layoutSettings, JSON.stringify(layoutSettings));
+        localStorage.setItem(persistKeys.textSettings, JSON.stringify(textSettings));
         window.dispatchEvent(new Event('storage'));
     }, [backgroundSettings, layoutSettings, textSettings, isInitialized]);
 
@@ -831,7 +888,17 @@ export default function EditorPage() {
                             >
                                 <ChevronLeft size={20} />
                             </button>
-                            <span className="text-xs font-bold text-gray-900">KABUKI寿司 1番通り店</span>
+                            <select
+                                value={selectedStore}
+                                onChange={(e) => handleStoreSwitch(e.target.value as StoreId)}
+                                className="text-xs font-bold text-gray-900 bg-transparent border border-gray-200 rounded px-2 py-1 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {(Object.values(STORE_CONFIGS) as Array<{ id: StoreId; displayName: string }>).map((store) => (
+                                    <option key={store.id} value={store.id}>
+                                        {store.displayName}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div className="h-4 w-px bg-gray-300" />
                         <div className="flex items-center gap-4">
@@ -911,9 +978,10 @@ export default function EditorPage() {
 
                         <button
                             onClick={() => {
-                                localStorage.setItem('site_background_settings', JSON.stringify(backgroundSettings));
-                                localStorage.setItem('site_layout_settings', JSON.stringify(layoutSettings));
-                                localStorage.setItem('site_text_settings', JSON.stringify(textSettings));
+                                const btnKeys = getStorageKeys(selectedStore);
+                                localStorage.setItem(btnKeys.backgroundSettings, JSON.stringify(backgroundSettings));
+                                localStorage.setItem(btnKeys.layoutSettings, JSON.stringify(layoutSettings));
+                                localStorage.setItem(btnKeys.textSettings, JSON.stringify(textSettings));
                                 window.dispatchEvent(new Event('storage'));
                                 updateLastSaved();
                                 alert('保存しました!');
@@ -946,6 +1014,7 @@ export default function EditorPage() {
                             <div>
                                 {editPage === 'landing' ? (
                                     <LandingPage
+                                        storeId={selectedStore}
                                         isEditing={true}
                                         onSectionSelect={setActiveSection}
                                         onBackgroundEdit={handleBackgroundEdit}
@@ -963,6 +1032,7 @@ export default function EditorPage() {
                                     />
                                 ) : (
                                     <TravelerPage
+                                        storeId={selectedStore}
                                         isEditing={true}
                                         onSectionSelect={setActiveSection}
                                         onBackgroundEdit={handleBackgroundEdit}

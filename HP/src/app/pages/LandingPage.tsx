@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText, Trash2, EyeOff, Ban, Globe, Plus } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
+import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 
 interface LandingPageProps {
+    storeId?: StoreId;
     isEditing?: boolean;
     onSectionSelect?: (id: string) => void;
     onBackgroundEdit?: (id: string) => void;
@@ -176,6 +178,18 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         other_content_zh: '香片茶 / 500\n乌龙茶 / 500\n绿茶 / 500\n玉米茶 / 500\n可口可乐 / 500\n苏打水 / 500'
     }
 };
+
+export function getDefaultTextSettings(storeId: StoreId = 'honten'): Record<string, Record<string, string>> {
+    const base = JSON.parse(JSON.stringify(DEFAULT_TEXT_SETTINGS));
+    const storeLinks = STORE_CONFIGS[storeId].links;
+    // アクセス情報を店舗に合わせる
+    base.access.phone = storeLinks.phoneDisplay;
+    if (storeId === 'honten') {
+        base.home.subtitle = '本店';
+        base.about.content = base.about.content.replace(/1番通り店/g, '本店');
+    }
+    return base;
+}
 
 interface InlineEditableTextProps {
     value: string;
@@ -776,6 +790,7 @@ function MultiLanguageTextEditor({
 }
 
 export function LandingPage({
+    storeId = 'honten',
     isEditing = false,
     onSectionSelect,
     onBackgroundEdit,
@@ -792,6 +807,7 @@ export function LandingPage({
     onLayoutChange
 }: LandingPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const links = STORE_CONFIGS[storeId].links;
 
     // Local state for settings when running in public mode (not editing)
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
@@ -803,7 +819,7 @@ export function LandingPage({
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
     const layoutSettings = propLayoutSettings || (localLayoutSettings ? { ...DEFAULT_LAYOUT_SETTINGS, ...localLayoutSettings } : DEFAULT_LAYOUT_SETTINGS);
     const textSettings = propTextSettings || (() => {
-        const base = { ...DEFAULT_TEXT_SETTINGS };
+        const base = { ...getDefaultTextSettings(storeId) };
         if (localTextSettings) {
             Object.keys(localTextSettings).forEach(sectionId => {
                 const savedSection = localTextSettings[sectionId];
@@ -836,9 +852,10 @@ export function LandingPage({
     // Load settings from localStorage if on public page
     useEffect(() => {
         if (!isEditing) {
-            const savedBackgrounds = localStorage.getItem('site_background_settings');
-            const savedLayouts = localStorage.getItem('site_layout_settings');
-            const savedText = localStorage.getItem('site_text_settings');
+            const keys = getStorageKeys(storeId);
+            const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
+            const savedLayouts = localStorage.getItem(keys.layoutSettings);
+            const savedText = localStorage.getItem(keys.textSettings);
 
             if (savedBackgrounds) {
                 try {
@@ -1021,7 +1038,7 @@ export function LandingPage({
                                 </span>
                                 <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-widest text-[#deb55a]/80 font-light">
                                     <InlineEditableText
-                                        value={textSettings.home?.subtitle || '1番通り'}
+                                        value={textSettings.home?.subtitle || ''}
                                         onChange={(val) => onTextChange?.('home', 'subtitle', val)}
                                         isEditing={isEditing}
                                     />
@@ -1033,18 +1050,18 @@ export function LandingPage({
                         <div className="hidden md:flex items-center gap-6">
                             {/* Social Icons */}
                             <div className="flex items-center gap-3 mr-2">
-                                <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
-                                <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
-                                <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
-                                <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
+                                <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
+                                <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
+                                <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
+                                <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
                             </div>
 
                             <span className="text-[#e8eaec]/20">|</span>
 
                             {/* Phone Button */}
-                            <a href="tel:0363021477" className="flex items-center gap-1 text-[#e8eaec]/70 hover:text-[#deb55a] transition-colors">
+                            <a href={`tel:${links.phone}`} className="flex items-center gap-1 text-[#e8eaec]/70 hover:text-[#deb55a] transition-colors">
                                 <Phone size={12} />
-                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-wide">03-6302-1477</span>
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[10px] tracking-wide">{links.phoneDisplay}</span>
                             </a>
 
                             <span className="text-[#e8eaec]/20">|</span>
@@ -1056,7 +1073,7 @@ export function LandingPage({
 
                             {/* Reserve Button */}
                             <a
-                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                href={links.reserveUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Inter', sans-serif" }}
@@ -1081,9 +1098,9 @@ export function LandingPage({
                     <div className="md:hidden bg-[#1C1C1C]/95 backdrop-blur-md border-t border-white/5">
                         <div className="px-6 py-6 space-y-4">
                             {/* Phone Button - Mobile */}
-                            <a href="tel:0363021477" className="flex items-center gap-2 text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2">
+                            <a href={`tel:${links.phone}`} className="flex items-center gap-2 text-[#e8eaec]/80 hover:text-[#deb55a] transition-colors py-2">
                                 <Phone size={16} />
-                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-wide">03-6302-1477</span>
+                                <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm tracking-wide">{links.phoneDisplay}</span>
                             </a>
 
                             <div className="border-t border-white/10 my-3"></div>
@@ -1095,14 +1112,14 @@ export function LandingPage({
 
                             {/* Social Icons - Mobile */}
                             <div className="flex items-center gap-4 py-3">
-                                <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={18} /></a>
-                                <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={18} /></a>
-                                <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={18} /></a>
-                                <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={18} /></a>
+                                <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={18} /></a>
+                                <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={18} /></a>
+                                <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={18} /></a>
+                                <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={18} /></a>
                             </div>
 
                             <a
-                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                href={links.reserveUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Inter', sans-serif" }}
@@ -1140,7 +1157,7 @@ export function LandingPage({
                     <div className="mb-12 flex justify-center">
                         <ImageWithFallback
                             src="/assets/logo.png"
-                            alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || '1番通り'} ロゴ`}
+                            alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || ''} ロゴ`}
                             className="w-auto h-28 md:h-36 object-contain"
                         />
                     </div>
@@ -1158,7 +1175,7 @@ export function LandingPage({
                             </button>
                             <span className="text-[#e8eaec]/30">|</span>
                             <a
-                                href="https://www.tablecheck.com/shops/kabukisushi-ichiban/reserve"
+                                href={links.reserveUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Inter', sans-serif" }}
@@ -1168,7 +1185,7 @@ export function LandingPage({
                             </a>
                             <span className="text-[#e8eaec]/30">|</span>
                             <a
-                                href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA"
+                                href={links.mapsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontFamily: "'Inter', sans-serif" }}
@@ -1180,7 +1197,7 @@ export function LandingPage({
 
                         {/* Language Switcher - More Visible */}
                         <a
-                            href="/traveler"
+                            href={STORE_CONFIGS[storeId].travelerPath}
                             style={{ fontFamily: "'Inter', sans-serif" }}
                             className="mt-8 inline-flex items-center gap-2 px-6 py-2 border border-[#e8eaec]/40 text-xs tracking-[0.1em] text-[#e8eaec]/80 hover:text-[#deb55a] hover:border-[#deb55a] transition-all duration-300"
                         >
@@ -1190,10 +1207,10 @@ export function LandingPage({
 
                         {/* Social Icons */}
                         <div className="flex items-center gap-3 mt-6">
-                            <a href="https://www.instagram.com/kabuki_sushi_1st/" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
-                            <a href="https://www.facebook.com/kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
-                            <a href="https://www.tiktok.com/@kabukisushi1st" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
-                            <a href="https://www.youtube.com/@kabukisushi" target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
+                            <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
+                            <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
+                            <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
+                            <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
                         </div>
                     </div>
                 </div>
@@ -1228,14 +1245,14 @@ export function LandingPage({
                         <div className="w-full max-w-4xl">
                             <ImageWithFallback
                                 src="/assets/about_content_new.jpg"
-                                alt={textSettings.about?.title || 'KABUKI寿司 1番通り店'}
+                                alt={textSettings.about?.title || 'KABUKI寿司'}
                                 className="rounded-lg shadow-xl w-full h-auto"
                             />
                         </div>
                         <div className="space-y-4 text-center max-w-3xl mx-auto" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
                             <div className="text-lg">
                                 <InlineEditableText
-                                    value={textSettings.about?.content || 'KABUKI寿司の2号店となる 「KABUKI寿司 1番通り店」 をオープンいたしました。\n\n1番通り店では、これまでの伝統を受け継ぎながらも、さらなる進化を目指しています。\n\n店主を務めるのは、新進気鋭の若手寿司職人増田。\n\n繊細な技術と斬新なアイデアで、新しい「KABUKI寿司」の世界を皆さまにお届けいたします。\n\nお店の特徴の一つは、カウンター付きの個室です。職人の技を間近で堪能しながら、ゆったりとしたプライベート空間でお食事をお楽しみいただけます。特別な日のお祝いから接待まで、幅広いシーンでご利用いただけます。\n\n伝統と革新が融合したKABUKI寿司 1番通り店で、特別なひとときをお過ごしください。'}
+                                    value={textSettings.about?.content || getDefaultTextSettings(storeId).about?.content || ''}
                                     onChange={(val) => onTextChange?.('about', 'content', val)}
                                     isEditing={isEditing}
                                     multiline={true}
@@ -1390,7 +1407,7 @@ export function LandingPage({
                                 <Phone className="w-6 h-6 text-[#deb55a]" />
                                 <div className="text-lg text-[#1C1C1C]">
                                     <InlineEditableText
-                                        value={textSettings.access?.phone || '03-6302-1477'}
+                                        value={textSettings.access?.phone || links.phoneDisplay}
                                         onChange={(val) => onTextChange?.('access', 'phone', val)}
                                         isEditing={isEditing}
                                     />
@@ -2262,19 +2279,19 @@ export function LandingPage({
                 )}
                 <div className={`mx-auto text-center ${getContainerWidthClass('footer')}`}>
                     <div className="flex justify-center gap-6 mb-8">
-                        <a href="https://www.instagram.com/kabukizushi_ichiban?igsh=MWRzdmxuNzF1ODlzNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Instagram size={20} />
                         </a>
-                        <a href="https://www.facebook.com/profile.php?id=100068484907117&locale=hi_IN" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Facebook size={20} />
                         </a>
-                        <a href="https://www.tiktok.com/@kabukisushi1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Music2 size={20} />
                         </a>
-                        <a href="https://www.youtube.com/@KABUKI-ev3sy" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <Youtube size={20} />
                         </a>
-                        <a href="https://maps.app.goo.gl/yC8c23nWvXpjYmoXA" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
+                        <a href={links.mapsUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec] hover:text-[#deb55a] transition-all">
                             <MapPin size={20} />
                         </a>
                     </div>
@@ -2282,7 +2299,7 @@ export function LandingPage({
                     <div className="flex flex-col items-center gap-4 mb-8">
                         <div className="flex items-center gap-2 text-[#e8eaec]">
                             <Phone size={18} className="text-[#deb55a]" />
-                            <span className="text-lg font-semibold">03-6302-1477</span>
+                            <span className="text-lg font-semibold">{links.phoneDisplay}</span>
                         </div>
                     </div>
 

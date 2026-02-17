@@ -72,7 +72,7 @@ export function DashboardPage() {
               <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">公開中</div>
             </div>
             <div className="p-4">
-              <h3 className="font-bold text-gray-900">KABUKI寿司 1番通り店</h3>
+              <h3 className="font-bold text-gray-900">KABUKI寿司</h3>
               <p className="text-xs text-gray-500 mt-1">最終更新: 6時間前</p>
               <div className="mt-4 flex gap-2">
                 <button

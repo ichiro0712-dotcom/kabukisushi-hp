@@ -47,7 +47,7 @@ export function LoginPage() {
           </div>
         </div>
         <CardTitle className="text-2xl font-bold">管理画面</CardTitle>
-        <CardDescription>KABUKI寿司 1番通り店</CardDescription>
+        <CardDescription>KABUKI寿司 管理画面</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

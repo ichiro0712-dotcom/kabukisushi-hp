@@ -15,9 +15,13 @@ export default function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/traveler" element={<TravelerPage />} />
+            {/* Public Routes - Honten (本店) */}
+            <Route path="/" element={<LandingPage storeId="honten" />} />
+            <Route path="/traveler" element={<TravelerPage storeId="honten" />} />
+
+            {/* Public Routes - Ichiban-dori (1番通り店) */}
+            <Route path="/ichiban-dori" element={<LandingPage storeId="ichiban" />} />
+            <Route path="/ichiban-dori/traveler" element={<TravelerPage storeId="ichiban" />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
