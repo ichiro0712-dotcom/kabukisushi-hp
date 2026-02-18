@@ -2206,7 +2206,7 @@ export function LandingPage({
                                         isEditing={isEditing}
                                     />
                                 </div>
-                                <a href="https://site-1229809-8757-747.mystrikingly.com/" target="_blank" rel="noopener noreferrer" className="text-[#deb55a] hover:underline block mt-2">https://site-1229809-8757-747.mystrikingly.com/</a>
+                                <a href="https://kabuki-sushi.co.jp/" target="_blank" rel="noopener noreferrer" className="text-[#deb55a] hover:underline block mt-2">https://kabuki-sushi.co.jp/</a>
                             </div>
                         </div>
 
