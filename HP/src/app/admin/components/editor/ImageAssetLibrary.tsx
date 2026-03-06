@@ -17,6 +17,8 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
     const [activeTab, setActiveTab] = useState<TabType>('upload');
     const [searchQuery, setSearchQuery] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
     const isVideo = mediaType === 'video';
     const label = isVideo ? '動画' : '画像';
@@ -42,29 +44,27 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         "https://uploads.strikinglycdn.com/static/backgrounds/abstract/t66.jpg",
     ];
 
-    const [isUploading, setIsUploading] = useState(false);
-
-    const fileToDataUrl = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    };
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     const handleUploadFile = async (file: File) => {
+        setUploadError(null);
+
+        if (file.size > MAX_FILE_SIZE) {
+            setUploadError('ファイルサイズが大きすぎます（最大10MB）');
+            return;
+        }
+
         setIsUploading(true);
         try {
-            // Try Supabase Storage first
             const publicUrl = await uploadImage(file, storeId, category);
             if (publicUrl) {
                 onSelect(publicUrl);
                 return;
             }
-            // Fallback to base64 Data URL
-            const dataUrl = await fileToDataUrl(file);
-            onSelect(dataUrl);
+            setUploadError('画像のアップロードに失敗しました。Supabase設定を確認してください。');
+        } catch (err) {
+            console.error('Image upload error:', err);
+            setUploadError('画像のアップロード中にエラーが発生しました。');
         } finally {
             setIsUploading(false);
         }
@@ -136,6 +136,11 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
                                 onDragOver={handleDragOver}
                                 onDrop={handleDrop}
                             >
+                                {uploadError && (
+                                    <div className="mb-4 px-4 py-2 bg-red-50 border border-red-200 rounded text-red-600 text-sm font-bold">
+                                        {uploadError}
+                                    </div>
+                                )}
                                 {isUploading ? (
                                     <>
                                         <Loader2 size={40} className="text-blue-500 animate-spin mb-4" />

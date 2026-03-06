@@ -5,6 +5,7 @@ import { InlineEditableText, MenuItemControls, SectionToolbar, DEFAULT_TEXT_SETT
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
+import { mergeTextSettingsWithDefaults, migrateBackgroundSettings } from '../../lib/textSettingsUtils';
 
 interface TravelerPageProps {
     storeId?: StoreId;
@@ -62,48 +63,27 @@ export function TravelerPage({
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
     const [localLayoutSettings, setLocalLayoutSettings] = useState<Record<string, LayoutConfig> | undefined>(undefined);
     const [localTextSettings, setLocalTextSettings] = useState<Record<string, Record<string, string>> | undefined>(undefined);
+    const [isSettingsLoaded, setIsSettingsLoaded] = useState(isEditing);
 
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
     const layoutSettings = propLayoutSettings || (localLayoutSettings ? { ...DEFAULT_LAYOUT_SETTINGS, ...localLayoutSettings } : DEFAULT_LAYOUT_SETTINGS);
     const textSettings = propTextSettings || (() => {
-        const base = { ...getDefaultTextSettings(storeId) };
-        if (localTextSettings) {
-            Object.keys(localTextSettings).forEach(sectionId => {
-                const savedSection = localTextSettings[sectionId];
-                const defaultSection = base[sectionId] || {};
-
-                const isDynamicKey = (k: string) =>
-                    (k.startsWith('image_') ||
-                        ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
-                    !k.includes('_content');
-
-                const hasSavedDynamic = Object.keys(savedSection).some(isDynamicKey);
-
-                if (hasSavedDynamic) {
-                    const sectionWithStaticDefaults: Record<string, string> = {};
-                    Object.keys(defaultSection).forEach(k => {
-                        if (!isDynamicKey(k)) {
-                            sectionWithStaticDefaults[k] = defaultSection[k];
-                        }
-                    });
-                    base[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
-                } else {
-                    base[sectionId] = { ...defaultSection, ...savedSection };
-                }
-            });
-        }
-        return base;
+        const defaults = getDefaultTextSettings(storeId);
+        return localTextSettings ? mergeTextSettingsWithDefaults(localTextSettings, defaults) : defaults;
     })();
 
     useEffect(() => {
         if (!isEditing) {
+            let cancelled = false;
             async function loadSettings() {
                 const supabaseData = await loadStoreSettings(storeId);
+                if (cancelled) return;
                 const hasSupabaseData = supabaseData.backgroundSettings || supabaseData.layoutSettings || supabaseData.textSettings;
                 if (hasSupabaseData) {
-                    if (supabaseData.backgroundSettings) setLocalBackgroundSettings(supabaseData.backgroundSettings);
+                    if (supabaseData.backgroundSettings) setLocalBackgroundSettings(migrateBackgroundSettings(supabaseData.backgroundSettings));
                     if (supabaseData.layoutSettings) setLocalLayoutSettings(supabaseData.layoutSettings);
                     if (supabaseData.textSettings) setLocalTextSettings(supabaseData.textSettings);
+                    setIsSettingsLoaded(true);
                     return;
                 }
                 // Fallback to localStorage
@@ -111,13 +91,15 @@ export function TravelerPage({
                 const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
                 const savedLayouts = localStorage.getItem(keys.layoutSettings);
                 const savedText = localStorage.getItem(keys.textSettings);
-                if (savedBackgrounds) try { setLocalBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { }
+                if (savedBackgrounds) try { setLocalBackgroundSettings(migrateBackgroundSettings(JSON.parse(savedBackgrounds))); } catch (e) { }
                 if (savedLayouts) try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { }
                 if (savedText) try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { }
+                setIsSettingsLoaded(true);
             }
             loadSettings();
+            return () => { cancelled = true; };
         }
-    }, [isEditing]);
+    }, [isEditing, storeId]);
 
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
@@ -156,6 +138,11 @@ export function TravelerPage({
             default: return 'max-w-4xl w-full px-4';
         }
     };
+
+    // Prevent FOUC: don't render until settings are loaded from Supabase
+    if (!isSettingsLoaded) {
+        return <div className="min-h-screen bg-[#1C1C1C]" />;
+    }
 
     return (
         <div className="min-h-screen bg-[#1C1C1C]">

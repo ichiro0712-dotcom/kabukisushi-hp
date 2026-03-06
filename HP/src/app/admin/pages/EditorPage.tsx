@@ -32,6 +32,7 @@ import {
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
 import { loadStoreSettings, saveAllSettings } from '../../../lib/settingsService';
+import { mergeTextSettingsWithDefaults } from '../../../lib/textSettingsUtils';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
 import AddSectionModal from '../components/editor/AddSectionModal';
@@ -150,18 +151,10 @@ export default function EditorPage() {
         setFuture(prev => [JSON.parse(JSON.stringify(currentState)), ...prev]);
         setPast(newPast);
 
-        // Restore state
+        // Restore state (central persistence effect handles localStorage + Supabase save)
         setBackgroundSettings(previousState.backgroundSettings);
         setLayoutSettings(previousState.layoutSettings);
         setTextSettings(previousState.textSettings);
-
-        // Persist to localStorage
-        const keys = getStorageKeys(selectedStore);
-        localStorage.setItem(keys.backgroundSettings, JSON.stringify(previousState.backgroundSettings));
-        localStorage.setItem(keys.layoutSettings, JSON.stringify(previousState.layoutSettings));
-        localStorage.setItem(keys.textSettings, JSON.stringify(previousState.textSettings));
-        window.dispatchEvent(new Event('storage'));
-        updateLastSaved();
     };
 
     const redo = () => {
@@ -179,18 +172,10 @@ export default function EditorPage() {
         setPast(prev => [...prev, JSON.parse(JSON.stringify(currentState))]);
         setFuture(newFuture);
 
-        // Restore state
+        // Restore state (central persistence effect handles localStorage + Supabase save)
         setBackgroundSettings(nextState.backgroundSettings);
         setLayoutSettings(nextState.layoutSettings);
         setTextSettings(nextState.textSettings);
-
-        // Persist to localStorage
-        const redoKeys = getStorageKeys(selectedStore);
-        localStorage.setItem(redoKeys.backgroundSettings, JSON.stringify(nextState.backgroundSettings));
-        localStorage.setItem(redoKeys.layoutSettings, JSON.stringify(nextState.layoutSettings));
-        localStorage.setItem(redoKeys.textSettings, JSON.stringify(nextState.textSettings));
-        window.dispatchEvent(new Event('storage'));
-        updateLastSaved();
     };
 
     // Default background/layout settings for resetting
@@ -214,12 +199,18 @@ export default function EditorPage() {
     };
 
     const handleStoreSwitch = async (newStoreId: StoreId) => {
-        // Save current store data to localStorage + Supabase
+        // Flush any pending debounced save before switching
+        if (supabaseSaveTimerRef.current) {
+            clearTimeout(supabaseSaveTimerRef.current);
+            supabaseSaveTimerRef.current = undefined;
+        }
+
+        // Save current store data to localStorage + Supabase (awaited to prevent data loss)
         const currentKeys = getStorageKeys(selectedStore);
         localStorage.setItem(currentKeys.backgroundSettings, JSON.stringify(backgroundSettings));
         localStorage.setItem(currentKeys.layoutSettings, JSON.stringify(layoutSettings));
         localStorage.setItem(currentKeys.textSettings, JSON.stringify(textSettings));
-        saveAllSettings(selectedStore, backgroundSettings, layoutSettings, textSettings);
+        await saveAllSettings(selectedStore, backgroundSettings, layoutSettings, textSettings);
 
         // Switch store
         setSelectedStore(newStoreId);
@@ -317,6 +308,7 @@ export default function EditorPage() {
 
     const handleDeleteBackground = () => {
         if (backgroundEditSection) {
+            pushToHistory();
             setBackgroundSettings(prev => {
                 const newSettings = { ...prev };
                 delete newSettings[backgroundEditSection];
@@ -468,50 +460,14 @@ export default function EditorPage() {
         // This is a mock interaction since the UI is static
     };
 
-    const handlePublish = () => {
+    const handlePublish = async () => {
         handleSaveBackground();
-        alert('公開しました！');
+        const success = await saveAllSettings(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
+        alert(success ? '公開しました！' : '公開に失敗しました。再度お試しください。');
     };
 
-    // Merge saved text with defaults (reusable for init and store switch)
-    const mergeTextWithDefaults = (parsed: Record<string, any>, storeDefaults: Record<string, Record<string, string>>) => {
-        // Proactive correction for "reversed text" issue
-        if (parsed && typeof parsed === 'object') {
-            Object.keys(parsed).forEach(sectionId => {
-                const section = parsed[sectionId];
-                if (section && typeof section === 'object') {
-                    Object.keys(section).forEach(field => {
-                        const val = section[field];
-                        if (typeof val === 'string' && (val.toLowerCase().includes('ihsus enilni') || val.toLowerCase().includes('ih su s enilni'))) {
-                            parsed[sectionId][field] = storeDefaults?.[sectionId]?.[field] || val;
-                        }
-                    });
-                }
-            });
-        }
-        const mergedText = { ...storeDefaults };
-        if (parsed && typeof parsed === 'object') {
-            Object.keys(parsed).forEach(sectionId => {
-                const savedSection = parsed[sectionId];
-                const defaultSection = storeDefaults[sectionId] || {};
-                const isDynamicKey = (k: string) =>
-                    (k.startsWith('image_') ||
-                        ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
-                    !k.includes('_content');
-                const hasSavedDynamic = Object.keys(savedSection).some(isDynamicKey);
-                if (hasSavedDynamic) {
-                    const sectionWithStaticDefaults: Record<string, string> = {};
-                    Object.keys(defaultSection).forEach(k => {
-                        if (!isDynamicKey(k)) sectionWithStaticDefaults[k] = defaultSection[k];
-                    });
-                    mergedText[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
-                } else {
-                    mergedText[sectionId] = { ...defaultSection, ...savedSection };
-                }
-            });
-        }
-        return mergedText;
-    };
+    // Use shared utility for text merge (see textSettingsUtils.ts)
+    const mergeTextWithDefaults = mergeTextSettingsWithDefaults;
 
     // Initialize from Supabase (fallback to localStorage) on mount
     const [isInitialized, setIsInitialized] = useState(false);
@@ -542,6 +498,15 @@ export default function EditorPage() {
 
     // Central persistence effect - uses ref to avoid stale store on rapid switching
     const supabaseSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const [supabaseSaveError, setSupabaseSaveError] = useState(false);
+    // Keep latest state in refs for unmount flush
+    const latestBgRef = useRef(backgroundSettings);
+    const latestLayoutRef = useRef(layoutSettings);
+    const latestTextRef = useRef(textSettings);
+    latestBgRef.current = backgroundSettings;
+    latestLayoutRef.current = layoutSettings;
+    latestTextRef.current = textSettings;
+
     useEffect(() => {
         if (!isInitialized) return;
         // Immediate localStorage write (local cache + preview sync)
@@ -553,12 +518,24 @@ export default function EditorPage() {
 
         // Debounced Supabase save (2 seconds)
         if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current);
-        supabaseSaveTimerRef.current = setTimeout(() => {
-            saveAllSettings(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
+        supabaseSaveTimerRef.current = setTimeout(async () => {
+            const success = await saveAllSettings(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
+            setSupabaseSaveError(!success);
+            if (success) updateLastSaved();
         }, 2000);
 
         return () => { if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current); };
     }, [backgroundSettings, layoutSettings, textSettings, isInitialized]);
+
+    // Flush pending save on unmount to prevent data loss
+    useEffect(() => {
+        return () => {
+            if (supabaseSaveTimerRef.current) {
+                clearTimeout(supabaseSaveTimerRef.current);
+                saveAllSettings(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
+            }
+        };
+    }, []);
 
     const handleLayoutChange = (sectionId: string, config: Partial<LayoutConfig>) => {
         pushToHistory();
@@ -834,7 +811,7 @@ export default function EditorPage() {
                                         className="aspect-video rounded border border-dashed border-gray-700 flex flex-col items-center justify-center gap-1 hover:border-gray-500 bg-white/5 group"
                                     >
                                         <Plus size={14} className="text-gray-500 group-hover:text-gray-300" />
-                                        <span className="10px] text-gray-500">その他</span>
+                                        <span className="text-[10px] text-gray-500">その他</span>
                                     </button>
                                 </div>
 
@@ -1001,19 +978,34 @@ export default function EditorPage() {
 
                         <button
                             onClick={async () => {
-                                const btnKeys = getStorageKeys(selectedStore);
+                                // Flush pending debounce
+                                if (supabaseSaveTimerRef.current) {
+                                    clearTimeout(supabaseSaveTimerRef.current);
+                                    supabaseSaveTimerRef.current = undefined;
+                                }
+                                const storeId = selectedStoreRef.current;
+                                const btnKeys = getStorageKeys(storeId);
                                 localStorage.setItem(btnKeys.backgroundSettings, JSON.stringify(backgroundSettings));
                                 localStorage.setItem(btnKeys.layoutSettings, JSON.stringify(layoutSettings));
                                 localStorage.setItem(btnKeys.textSettings, JSON.stringify(textSettings));
                                 window.dispatchEvent(new Event('storage'));
-                                const success = await saveAllSettings(selectedStore, backgroundSettings, layoutSettings, textSettings);
-                                updateLastSaved();
+                                const success = await saveAllSettings(storeId, backgroundSettings, layoutSettings, textSettings);
+                                if (success) {
+                                    setSupabaseSaveError(false);
+                                    updateLastSaved();
+                                }
                                 alert(success ? '保存しました!' : '保存に失敗しました。再度お試しください。');
                             }}
                             className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
                         >
                             保存
                         </button>
+
+                        {supabaseSaveError && (
+                            <span className="text-[10px] text-red-500 font-bold animate-pulse" title="Supabase保存に失敗しています">
+                                保存エラー
+                            </span>
+                        )}
 
                         <button
                             onClick={() => {

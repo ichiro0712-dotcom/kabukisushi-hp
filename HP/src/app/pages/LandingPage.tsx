@@ -4,6 +4,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
+import { mergeTextSettingsWithDefaults, migrateBackgroundSettings } from '../../lib/textSettingsUtils';
 
 interface LandingPageProps {
     storeId?: StoreId;
@@ -819,61 +820,30 @@ export function LandingPage({
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
     const [localLayoutSettings, setLocalLayoutSettings] = useState<Record<string, LayoutConfig> | undefined>(undefined);
     const [localTextSettings, setLocalTextSettings] = useState<Record<string, Record<string, string>> | undefined>(undefined);
+    const [isSettingsLoaded, setIsSettingsLoaded] = useState(isEditing); // Skip loading state in edit mode
 
     // Use props if available (editing mode), otherwise use local state (public mode)
-    // Merge with defaults to ensure new defaults (like images) are used if not explicitly overridden in local state
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
     const layoutSettings = propLayoutSettings || (localLayoutSettings ? { ...DEFAULT_LAYOUT_SETTINGS, ...localLayoutSettings } : DEFAULT_LAYOUT_SETTINGS);
     const textSettings = propTextSettings || (() => {
-        const base = { ...getDefaultTextSettings(storeId) };
-        if (localTextSettings) {
-            Object.keys(localTextSettings).forEach(sectionId => {
-                const savedSection = localTextSettings[sectionId];
-                const defaultSection = base[sectionId] || {};
-
-                const hasSavedDynamic = Object.keys(savedSection).some(k =>
-                    (k.startsWith('image_') ||
-                        ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
-                    !k.includes('_content')
-                );
-
-                if (hasSavedDynamic) {
-                    const sectionWithStaticDefaults = { ...defaultSection };
-                    Object.keys(sectionWithStaticDefaults).forEach(k => {
-                        if ((k.startsWith('image_') ||
-                            ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
-                            !k.includes('_content')) {
-                            delete sectionWithStaticDefaults[k];
-                        }
-                    });
-                    base[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
-                } else {
-                    base[sectionId] = { ...defaultSection, ...savedSection };
-                }
-            });
-        }
-        return base;
+        const defaults = getDefaultTextSettings(storeId);
+        return localTextSettings ? mergeTextSettingsWithDefaults(localTextSettings, defaults) : defaults;
     })();
 
     // Load settings from Supabase (fallback to localStorage) if on public page
     useEffect(() => {
         if (!isEditing) {
+            let cancelled = false;
             async function loadSettings() {
-                // Try Supabase first
                 const supabaseData = await loadStoreSettings(storeId);
+                if (cancelled) return;
                 const hasSupabaseData = supabaseData.backgroundSettings || supabaseData.layoutSettings || supabaseData.textSettings;
 
                 if (hasSupabaseData) {
-                    if (supabaseData.backgroundSettings) {
-                        const parsed = { ...supabaseData.backgroundSettings };
-                        // Migration: Remove old Unsplash default URLs
-                        const oldUnsplashUrl = 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80';
-                        if (parsed.affiliated && parsed.affiliated.value === oldUnsplashUrl) delete parsed.affiliated;
-                        if (parsed.home && (parsed.home.value === '/assets/home_hero.webp' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) delete parsed.home;
-                        setLocalBackgroundSettings(parsed);
-                    }
+                    if (supabaseData.backgroundSettings) setLocalBackgroundSettings(migrateBackgroundSettings(supabaseData.backgroundSettings));
                     if (supabaseData.layoutSettings) setLocalLayoutSettings(supabaseData.layoutSettings);
                     if (supabaseData.textSettings) setLocalTextSettings(supabaseData.textSettings);
+                    setIsSettingsLoaded(true);
                     return;
                 }
 
@@ -884,13 +854,7 @@ export function LandingPage({
                 const savedText = localStorage.getItem(keys.textSettings);
 
                 if (savedBackgrounds) {
-                    try {
-                        const parsed = JSON.parse(savedBackgrounds);
-                        const oldUnsplashUrl = 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80';
-                        if (parsed.affiliated && parsed.affiliated.value === oldUnsplashUrl) delete parsed.affiliated;
-                        if (parsed.home && (parsed.home.value === '/assets/home_hero.webp' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) delete parsed.home;
-                        setLocalBackgroundSettings(parsed);
-                    } catch (e) { console.error('Failed to parse saved background settings', e); }
+                    try { setLocalBackgroundSettings(migrateBackgroundSettings(JSON.parse(savedBackgrounds))); } catch (e) { console.error('Failed to parse saved background settings', e); }
                 }
                 if (savedLayouts) {
                     try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { console.error('Failed to parse saved layout settings', e); }
@@ -898,10 +862,12 @@ export function LandingPage({
                 if (savedText) {
                     try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { console.error('Failed to parse saved text settings', e); }
                 }
+                setIsSettingsLoaded(true);
             }
             loadSettings();
+            return () => { cancelled = true; };
         }
-    }, [isEditing]);
+    }, [isEditing, storeId]);
 
 
 
@@ -1027,6 +993,11 @@ export function LandingPage({
             setIsMobileMenuOpen(false);
         }
     };
+
+    // Prevent FOUC: don't render until settings are loaded from Supabase
+    if (!isSettingsLoaded) {
+        return <div className="min-h-screen bg-[#1C1C1C]" />;
+    }
 
     return (
         <div className="min-h-screen bg-[#1C1C1C] relative">
