@@ -3,6 +3,7 @@ import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, C
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
+import { loadStoreSettings } from '../../lib/settingsService';
 
 interface LandingPageProps {
     storeId?: StoreId;
@@ -854,46 +855,51 @@ export function LandingPage({
         return base;
     })();
 
-    // Load settings from localStorage if on public page
+    // Load settings from Supabase (fallback to localStorage) if on public page
     useEffect(() => {
         if (!isEditing) {
-            const keys = getStorageKeys(storeId);
-            const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
-            const savedLayouts = localStorage.getItem(keys.layoutSettings);
-            const savedText = localStorage.getItem(keys.textSettings);
+            async function loadSettings() {
+                // Try Supabase first
+                const supabaseData = await loadStoreSettings(storeId);
+                const hasSupabaseData = supabaseData.backgroundSettings || supabaseData.layoutSettings || supabaseData.textSettings;
 
-            if (savedBackgrounds) {
-                try {
-                    const parsed = JSON.parse(savedBackgrounds);
-                    // Migration: Remove old Unsplash default URLs so they fall back to the new hardcoded defaults
-                    const oldUnsplashUrl = 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80';
-                    if (parsed.affiliated && parsed.affiliated.value === oldUnsplashUrl) {
-                        delete parsed.affiliated;
+                if (hasSupabaseData) {
+                    if (supabaseData.backgroundSettings) {
+                        const parsed = { ...supabaseData.backgroundSettings };
+                        // Migration: Remove old Unsplash default URLs
+                        const oldUnsplashUrl = 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80';
+                        if (parsed.affiliated && parsed.affiliated.value === oldUnsplashUrl) delete parsed.affiliated;
+                        if (parsed.home && (parsed.home.value === '/assets/home_hero.webp' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) delete parsed.home;
+                        setLocalBackgroundSettings(parsed);
                     }
-                    if (parsed.home && (parsed.home.value === '/assets/home_hero.webp' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) {
-                        delete parsed.home;
-                    }
-                    setLocalBackgroundSettings(parsed);
-                } catch (e) {
-                    console.error('Failed to parse saved background settings', e);
+                    if (supabaseData.layoutSettings) setLocalLayoutSettings(supabaseData.layoutSettings);
+                    if (supabaseData.textSettings) setLocalTextSettings(supabaseData.textSettings);
+                    return;
                 }
-            }
 
-            if (savedLayouts) {
-                try {
-                    setLocalLayoutSettings(JSON.parse(savedLayouts));
-                } catch (e) {
-                    console.error('Failed to parse saved layout settings', e);
-                }
-            }
+                // Fallback to localStorage
+                const keys = getStorageKeys(storeId);
+                const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
+                const savedLayouts = localStorage.getItem(keys.layoutSettings);
+                const savedText = localStorage.getItem(keys.textSettings);
 
-            if (savedText) {
-                try {
-                    setLocalTextSettings(JSON.parse(savedText));
-                } catch (e) {
-                    console.error('Failed to parse saved text settings', e);
+                if (savedBackgrounds) {
+                    try {
+                        const parsed = JSON.parse(savedBackgrounds);
+                        const oldUnsplashUrl = 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1920&auto=format&q=80';
+                        if (parsed.affiliated && parsed.affiliated.value === oldUnsplashUrl) delete parsed.affiliated;
+                        if (parsed.home && (parsed.home.value === '/assets/home_hero.webp' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) delete parsed.home;
+                        setLocalBackgroundSettings(parsed);
+                    } catch (e) { console.error('Failed to parse saved background settings', e); }
+                }
+                if (savedLayouts) {
+                    try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { console.error('Failed to parse saved layout settings', e); }
+                }
+                if (savedText) {
+                    try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { console.error('Failed to parse saved text settings', e); }
                 }
             }
+            loadSettings();
         }
     }, [isEditing]);
 

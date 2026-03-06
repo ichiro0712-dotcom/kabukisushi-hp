@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
+import { loadStoreSettings, saveAllSettings } from '../../../lib/settingsService';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
 import AddSectionModal from '../components/editor/AddSectionModal';
@@ -212,28 +213,33 @@ export default function EditorPage() {
         footer: { width: 'wide', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true }
     };
 
-    const handleStoreSwitch = (newStoreId: StoreId) => {
-        // Save current store data
+    const handleStoreSwitch = async (newStoreId: StoreId) => {
+        // Save current store data to localStorage + Supabase
         const currentKeys = getStorageKeys(selectedStore);
         localStorage.setItem(currentKeys.backgroundSettings, JSON.stringify(backgroundSettings));
         localStorage.setItem(currentKeys.layoutSettings, JSON.stringify(layoutSettings));
         localStorage.setItem(currentKeys.textSettings, JSON.stringify(textSettings));
+        saveAllSettings(selectedStore, backgroundSettings, layoutSettings, textSettings);
 
         // Switch store
         setSelectedStore(newStoreId);
         selectedStoreRef.current = newStoreId;
 
-        // Load new store data
-        const newKeys = getStorageKeys(newStoreId);
+        // Load new store data from Supabase (fallback to localStorage)
         const newDefaults = getDefaultTextSettings(newStoreId);
+        const supabaseData = await loadStoreSettings(newStoreId);
 
-        const savedBg = localStorage.getItem(newKeys.backgroundSettings);
-        const savedLayout = localStorage.getItem(newKeys.layoutSettings);
-        const savedText = localStorage.getItem(newKeys.textSettings);
+        const newKeys = getStorageKeys(newStoreId);
+        const savedBg = supabaseData.backgroundSettings
+            || (() => { try { const v = localStorage.getItem(newKeys.backgroundSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+        const savedLayout = supabaseData.layoutSettings
+            || (() => { try { const v = localStorage.getItem(newKeys.layoutSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+        const savedText = supabaseData.textSettings
+            || (() => { try { const v = localStorage.getItem(newKeys.textSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
 
-        setBackgroundSettings(savedBg ? JSON.parse(savedBg) : { ...DEFAULT_BG });
-        setLayoutSettings(savedLayout ? JSON.parse(savedLayout) : { ...DEFAULT_LAYOUT });
-        setTextSettings(savedText ? JSON.parse(savedText) : newDefaults);
+        setBackgroundSettings(savedBg || { ...DEFAULT_BG });
+        setLayoutSettings(savedLayout || { ...DEFAULT_LAYOUT });
+        setTextSettings(savedText ? mergeTextWithDefaults(savedText, newDefaults) : newDefaults);
 
         // Clear undo/redo history
         setPast([]);
@@ -467,84 +473,91 @@ export default function EditorPage() {
         alert('公開しました！');
     };
 
-    // Initialize from localStorage on mount
+    // Merge saved text with defaults (reusable for init and store switch)
+    const mergeTextWithDefaults = (parsed: Record<string, any>, storeDefaults: Record<string, Record<string, string>>) => {
+        // Proactive correction for "reversed text" issue
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(sectionId => {
+                const section = parsed[sectionId];
+                if (section && typeof section === 'object') {
+                    Object.keys(section).forEach(field => {
+                        const val = section[field];
+                        if (typeof val === 'string' && (val.toLowerCase().includes('ihsus enilni') || val.toLowerCase().includes('ih su s enilni'))) {
+                            parsed[sectionId][field] = storeDefaults?.[sectionId]?.[field] || val;
+                        }
+                    });
+                }
+            });
+        }
+        const mergedText = { ...storeDefaults };
+        if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(sectionId => {
+                const savedSection = parsed[sectionId];
+                const defaultSection = storeDefaults[sectionId] || {};
+                const isDynamicKey = (k: string) =>
+                    (k.startsWith('image_') ||
+                        ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
+                    !k.includes('_content');
+                const hasSavedDynamic = Object.keys(savedSection).some(isDynamicKey);
+                if (hasSavedDynamic) {
+                    const sectionWithStaticDefaults: Record<string, string> = {};
+                    Object.keys(defaultSection).forEach(k => {
+                        if (!isDynamicKey(k)) sectionWithStaticDefaults[k] = defaultSection[k];
+                    });
+                    mergedText[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
+                } else {
+                    mergedText[sectionId] = { ...defaultSection, ...savedSection };
+                }
+            });
+        }
+        return mergedText;
+    };
+
+    // Initialize from Supabase (fallback to localStorage) on mount
     const [isInitialized, setIsInitialized] = useState(false);
     useEffect(() => {
-        const initKeys = getStorageKeys(selectedStore);
-        const savedBackgrounds = localStorage.getItem(initKeys.backgroundSettings);
-        const savedLayouts = localStorage.getItem(initKeys.layoutSettings);
-        const savedText = localStorage.getItem(initKeys.textSettings);
+        async function initSettings() {
+            const storeDefaults = getDefaultTextSettings(selectedStore);
 
-        if (savedBackgrounds) {
-            try { setBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { console.error(e); }
+            // Try Supabase first
+            const supabaseData = await loadStoreSettings(selectedStore);
+
+            // Fall back to localStorage if Supabase has no data
+            const initKeys = getStorageKeys(selectedStore);
+            const savedBg = supabaseData.backgroundSettings
+                || (() => { try { const v = localStorage.getItem(initKeys.backgroundSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+            const savedLayout = supabaseData.layoutSettings
+                || (() => { try { const v = localStorage.getItem(initKeys.layoutSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+            const savedText = supabaseData.textSettings
+                || (() => { try { const v = localStorage.getItem(initKeys.textSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+
+            if (savedBg) setBackgroundSettings(savedBg);
+            if (savedLayout) setLayoutSettings(savedLayout);
+            if (savedText) setTextSettings(mergeTextWithDefaults(savedText, storeDefaults));
+
+            setIsInitialized(true);
         }
-        if (savedLayouts) {
-            try { setLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { console.error(e); }
-        }
-        if (savedText) {
-            try {
-                let parsed = JSON.parse(savedText);
-                // Proactive correction for "reversed text" issue
-                const storeDefaults = getDefaultTextSettings(selectedStore);
-                if (parsed && typeof parsed === 'object') {
-                    Object.keys(parsed).forEach(sectionId => {
-                        const section = parsed[sectionId];
-                        if (section && typeof section === 'object') {
-                            Object.keys(section).forEach(field => {
-                                const val = section[field];
-                                if (typeof val === 'string' && (val.toLowerCase().includes('ihsus enilni') || val.toLowerCase().includes('ih su s enilni'))) {
-                                    parsed[sectionId][field] = storeDefaults?.[sectionId]?.[field] || val;
-                                }
-                            });
-                        }
-                    });
-                }
-                const mergedText = { ...storeDefaults };
-                if (parsed && typeof parsed === 'object') {
-                    Object.keys(parsed).forEach(sectionId => {
-                        const savedSection = parsed[sectionId];
-                        const defaultSection = storeDefaults[sectionId] || {};
-
-                        // Logic: If the saved section has ANY dynamic items (keys starting with image_ or category_),
-                        // we treat the saved dynamic items as the source of truth for that section.
-                        const isDynamicKey = (k: string) =>
-                            (k.startsWith('image_') ||
-                                ['nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'].some(p => k.startsWith(p))) &&
-                            !k.includes('_content'); // _content fields are not considered dynamic items for this check
-
-                        const hasSavedDynamic = Object.keys(savedSection).some(isDynamicKey);
-
-                        if (hasSavedDynamic) {
-                            // Start with default static fields
-                            const sectionWithStaticDefaults: Record<string, string> = {};
-                            Object.keys(defaultSection).forEach(k => {
-                                if (!isDynamicKey(k)) { // Copy non-dynamic fields from default
-                                    sectionWithStaticDefaults[k] = defaultSection[k];
-                                }
-                            });
-
-                            // Merge with saved section, allowing saved dynamic items and _content fields to override
-                            mergedText[sectionId] = { ...sectionWithStaticDefaults, ...savedSection };
-                        } else {
-                            // No dynamic items in saved section, merge default and saved
-                            mergedText[sectionId] = { ...defaultSection, ...savedSection };
-                        }
-                    });
-                }
-                setTextSettings(mergedText);
-            } catch (e) { console.error(e); }
-        }
-        setIsInitialized(true);
+        initSettings();
     }, []);
 
     // Central persistence effect - uses ref to avoid stale store on rapid switching
+    const supabaseSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
     useEffect(() => {
         if (!isInitialized) return;
+        // Immediate localStorage write (local cache + preview sync)
         const persistKeys = getStorageKeys(selectedStoreRef.current);
         localStorage.setItem(persistKeys.backgroundSettings, JSON.stringify(backgroundSettings));
         localStorage.setItem(persistKeys.layoutSettings, JSON.stringify(layoutSettings));
         localStorage.setItem(persistKeys.textSettings, JSON.stringify(textSettings));
         window.dispatchEvent(new Event('storage'));
+
+        // Debounced Supabase save (2 seconds)
+        if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current);
+        supabaseSaveTimerRef.current = setTimeout(() => {
+            saveAllSettings(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
+        }, 2000);
+
+        return () => { if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current); };
     }, [backgroundSettings, layoutSettings, textSettings, isInitialized]);
 
     const handleLayoutChange = (sectionId: string, config: Partial<LayoutConfig>) => {
@@ -987,14 +1000,15 @@ export default function EditorPage() {
                         </div>
 
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 const btnKeys = getStorageKeys(selectedStore);
                                 localStorage.setItem(btnKeys.backgroundSettings, JSON.stringify(backgroundSettings));
                                 localStorage.setItem(btnKeys.layoutSettings, JSON.stringify(layoutSettings));
                                 localStorage.setItem(btnKeys.textSettings, JSON.stringify(textSettings));
                                 window.dispatchEvent(new Event('storage'));
+                                const success = await saveAllSettings(selectedStore, backgroundSettings, layoutSettings, textSettings);
                                 updateLastSaved();
-                                alert('保存しました!');
+                                alert(success ? '保存しました!' : '保存に失敗しました。再度お試しください。');
                             }}
                             className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
                         >
@@ -1080,6 +1094,8 @@ export default function EditorPage() {
                 onClose={() => setShowAssetLibrary(false)}
                 onSelect={handleImageSelect}
                 mediaType={activeBackgroundTab === 'video' ? 'video' : 'image'}
+                storeId={selectedStore}
+                category={editingMenuImage?.category || backgroundEditSection || 'general'}
             />
             {/* Image Editor Modal */}
             <ImageEditorModal

@@ -1,16 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { X, CloudUpload, Folder, Archive, Check, Trash2, Search, ChevronRight, Video, Plus } from 'lucide-react';
+import { X, CloudUpload, Folder, Archive, Check, Trash2, Search, ChevronRight, Video, Plus, Loader2 } from 'lucide-react';
+import { uploadImage } from '../../../../lib/storageService';
 
 interface ImageAssetLibraryProps {
     isOpen: boolean;
     onClose: () => void;
     onSelect: (url: string) => void;
     mediaType?: 'image' | 'video';
+    storeId?: string;
+    category?: string;
 }
 
 type TabType = 'upload' | 'uploaded' | 'library';
 
-export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType = 'image' }: ImageAssetLibraryProps) {
+export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType = 'image', storeId = 'general', category = 'uploads' }: ImageAssetLibraryProps) {
     const [activeTab, setActiveTab] = useState<TabType>('upload');
     const [searchQuery, setSearchQuery] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +42,8 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         "https://uploads.strikinglycdn.com/static/backgrounds/abstract/t66.jpg",
     ];
 
+    const [isUploading, setIsUploading] = useState(false);
+
     const fileToDataUrl = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -48,12 +53,26 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         });
     };
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
+    const handleUploadFile = async (file: File) => {
+        setIsUploading(true);
+        try {
+            // Try Supabase Storage first
+            const publicUrl = await uploadImage(file, storeId, category);
+            if (publicUrl) {
+                onSelect(publicUrl);
+                return;
+            }
+            // Fallback to base64 Data URL
             const dataUrl = await fileToDataUrl(file);
             onSelect(dataUrl);
+        } finally {
+            setIsUploading(false);
         }
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) await handleUploadFile(file);
     };
 
     const handleBrowseClick = () => {
@@ -69,10 +88,7 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         e.preventDefault();
         e.stopPropagation();
         const file = e.dataTransfer.files?.[0];
-        if (file) {
-            const dataUrl = await fileToDataUrl(file);
-            onSelect(dataUrl);
-        }
+        if (file) await handleUploadFile(file);
     };
 
     return (
@@ -120,14 +136,23 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
                                 onDragOver={handleDragOver}
                                 onDrop={handleDrop}
                             >
-                                <div className="text-xl font-bold text-gray-800 mb-2">ファイルをここへドラッグしてください</div>
-                                <div className="text-gray-400 mb-8 font-medium">もしくは</div>
-                                <button
-                                    onClick={handleBrowseClick}
-                                    className="px-10 py-3 bg-[#88c057] hover:bg-[#7ab04a] text-white rounded-md font-bold text-sm shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 mb-8"
-                                >
-                                    参照
-                                </button>
+                                {isUploading ? (
+                                    <>
+                                        <Loader2 size={40} className="text-blue-500 animate-spin mb-4" />
+                                        <div className="text-xl font-bold text-gray-800 mb-2">アップロード中...</div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="text-xl font-bold text-gray-800 mb-2">ファイルをここへドラッグしてください</div>
+                                        <div className="text-gray-400 mb-8 font-medium">もしくは</div>
+                                        <button
+                                            onClick={handleBrowseClick}
+                                            className="px-10 py-3 bg-[#88c057] hover:bg-[#7ab04a] text-white rounded-md font-bold text-sm shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 mb-8"
+                                        >
+                                            参照
+                                        </button>
+                                    </>
+                                )}
                                 <input
                                     type="file"
                                     ref={fileInputRef}

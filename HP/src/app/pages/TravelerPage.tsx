@@ -4,6 +4,7 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { InlineEditableText, MenuItemControls, SectionToolbar, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
+import { loadStoreSettings } from '../../lib/settingsService';
 
 interface TravelerPageProps {
     storeId?: StoreId;
@@ -96,13 +97,25 @@ export function TravelerPage({
 
     useEffect(() => {
         if (!isEditing) {
-            const keys = getStorageKeys(storeId);
-            const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
-            const savedLayouts = localStorage.getItem(keys.layoutSettings);
-            const savedText = localStorage.getItem(keys.textSettings);
-            if (savedBackgrounds) try { setLocalBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { }
-            if (savedLayouts) try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { }
-            if (savedText) try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { }
+            async function loadSettings() {
+                const supabaseData = await loadStoreSettings(storeId);
+                const hasSupabaseData = supabaseData.backgroundSettings || supabaseData.layoutSettings || supabaseData.textSettings;
+                if (hasSupabaseData) {
+                    if (supabaseData.backgroundSettings) setLocalBackgroundSettings(supabaseData.backgroundSettings);
+                    if (supabaseData.layoutSettings) setLocalLayoutSettings(supabaseData.layoutSettings);
+                    if (supabaseData.textSettings) setLocalTextSettings(supabaseData.textSettings);
+                    return;
+                }
+                // Fallback to localStorage
+                const keys = getStorageKeys(storeId);
+                const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
+                const savedLayouts = localStorage.getItem(keys.layoutSettings);
+                const savedText = localStorage.getItem(keys.textSettings);
+                if (savedBackgrounds) try { setLocalBackgroundSettings(JSON.parse(savedBackgrounds)); } catch (e) { }
+                if (savedLayouts) try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { }
+                if (savedText) try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { }
+            }
+            loadSettings();
         }
     }, [isEditing]);
 
