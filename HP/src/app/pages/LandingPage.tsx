@@ -148,6 +148,7 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         store1_phone: 'TEL：03-6457-6612',
         store1_hours: 'OPEN：18:00-4:00',
         store1_note: 'グルテンフリー対応可',
+        store1_url: 'https://kabuki-sushi.co.jp/',
         store2_name: 'KABUKI SOBA',
         store2_address: '〒160-0021 東京都新宿区歌舞伎町２丁目２７ １２Lee２ビル １F',
         store2_phone: 'TEL：03-6457-3112',
@@ -2234,7 +2235,19 @@ export function LandingPage({
                                         isEditing={isEditing}
                                     />
                                 </div>
-                                <a href="https://kabuki-sushi.co.jp/" target="_blank" rel="noopener noreferrer" className="text-[#deb55a] hover:underline block mt-2">https://kabuki-sushi.co.jp/</a>
+                                <div className="text-[#deb55a] block mt-2">
+                                    {isEditing ? (
+                                        <InlineEditableText
+                                            value={textSettings.affiliated?.store1_url || 'https://kabuki-sushi.co.jp/'}
+                                            onChange={(val) => onTextChange?.('affiliated', 'store1_url', val)}
+                                            isEditing={isEditing}
+                                        />
+                                    ) : (
+                                        <a href={textSettings.affiliated?.store1_url || 'https://kabuki-sushi.co.jp/'} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                            {textSettings.affiliated?.store1_url || 'https://kabuki-sushi.co.jp/'}
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
