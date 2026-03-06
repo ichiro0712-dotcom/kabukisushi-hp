@@ -88,12 +88,12 @@ export default function EditorPage() {
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
-        home: { type: 'image', value: '/assets/home_hero_new.jpg' },
+        home: { type: 'image', value: '/assets/home_hero_new.webp' },
         about: { type: 'color', value: '#ffffff', textTheme: 'dark' },
         gallery: { type: 'color', value: '#E8EAEC' },
         access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
         menu: { type: 'color', value: '#f5f5f5' },
-        affiliated: { type: 'image', value: '/assets/honten_hero.jpg' },
+        affiliated: { type: 'image', value: '/assets/honten_hero.webp' },
         footer: { type: 'color', value: '#1C1C1C' }
     });
 
@@ -194,12 +194,12 @@ export default function EditorPage() {
 
     // Default background/layout settings for resetting
     const DEFAULT_BG: Record<string, BackgroundConfig> = {
-        home: { type: 'image', value: '/assets/home_hero_new.jpg' },
+        home: { type: 'image', value: '/assets/home_hero_new.webp' },
         about: { type: 'color', value: '#ffffff', textTheme: 'dark' },
         gallery: { type: 'color', value: '#E8EAEC' },
         access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
         menu: { type: 'color', value: '#f5f5f5' },
-        affiliated: { type: 'image', value: '/assets/honten_hero.jpg' },
+        affiliated: { type: 'image', value: '/assets/honten_hero.webp' },
         footer: { type: 'color', value: '#1C1C1C' }
     };
     const DEFAULT_LAYOUT: Record<string, LayoutConfig> = {

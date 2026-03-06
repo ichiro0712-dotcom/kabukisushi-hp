@@ -39,13 +39,20 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         "https://uploads.strikinglycdn.com/static/backgrounds/abstract/t66.jpg",
     ];
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileToDataUrl = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // In a real app, you would upload to a server. 
-            // Here we create a local object URL for preview.
-            const url = URL.createObjectURL(file);
-            onSelect(url);
+            const dataUrl = await fileToDataUrl(file);
+            onSelect(dataUrl);
         }
     };
 
@@ -58,13 +65,13 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         e.stopPropagation();
     };
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         const file = e.dataTransfer.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            onSelect(url);
+            const dataUrl = await fileToDataUrl(file);
+            onSelect(dataUrl);
         }
     };
 
@@ -126,7 +133,7 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
                                     ref={fileInputRef}
                                     onChange={handleFileChange}
                                     className="hidden"
-                                    accept={isVideo ? "video/mp4,video/webm,video/ogg" : "image/gif,image/jpeg,image/jpg,image/png,image/bmp,image/x-icon"}
+                                    accept={isVideo ? "video/mp4,video/webm,video/ogg" : "image/gif,image/jpeg,image/jpg,image/png,image/webp,image/bmp,image/x-icon"}
                                 />
 
                                 <div className="w-full max-w-md space-y-4">

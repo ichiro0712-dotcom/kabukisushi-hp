@@ -22,12 +22,12 @@ interface TravelerPageProps {
 }
 
 const DEFAULT_BACKGROUND_SETTINGS: Record<string, BackgroundConfig> = {
-    home: { type: 'image', value: '/assets/home_hero_new.jpg' },
+    home: { type: 'image', value: '/assets/home_hero_new.webp' },
     about: { type: 'color', value: '#ffffff', textTheme: 'dark' },
     gallery: { type: 'color', value: '#E8EAEC' },
     access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
     menu: { type: 'color', value: '#d4183d', textTheme: 'light' },
-    affiliated: { type: 'image', value: '/assets/honten_hero.jpg' },
+    affiliated: { type: 'image', value: '/assets/honten_hero.webp' },
     footer: { type: 'color', value: '#1C1C1C' }
 };
 
@@ -278,7 +278,7 @@ export function TravelerPage({
                     {/* Logo */}
                     <div className="mb-12 flex justify-center">
                         <ImageWithFallback
-                            src="/assets/logo.png"
+                            src="/assets/logo.webp"
                             alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || '本店'} ロゴ`}
                             className="w-auto h-28 md:h-36 object-contain"
                         />
@@ -354,7 +354,7 @@ export function TravelerPage({
                     <div className="flex flex-col items-center gap-12">
                         <div className="w-full max-w-4xl">
                             <ImageWithFallback
-                                src="/assets/about_content_new.jpg"
+                                src="/assets/about_content_new.webp"
                                 alt="Restaurant Interior"
                                 className="rounded-lg shadow-xl w-full h-auto"
                             />
@@ -381,16 +381,16 @@ export function TravelerPage({
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C] uppercase">GALLERY</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {[
-                            '/assets/gallery_2.jpg',
-                            '/assets/gallery_4.jpg',
-                            '/assets/gallery_3.jpg',
-                            '/assets/gallery_5.jpg',
-                            '/assets/gallery_1.jpg',
-                            '/assets/gallery_6.jpg',
-                            '/assets/gallery_7.jpg',
-                            '/assets/gallery_8.jpg',
-                            '/assets/gallery_9.jpg',
-                            '/assets/gallery_10.jpg',
+                            '/assets/gallery_2.webp',
+                            '/assets/gallery_4.webp',
+                            '/assets/gallery_3.webp',
+                            '/assets/gallery_5.webp',
+                            '/assets/gallery_1.webp',
+                            '/assets/gallery_6.webp',
+                            '/assets/gallery_7.webp',
+                            '/assets/gallery_8.webp',
+                            '/assets/gallery_9.webp',
+                            '/assets/gallery_10.webp',
                         ].map((src, i) => (
                             <div key={i} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow">
                                 <ImageWithFallback src={src} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
@@ -476,7 +476,7 @@ export function TravelerPage({
                                     const name_ko = section[`nigiri_${index}_name_ko`] || '';
                                     const name_zh = section[`nigiri_${index}_name_zh`] || '';
                                     const price = section[`nigiri_${index}_price`] || '0';
-                                    const image = section[`nigiri_${index}_image`] || '/assets/placeholder.jpg';
+                                    const image = section[`nigiri_${index}_image`] || '/assets/placeholder.webp';
                                     const isSoldOut = section[`nigiri_${index}_soldOut`] === 'true';
                                     const isHidden = section[`nigiri_${index}_hidden`] === 'true';
 
@@ -593,7 +593,7 @@ export function TravelerPage({
                                     const name_ko = section[`makimono_${index}_name_ko`] || '';
                                     const name_zh = section[`makimono_${index}_name_zh`] || '';
                                     const price = section[`makimono_${index}_price`] || '0';
-                                    const image = section[`makimono_${index}_image`] || '/assets/placeholder.jpg';
+                                    const image = section[`makimono_${index}_image`] || '/assets/placeholder.webp';
                                     const isSoldOut = section[`makimono_${index}_soldOut`] === 'true';
                                     const isHidden = section[`makimono_${index}_hidden`] === 'true';
 
@@ -701,7 +701,7 @@ export function TravelerPage({
                                     const name_ko = section[`ippin_${index}_name_ko`] || '';
                                     const name_zh = section[`ippin_${index}_name_zh`] || '';
                                     const price = section[`ippin_${index}_price`] || '0';
-                                    const image = section[`ippin_${index}_image`] || '/assets/placeholder.jpg';
+                                    const image = section[`ippin_${index}_image`] || '/assets/placeholder.webp';
                                     const note_en = section[`ippin_${index}_note_en`] || section[`ippin_${index}_note`] || '';
                                     const isSoldOut = section[`ippin_${index}_soldOut`] === 'true';
                                     const isHidden = section[`ippin_${index}_hidden`] === 'true';
@@ -841,7 +841,7 @@ export function TravelerPage({
                                         const name_ko = section[`nihonshu_${index}_name_ko`] || '';
                                         const name_zh = section[`nihonshu_${index}_name_zh`] || '';
                                         const price = section[`nihonshu_${index}_price`] || '0';
-                                        const image = section[`nihonshu_${index}_image`] || '/assets/placeholder.jpg';
+                                        const image = section[`nihonshu_${index}_image`] || '/assets/placeholder.webp';
                                         const isSoldOut = section[`nihonshu_${index}_soldOut`] === 'true';
                                         const isHidden = section[`nihonshu_${index}_hidden`] === 'true';
 
@@ -1014,7 +1014,7 @@ export function TravelerPage({
                             <a href={links.mapsUrl} target="_blank" className="inline-block px-8 py-3 bg-[#1C1C1C] text-white rounded hover:bg-[#deb55a] transition-colors font-bold uppercase tracking-wider">Open in Google Maps</a>
                         </div>
                         <div className="rounded-lg overflow-hidden shadow-2xl">
-                            <ImageWithFallback src="/assets/access_map.jpg" alt="Map" className="w-full h-auto" />
+                            <ImageWithFallback src="/assets/access_map.webp" alt="Map" className="w-full h-auto" />
                         </div>
                     </div>
                 </div>
@@ -1037,7 +1037,7 @@ export function TravelerPage({
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
-                            <ImageWithFallback src="/assets/honten_card_new.jpg" alt="KABUKI Sushi Main Store" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
+                            <ImageWithFallback src="/assets/honten_card_new.webp" alt="KABUKI Sushi Main Store" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
                             <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo">■KABUKI Sushi Main Store</h3>
                             <div className="space-y-2 text-gray-300 font-archivo">
                                 <p>Eco Place Shinjuku 1F, 2-25-8 Kabukicho, Shinjuku-ku, Tokyo</p>
@@ -1047,7 +1047,7 @@ export function TravelerPage({
                         </div>
 
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
-                            <ImageWithFallback src="/assets/soba_card_new.jpg" alt="KABUKI SOBA" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
+                            <ImageWithFallback src="/assets/soba_card_new.webp" alt="KABUKI SOBA" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
                             <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo">■KABUKI SOBA</h3>
                             <div className="space-y-2 text-gray-300 font-archivo">
                                 <p>Lee2 Bldg 1F, 2-27-12 Kabukicho, Shinjuku-ku, Tokyo</p>
@@ -1057,7 +1057,7 @@ export function TravelerPage({
                     </div>
 
                     <div className="mt-12 rounded-lg overflow-hidden shadow-2xl max-w-4xl mx-auto">
-                        <ImageWithFallback src="/assets/affiliated_map.jpg" alt="Stores Map" className="w-full h-auto" />
+                        <ImageWithFallback src="/assets/affiliated_map.webp" alt="Stores Map" className="w-full h-auto" />
                     </div>
                 </div>
             </section>

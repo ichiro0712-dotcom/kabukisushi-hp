@@ -25,12 +25,12 @@ interface LandingPageProps {
 
 
 const DEFAULT_BACKGROUND_SETTINGS: Record<string, BackgroundConfig> = {
-    home: { type: 'image', value: '/assets/home_hero_new.jpg' },
+    home: { type: 'image', value: '/assets/home_hero_new.webp' },
     about: { type: 'color', value: '#ffffff', textTheme: 'dark' },
     gallery: { type: 'color', value: '#E8EAEC' },
     access: { type: 'image', value: 'https://images.unsplash.com/photo-1512132411229-c30391241dd8?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&w=1080' },
     menu: { type: 'color', value: '#f5f5f5' },
-    affiliated: { type: 'image', value: '/assets/honten_hero.jpg' },
+    affiliated: { type: 'image', value: '/assets/honten_hero.webp' },
     footer: { type: 'color', value: '#1C1C1C' }
 };
 
@@ -51,23 +51,23 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
     },
     about: {
         title: 'ABOUT US',
-        content_image: '/assets/about_content_new.jpg',
+        content_image: '/assets/about_content_new.webp',
         content: 'KABUKI寿司の2号店となる 「KABUKI寿司 1番通り店」 をオープンいたしました。\n\n1番通り店では、これまでの伝統を受け継ぎながらも、さらなる進化を目指しています。\n\n店主を務めるのは、新進気鋭の若手寿司職人増田。\n\n繊細な技術と斬新なアイデアで、新しい「KABUKI寿司」の世界を皆さまにお届けいたします。\n\nお店の特徴の一つは、カウンター付きの個室です。職人の技を間近で堪能しながら、ゆったりとしたプライベート空間でお食事をお楽しみいただけます。特別な日のお祝いから接待まで、幅広いシーンでご利用いただけます。\n\n伝統と革新が融合したKABUKI寿司 1番通り店で、特別なひとときをお過ごしください。'
     },
     gallery: {
         title: 'Gallery',
         subtitle: 'Photos from our restaurant.',
-        image_0: '/assets/gallery_2.jpg',
-        image_1: '/assets/gallery_4.jpg',
-        image_2: '/assets/gallery_3.jpg',
-        image_3: '/assets/gallery_5.jpg',
-        image_4: '/assets/gallery_1.jpg',
-        image_5: '/assets/gallery_6.jpg',
-        image_6: '/assets/gallery_7.jpg',
-        image_7: '/assets/gallery_8.jpg',
-        image_8: '/assets/gallery_9.jpg',
-        image_9: '/assets/gallery_10.jpg',
-        image_10: '/assets/gallery_11.jpg',
+        image_0: '/assets/gallery_2.webp',
+        image_1: '/assets/gallery_4.webp',
+        image_2: '/assets/gallery_3.webp',
+        image_3: '/assets/gallery_5.webp',
+        image_4: '/assets/gallery_1.webp',
+        image_5: '/assets/gallery_6.webp',
+        image_6: '/assets/gallery_7.webp',
+        image_7: '/assets/gallery_8.webp',
+        image_8: '/assets/gallery_9.webp',
+        image_9: '/assets/gallery_10.webp',
+        image_10: '/assets/gallery_11.webp',
     },
     access: {
         title: 'ACCESS',
@@ -89,60 +89,60 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         ippin_title: 'IPPIN',
         ippin_subtitle: '一品料理',
         // NIGIRI items
-        nigiri_0_name: '赤身', nigiri_0_name_en: 'Lean Tuna', nigiri_0_name_ko: '다랑어붉은살', nigiri_0_name_zh: '鮪魚（魚身瘦肉部分）', nigiri_0_price: '550', nigiri_0_image: '/assets/nigiri_akami.jpg',
-        nigiri_1_name: '中トロ', nigiri_1_name_en: 'Chutoro', nigiri_1_name_sub: '(medium fatty tuna)', nigiri_1_name_ko: '다랑어중뱃살', nigiri_1_name_zh: '鮪魚（油脂中等部位）', nigiri_1_price: '780', nigiri_1_image: '/assets/nigiri_chutoro.jpg',
-        nigiri_2_name: '大トロ', nigiri_2_name_en: 'Otoro', nigiri_2_name_sub: '(super fatty tuna)', nigiri_2_name_ko: '다랑어대뱃살', nigiri_2_name_zh: '鮪魚（油脂較多部位）', nigiri_2_price: '880', nigiri_2_image: '/assets/nigiri_otoro.jpg',
-        nigiri_3_name: '大トロ炙り', nigiri_3_name_en: 'Seared Otoro', nigiri_3_name_ko: '다랑어대뱃살구이', nigiri_3_name_zh: '炙焼鮪魚（油脂較多部位）', nigiri_3_price: '880', nigiri_3_image: '/assets/nigiri_otoroaburi.jpg',
-        nigiri_4_name: '海ぶどうトロ手巻き', nigiri_4_name_en: 'Tuna And Sea Grapes Hand Roll', nigiri_4_name_ko: '바다 포도 참치 손말이', nigiri_4_name_zh: '海葡萄金槍魚手巻', nigiri_4_price: '880', nigiri_4_image: '/assets/nigiri_budo_toro_maki.jpg',
-        nigiri_5_name: 'タイ', nigiri_5_name_en: 'Snapper', nigiri_5_name_ko: '도미', nigiri_5_name_zh: '鯛魚', nigiri_5_price: '480', nigiri_5_image: '/assets/nigiri_tai.jpg',
-        nigiri_6_name: 'サワラ', nigiri_6_name_en: 'Spanish Mackerel', nigiri_6_name_ko: '삼치', nigiri_6_name_zh: '鰆魚', nigiri_6_price: '550', nigiri_6_image: '/assets/nigiri_sawara.jpg',
-        nigiri_7_name: 'ブリ', nigiri_7_name_en: 'Yellow Tail', nigiri_7_name_ko: '방어', nigiri_7_name_zh: '鰤魚', nigiri_7_price: '550', nigiri_7_image: '/assets/nigiri_buri.jpg',
-        nigiri_8_name: 'アジ', nigiri_8_name_en: 'Horse Mackerel', nigiri_8_name_sub: '(Aji)', nigiri_8_name_ko: '전갱이', nigiri_8_name_zh: '竹莢魚', nigiri_8_price: '450', nigiri_8_image: '/assets/nigiri_aji.jpg',
-        nigiri_9_name: 'サーモン', nigiri_9_name_en: 'Salmon', nigiri_9_name_ko: '연어', nigiri_9_name_zh: '鮭魚', nigiri_9_price: '450', nigiri_9_image: '/assets/nigiri_samon.jpg',
-        nigiri_10_name: '炙りサーモン', nigiri_10_name_en: 'Seared Salmon', nigiri_10_name_ko: '구운 연어', nigiri_10_name_zh: '炙焼鮭魚', nigiri_10_price: '450', nigiri_10_image: '/assets/nigiri_aburisamon.jpg',
-        nigiri_11_name: '車海老', nigiri_11_name_en: 'Japanese Tiger Prawn', nigiri_11_name_ko: '왕새우', nigiri_11_name_zh: '車海老', nigiri_11_price: '980', nigiri_11_image: '/assets/nigiri_ebi.jpg',
-        nigiri_12_name: '車海老カダイフ揚げ', nigiri_12_name_en: 'Fried Japanese Tiger Prawn', nigiri_12_name_ko: '새우튀김', nigiri_12_name_zh: '炸車海蝦', nigiri_12_price: '1300', nigiri_12_image: '/assets/nigiri_ebidokku.jpeg',
-        nigiri_13_name: '生海老漬け', nigiri_13_name_en: 'Shrimp', nigiri_13_name_ko: '새우', nigiri_13_name_zh: '蝦子', nigiri_13_price: '480', nigiri_13_image: '/assets/nigiri_ebiduke.jpg',
-        nigiri_14_name: 'イカ', nigiri_14_name_en: 'Squid', nigiri_14_name_ko: '뼈오징어', nigiri_14_name_zh: '墨水烏賊', nigiri_14_price: '550', nigiri_14_image: '/assets/nigiri_ika.jpg',
-        nigiri_15_name: '水タコ', nigiri_15_name_en: 'Octopus', nigiri_15_name_ko: '문어', nigiri_15_name_zh: '章魚', nigiri_15_price: '550', nigiri_15_image: '/assets/nigiri_tako.jpg',
-        nigiri_16_name: 'ホタテ', nigiri_16_name_en: 'Scallop', nigiri_16_name_sub: '(Hotate)', nigiri_16_name_ko: '가리비', nigiri_16_name_zh: '扇貝', nigiri_16_price: '600', nigiri_16_image: '/assets/nigiri_hotate.jpg',
-        nigiri_17_name: '赤貝', nigiri_17_name_en: 'Ark Shell', nigiri_17_name_ko: '홍합', nigiri_17_name_zh: '紅貝', nigiri_17_price: '850', nigiri_17_image: '/assets/nigiri_akagai.jpg',
-        nigiri_18_name: 'えんがわ', nigiri_18_name_en: 'Seared Flounder Fin', nigiri_18_name_ko: '광어 지느러미', nigiri_18_name_zh: '鰭辺肉', nigiri_18_price: '550', nigiri_18_image: '/assets/nigiri_engawa.jpg',
-        nigiri_19_name: 'ウナギドック', nigiri_19_name_en: 'Eel', nigiri_19_name_sub: '(Unagi)', nigiri_19_name_ko: '장어', nigiri_19_name_zh: '鰻', nigiri_19_price: '680', nigiri_19_image: '/assets/nigiri_unagi.jpg',
-        nigiri_20_name: '穴子', nigiri_20_name_en: 'Conger Eel', nigiri_20_name_ko: '홀자', nigiri_20_name_zh: '星鰻', nigiri_20_price: '680', nigiri_20_image: '/assets/nigiri_anago.jpg',
-        nigiri_21_name: 'ノドグロドック', nigiri_21_name_en: 'Blackthroat Seaperch', nigiri_21_name_ko: '눈볼대', nigiri_21_name_zh: '紅喉魚', nigiri_21_price: '900', nigiri_21_image: '/assets/nigiri_nodogurodokku.jpg',
-        nigiri_22_name: 'タチウオドック', nigiri_22_name_en: 'Cutlassfish', nigiri_22_name_ko: '갈치', nigiri_22_name_zh: '刀魚', nigiri_22_price: '700', nigiri_22_image: '/assets/nigiri_tachiuodokku.jpg',
-        nigiri_23_name: 'とびっこ', nigiri_23_name_en: 'Tobiko', nigiri_23_name_sub: '(flying fish roe)', nigiri_23_name_ko: '날치알', nigiri_23_name_zh: '飛魚卵', nigiri_23_price: '400', nigiri_23_image: '/assets/nigiri_tobikko.jpg',
-        nigiri_24_name: '白子軍艦', nigiri_24_name_en: 'Shirako gunkan', nigiri_24_name_sub: '(Cod milt)', nigiri_24_name_ko: '곤이', nigiri_24_name_zh: '魚白', nigiri_24_price: '550', nigiri_24_image: '/assets/nigiri_shirako.jpg',
-        nigiri_25_name: 'いくら', nigiri_25_name_en: 'Ikura', nigiri_25_name_sub: '(Salmon roe)', nigiri_25_name_ko: '연어알', nigiri_25_name_zh: '鮭魚卵', nigiri_25_price: '600', nigiri_25_image: '/assets/nigiri_ikura.jpg',
-        nigiri_26_name: '玉子', nigiri_26_name_en: 'Tamago', nigiri_26_name_sub: '(Japanese Omelet)', nigiri_26_name_ko: '달걀', nigiri_26_name_zh: '鶏蛋', nigiri_26_price: '350', nigiri_26_image: '/assets/nigiri_tamago.jpg',
-        nigiri_27_name: '芽ネギ', nigiri_27_name_en: 'Green Onion Shoots', nigiri_27_name_ko: '싹눈파', nigiri_27_name_zh: '嫩葱', nigiri_27_price: '350', nigiri_27_image: '/assets/nigiri_menegi.jpg',
+        nigiri_0_name: '赤身', nigiri_0_name_en: 'Lean Tuna', nigiri_0_name_ko: '다랑어붉은살', nigiri_0_name_zh: '鮪魚（魚身瘦肉部分）', nigiri_0_price: '550', nigiri_0_image: '/assets/nigiri_akami.webp',
+        nigiri_1_name: '中トロ', nigiri_1_name_en: 'Chutoro', nigiri_1_name_sub: '(medium fatty tuna)', nigiri_1_name_ko: '다랑어중뱃살', nigiri_1_name_zh: '鮪魚（油脂中等部位）', nigiri_1_price: '780', nigiri_1_image: '/assets/nigiri_chutoro.webp',
+        nigiri_2_name: '大トロ', nigiri_2_name_en: 'Otoro', nigiri_2_name_sub: '(super fatty tuna)', nigiri_2_name_ko: '다랑어대뱃살', nigiri_2_name_zh: '鮪魚（油脂較多部位）', nigiri_2_price: '880', nigiri_2_image: '/assets/nigiri_otoro.webp',
+        nigiri_3_name: '大トロ炙り', nigiri_3_name_en: 'Seared Otoro', nigiri_3_name_ko: '다랑어대뱃살구이', nigiri_3_name_zh: '炙焼鮪魚（油脂較多部位）', nigiri_3_price: '880', nigiri_3_image: '/assets/nigiri_otoroaburi.webp',
+        nigiri_4_name: '海ぶどうトロ手巻き', nigiri_4_name_en: 'Tuna And Sea Grapes Hand Roll', nigiri_4_name_ko: '바다 포도 참치 손말이', nigiri_4_name_zh: '海葡萄金槍魚手巻', nigiri_4_price: '880', nigiri_4_image: '/assets/nigiri_budo_toro_maki.webp',
+        nigiri_5_name: 'タイ', nigiri_5_name_en: 'Snapper', nigiri_5_name_ko: '도미', nigiri_5_name_zh: '鯛魚', nigiri_5_price: '480', nigiri_5_image: '/assets/nigiri_tai.webp',
+        nigiri_6_name: 'サワラ', nigiri_6_name_en: 'Spanish Mackerel', nigiri_6_name_ko: '삼치', nigiri_6_name_zh: '鰆魚', nigiri_6_price: '550', nigiri_6_image: '/assets/nigiri_sawara.webp',
+        nigiri_7_name: 'ブリ', nigiri_7_name_en: 'Yellow Tail', nigiri_7_name_ko: '방어', nigiri_7_name_zh: '鰤魚', nigiri_7_price: '550', nigiri_7_image: '/assets/nigiri_buri.webp',
+        nigiri_8_name: 'アジ', nigiri_8_name_en: 'Horse Mackerel', nigiri_8_name_sub: '(Aji)', nigiri_8_name_ko: '전갱이', nigiri_8_name_zh: '竹莢魚', nigiri_8_price: '450', nigiri_8_image: '/assets/nigiri_aji.webp',
+        nigiri_9_name: 'サーモン', nigiri_9_name_en: 'Salmon', nigiri_9_name_ko: '연어', nigiri_9_name_zh: '鮭魚', nigiri_9_price: '450', nigiri_9_image: '/assets/nigiri_samon.webp',
+        nigiri_10_name: '炙りサーモン', nigiri_10_name_en: 'Seared Salmon', nigiri_10_name_ko: '구운 연어', nigiri_10_name_zh: '炙焼鮭魚', nigiri_10_price: '450', nigiri_10_image: '/assets/nigiri_aburisamon.webp',
+        nigiri_11_name: '車海老', nigiri_11_name_en: 'Japanese Tiger Prawn', nigiri_11_name_ko: '왕새우', nigiri_11_name_zh: '車海老', nigiri_11_price: '980', nigiri_11_image: '/assets/nigiri_ebi.webp',
+        nigiri_12_name: '車海老カダイフ揚げ', nigiri_12_name_en: 'Fried Japanese Tiger Prawn', nigiri_12_name_ko: '새우튀김', nigiri_12_name_zh: '炸車海蝦', nigiri_12_price: '1300', nigiri_12_image: '/assets/nigiri_ebidokku.webp',
+        nigiri_13_name: '生海老漬け', nigiri_13_name_en: 'Shrimp', nigiri_13_name_ko: '새우', nigiri_13_name_zh: '蝦子', nigiri_13_price: '480', nigiri_13_image: '/assets/nigiri_ebiduke.webp',
+        nigiri_14_name: 'イカ', nigiri_14_name_en: 'Squid', nigiri_14_name_ko: '뼈오징어', nigiri_14_name_zh: '墨水烏賊', nigiri_14_price: '550', nigiri_14_image: '/assets/nigiri_ika.webp',
+        nigiri_15_name: '水タコ', nigiri_15_name_en: 'Octopus', nigiri_15_name_ko: '문어', nigiri_15_name_zh: '章魚', nigiri_15_price: '550', nigiri_15_image: '/assets/nigiri_tako.webp',
+        nigiri_16_name: 'ホタテ', nigiri_16_name_en: 'Scallop', nigiri_16_name_sub: '(Hotate)', nigiri_16_name_ko: '가리비', nigiri_16_name_zh: '扇貝', nigiri_16_price: '600', nigiri_16_image: '/assets/nigiri_hotate.webp',
+        nigiri_17_name: '赤貝', nigiri_17_name_en: 'Ark Shell', nigiri_17_name_ko: '홍합', nigiri_17_name_zh: '紅貝', nigiri_17_price: '850', nigiri_17_image: '/assets/nigiri_akagai.webp',
+        nigiri_18_name: 'えんがわ', nigiri_18_name_en: 'Seared Flounder Fin', nigiri_18_name_ko: '광어 지느러미', nigiri_18_name_zh: '鰭辺肉', nigiri_18_price: '550', nigiri_18_image: '/assets/nigiri_engawa.webp',
+        nigiri_19_name: 'ウナギドック', nigiri_19_name_en: 'Eel', nigiri_19_name_sub: '(Unagi)', nigiri_19_name_ko: '장어', nigiri_19_name_zh: '鰻', nigiri_19_price: '680', nigiri_19_image: '/assets/nigiri_unagi.webp',
+        nigiri_20_name: '穴子', nigiri_20_name_en: 'Conger Eel', nigiri_20_name_ko: '홀자', nigiri_20_name_zh: '星鰻', nigiri_20_price: '680', nigiri_20_image: '/assets/nigiri_anago.webp',
+        nigiri_21_name: 'ノドグロドック', nigiri_21_name_en: 'Blackthroat Seaperch', nigiri_21_name_ko: '눈볼대', nigiri_21_name_zh: '紅喉魚', nigiri_21_price: '900', nigiri_21_image: '/assets/nigiri_nodogurodokku.webp',
+        nigiri_22_name: 'タチウオドック', nigiri_22_name_en: 'Cutlassfish', nigiri_22_name_ko: '갈치', nigiri_22_name_zh: '刀魚', nigiri_22_price: '700', nigiri_22_image: '/assets/nigiri_tachiuodokku.webp',
+        nigiri_23_name: 'とびっこ', nigiri_23_name_en: 'Tobiko', nigiri_23_name_sub: '(flying fish roe)', nigiri_23_name_ko: '날치알', nigiri_23_name_zh: '飛魚卵', nigiri_23_price: '400', nigiri_23_image: '/assets/nigiri_tobikko.webp',
+        nigiri_24_name: '白子軍艦', nigiri_24_name_en: 'Shirako gunkan', nigiri_24_name_sub: '(Cod milt)', nigiri_24_name_ko: '곤이', nigiri_24_name_zh: '魚白', nigiri_24_price: '550', nigiri_24_image: '/assets/nigiri_shirako.webp',
+        nigiri_25_name: 'いくら', nigiri_25_name_en: 'Ikura', nigiri_25_name_sub: '(Salmon roe)', nigiri_25_name_ko: '연어알', nigiri_25_name_zh: '鮭魚卵', nigiri_25_price: '600', nigiri_25_image: '/assets/nigiri_ikura.webp',
+        nigiri_26_name: '玉子', nigiri_26_name_en: 'Tamago', nigiri_26_name_sub: '(Japanese Omelet)', nigiri_26_name_ko: '달걀', nigiri_26_name_zh: '鶏蛋', nigiri_26_price: '350', nigiri_26_image: '/assets/nigiri_tamago.webp',
+        nigiri_27_name: '芽ネギ', nigiri_27_name_en: 'Green Onion Shoots', nigiri_27_name_ko: '싹눈파', nigiri_27_name_zh: '嫩葱', nigiri_27_price: '350', nigiri_27_image: '/assets/nigiri_menegi.webp',
         // MAKIMONO items
-        makimono_0_name: 'トロたく巻き', makimono_0_name_en: 'Tuna And Pickled Radish Sushi Roll', makimono_0_name_ko: '도로 타쿠 김밥', makimono_0_name_zh: '鮪魚腌萝卜巻', makimono_0_price: '1200', makimono_0_image: '/assets/makimono_torotaku.jpg',
-        makimono_1_name: 'ネギトロ巻き', makimono_1_name_en: 'Tuna And Green Onion Sushi Roll', makimono_1_name_ko: '네기토로 김밥', makimono_1_name_zh: '葱鮪魚巻', makimono_1_price: '1000', makimono_1_image: '/assets/makimono_negitoro.jpg',
-        makimono_2_name: '鉄火巻き', makimono_2_name_en: 'Tuna Sushi Roll', makimono_2_name_ko: '참치 김밥', makimono_2_name_zh: '鉄火巻（新鮮金槍魚巻）', makimono_2_price: '1200', makimono_2_image: '/assets/makimono_tekka.jpg',
-        makimono_3_name: 'カッパ巻き', makimono_3_name_en: 'Cucumber Sushi Roll', makimono_3_name_ko: '오이 김밥', makimono_3_name_zh: '河童巻（小黄瓜寿司巻）', makimono_3_price: '650', makimono_3_image: '/assets/makimono_kappa.jpg',
-        makimono_4_name: 'かんぴょう巻き', makimono_4_name_en: 'Kanpyo Sushi Roll', makimono_4_name_ko: '나나시 김밥', makimono_4_name_zh: '瓠瓜干寿司巻', makimono_4_price: '650', makimono_4_image: '/assets/makimono_kanpyou.jpg',
+        makimono_0_name: 'トロたく巻き', makimono_0_name_en: 'Tuna And Pickled Radish Sushi Roll', makimono_0_name_ko: '도로 타쿠 김밥', makimono_0_name_zh: '鮪魚腌萝卜巻', makimono_0_price: '1200', makimono_0_image: '/assets/makimono_torotaku.webp',
+        makimono_1_name: 'ネギトロ巻き', makimono_1_name_en: 'Tuna And Green Onion Sushi Roll', makimono_1_name_ko: '네기토로 김밥', makimono_1_name_zh: '葱鮪魚巻', makimono_1_price: '1000', makimono_1_image: '/assets/makimono_negitoro.webp',
+        makimono_2_name: '鉄火巻き', makimono_2_name_en: 'Tuna Sushi Roll', makimono_2_name_ko: '참치 김밥', makimono_2_name_zh: '鉄火巻（新鮮金槍魚巻）', makimono_2_price: '1200', makimono_2_image: '/assets/makimono_tekka.webp',
+        makimono_3_name: 'カッパ巻き', makimono_3_name_en: 'Cucumber Sushi Roll', makimono_3_name_ko: '오이 김밥', makimono_3_name_zh: '河童巻（小黄瓜寿司巻）', makimono_3_price: '650', makimono_3_image: '/assets/makimono_kappa.webp',
+        makimono_4_name: 'かんぴょう巻き', makimono_4_name_en: 'Kanpyo Sushi Roll', makimono_4_name_ko: '나나시 김밥', makimono_4_name_zh: '瓠瓜干寿司巻', makimono_4_price: '650', makimono_4_image: '/assets/makimono_kanpyou.webp',
         // IPPIN items
-        ippin_0_name: '味噌汁', ippin_0_name_en: 'Miso Soup', ippin_0_name_ko: '된장국', ippin_0_name_zh: '味噌湯', ippin_0_price: '350', ippin_0_image: '/assets/ippin_misoshiru.jpg',
-        ippin_1_name: '茶碗蒸し', ippin_1_name_en: 'Steamed Egg (Chawan-mushi)', ippin_1_name_ko: '차완무시', ippin_1_name_zh: '茶碗蒸', ippin_1_price: '650', ippin_1_image: '/assets/ippin_chawanmushi.jpg',
-        ippin_2_name: '刺身盛り合わせ', ippin_2_name_en: '6 Kinds of Sashimi', ippin_2_name_ko: '사시미 5가지 모듬', ippin_2_name_zh: '生魚片什錦拼盤', ippin_2_price: '2000', ippin_2_note: '※その他(赤身だけ3人前、おまかせ3種類2人前)など、お客様のご要望あれば、お気軽にお申し付けください。', ippin_2_note_en: '※We can also accommodate other requests such as 3 servings of lean meat only, 2 servings of 3 types of chef\'s choice, etc. Please feel free to ask.', ippin_2_image: '/assets/ippin_sashimori.jpg',
-        ippin_3_name: 'カニつまみ', ippin_3_name_en: 'Crab', ippin_3_name_ko: '게', ippin_3_name_zh: '蟹', ippin_3_price: '980', ippin_3_image: '/assets/ippin_kanitsuami.jpg',
-        ippin_4_name: '白子（ポン酢・天ぷら）', ippin_4_name_en: 'Shirako (With Ponzu or Tempura)', ippin_4_name_ko: '흰자', ippin_4_name_zh: '白子', ippin_4_price: '1300', ippin_4_image: '/assets/ippin_shirapon.jpg',
-        ippin_5_name: '生牡蠣', ippin_5_name_en: 'Oyster', ippin_5_name_ko: '진주 굴', ippin_5_name_zh: '塩牡蠣', ippin_5_price: '750', ippin_5_image: '/assets/ippin_namagaki.jpg',
-        ippin_6_name: '海鮮ユッケ', ippin_6_name_en: 'Seafood Yukhoe', ippin_6_name_ko: '해산물 육회', ippin_6_name_zh: '海鮮生魚片', ippin_6_price: '980', ippin_6_image: '/assets/ippin_kaisenyukke.jpg',
-        ippin_7_name: 'マグロカマ焼き', ippin_7_name_en: 'Grilled Bluefin Tuna Collar', ippin_7_name_ko: '참치 카마 구い', ippin_7_name_zh: '焼金槍魚領肉', ippin_7_price: '3200', ippin_7_image: '/assets/ippin_kamayai.jpg',
-        ippin_8_name: 'サーモンハラス焼き', ippin_8_name_en: 'Grilled Salmon Belly', ippin_8_name_ko: '연어 배 구い', ippin_8_name_zh: '焼三文魚腩', ippin_8_price: '1800', ippin_8_image: '/assets/ippin_harasuyaki.jpg',
-        ippin_9_name: 'タチウオ塩焼き', ippin_9_name_en: 'Grilled Cutlassfish', ippin_9_name_ko: '갈치', ippin_9_name_zh: '刀魚', ippin_9_price: '980', ippin_9_image: '/assets/ippin_tachiuoyaki.jpg',
-        ippin_10_name: 'つまみ玉子', ippin_10_name_en: 'Tamago (Japanese Omelet)', ippin_10_name_ko: '달걀', ippin_10_name_zh: '鶏蛋', ippin_10_price: '680', ippin_10_image: '/assets/ippin_tsumatama.jpg',
-        ippin_11_name: '大福アイス', ippin_11_name_en: 'Mochi with icecream', ippin_11_name_ko: '', ippin_11_name_zh: '', ippin_11_price: '580', ippin_11_image: '/assets/ippin_ice.jpg'
+        ippin_0_name: '味噌汁', ippin_0_name_en: 'Miso Soup', ippin_0_name_ko: '된장국', ippin_0_name_zh: '味噌湯', ippin_0_price: '350', ippin_0_image: '/assets/ippin_misoshiru.webp',
+        ippin_1_name: '茶碗蒸し', ippin_1_name_en: 'Steamed Egg (Chawan-mushi)', ippin_1_name_ko: '차완무시', ippin_1_name_zh: '茶碗蒸', ippin_1_price: '650', ippin_1_image: '/assets/ippin_chawanmushi.webp',
+        ippin_2_name: '刺身盛り合わせ', ippin_2_name_en: '6 Kinds of Sashimi', ippin_2_name_ko: '사시미 5가지 모듬', ippin_2_name_zh: '生魚片什錦拼盤', ippin_2_price: '2000', ippin_2_note: '※その他(赤身だけ3人前、おまかせ3種類2人前)など、お客様のご要望あれば、お気軽にお申し付けください。', ippin_2_note_en: '※We can also accommodate other requests such as 3 servings of lean meat only, 2 servings of 3 types of chef\'s choice, etc. Please feel free to ask.', ippin_2_image: '/assets/ippin_sashimori.webp',
+        ippin_3_name: 'カニつまみ', ippin_3_name_en: 'Crab', ippin_3_name_ko: '게', ippin_3_name_zh: '蟹', ippin_3_price: '980', ippin_3_image: '/assets/ippin_kanitsuami.webp',
+        ippin_4_name: '白子（ポン酢・天ぷら）', ippin_4_name_en: 'Shirako (With Ponzu or Tempura)', ippin_4_name_ko: '흰자', ippin_4_name_zh: '白子', ippin_4_price: '1300', ippin_4_image: '/assets/ippin_shirapon.webp',
+        ippin_5_name: '生牡蠣', ippin_5_name_en: 'Oyster', ippin_5_name_ko: '진주 굴', ippin_5_name_zh: '塩牡蠣', ippin_5_price: '750', ippin_5_image: '/assets/ippin_namagaki.webp',
+        ippin_6_name: '海鮮ユッケ', ippin_6_name_en: 'Seafood Yukhoe', ippin_6_name_ko: '해산물 육회', ippin_6_name_zh: '海鮮生魚片', ippin_6_price: '980', ippin_6_image: '/assets/ippin_kaisenyukke.webp',
+        ippin_7_name: 'マグロカマ焼き', ippin_7_name_en: 'Grilled Bluefin Tuna Collar', ippin_7_name_ko: '참치 카마 구い', ippin_7_name_zh: '焼金槍魚領肉', ippin_7_price: '3200', ippin_7_image: '/assets/ippin_kamayai.webp',
+        ippin_8_name: 'サーモンハラス焼き', ippin_8_name_en: 'Grilled Salmon Belly', ippin_8_name_ko: '연어 배 구い', ippin_8_name_zh: '焼三文魚腩', ippin_8_price: '1800', ippin_8_image: '/assets/ippin_harasuyaki.webp',
+        ippin_9_name: 'タチウオ塩焼き', ippin_9_name_en: 'Grilled Cutlassfish', ippin_9_name_ko: '갈치', ippin_9_name_zh: '刀魚', ippin_9_price: '980', ippin_9_image: '/assets/ippin_tachiuoyaki.webp',
+        ippin_10_name: 'つまみ玉子', ippin_10_name_en: 'Tamago (Japanese Omelet)', ippin_10_name_ko: '달걀', ippin_10_name_zh: '鶏蛋', ippin_10_price: '680', ippin_10_image: '/assets/ippin_tsumatama.webp',
+        ippin_11_name: '大福アイス', ippin_11_name_en: 'Mochi with icecream', ippin_11_name_ko: '', ippin_11_name_zh: '', ippin_11_price: '580', ippin_11_image: '/assets/ippin_ice.webp'
     },
     affiliated: {
         title: 'Affiliated store of KABUKI SUSHI',
         subtitle: '姉妹店',
-        store1_image: '/assets/honten_card_new.jpg',
-        store2_image: '/assets/soba_card_new.jpg',
-        map_image: '/assets/affiliated_map.jpg',
+        store1_image: '/assets/honten_card_new.webp',
+        store2_image: '/assets/soba_card_new.webp',
+        map_image: '/assets/affiliated_map.webp',
         store1_name: 'KABUKI寿司 本店',
         store1_address: '〒160-0021 東京都新宿区歌舞伎町2丁目25-8 エコプレイス新宿1F',
         store1_phone: 'TEL：03-6457-6612',
@@ -162,10 +162,10 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         shochu_title: '焼酎・泡盛・ハブ酒',
         other_title: 'その他',
         // Nihonshu items
-        nihonshu_0_name: '写楽 福島', nihonshu_0_name_en: 'SHARAKU (FUKUSHIMA)', nihonshu_0_name_ko: '샤라쿠', nihonshu_0_name_zh: '写楽', nihonshu_0_price: '2000', nihonshu_0_image: '/assets/drink_sharaku.jpg',
-        nihonshu_1_name: '三井の寿 福岡', nihonshu_1_name_en: 'MIINOKOTOBUKI (FUKUOKA)', nihonshu_1_name_ko: '미이노코ト부키', nihonshu_1_name_zh: '三井寿', nihonshu_1_price: '1500', nihonshu_1_image: '/assets/drink_miinokotobuki.jpg',
-        nihonshu_2_name: '日高見 宮城', nihonshu_2_name_en: 'HITAKAMI (MIYAGI)', nihonshu_2_name_ko: '히타카미', nihonshu_2_name_zh: '日高見', nihonshu_2_price: '1500', nihonshu_2_image: '/assets/drink_hitakami.jpg',
-        nihonshu_3_name: 'ゼブラ 山形', nihonshu_3_name_en: 'ZEBRA (YAMAGATA)', nihonshu_3_name_ko: '제브라', nihonshu_3_name_zh: 'ZEBRA', nihonshu_3_price: '2000', nihonshu_3_image: '/assets/drink_zebra.jpg',
+        nihonshu_0_name: '写楽 福島', nihonshu_0_name_en: 'SHARAKU (FUKUSHIMA)', nihonshu_0_name_ko: '샤라쿠', nihonshu_0_name_zh: '写楽', nihonshu_0_price: '2000', nihonshu_0_image: '/assets/drink_sharaku.webp',
+        nihonshu_1_name: '三井の寿 福岡', nihonshu_1_name_en: 'MIINOKOTOBUKI (FUKUOKA)', nihonshu_1_name_ko: '미이노코ト부키', nihonshu_1_name_zh: '三井寿', nihonshu_1_price: '1500', nihonshu_1_image: '/assets/drink_miinokotobuki.webp',
+        nihonshu_2_name: '日高見 宮城', nihonshu_2_name_en: 'HITAKAMI (MIYAGI)', nihonshu_2_name_ko: '히타카미', nihonshu_2_name_zh: '日高見', nihonshu_2_price: '1500', nihonshu_2_image: '/assets/drink_hitakami.webp',
+        nihonshu_3_name: 'ゼブラ 山形', nihonshu_3_name_en: 'ZEBRA (YAMAGATA)', nihonshu_3_name_ko: '제브라', nihonshu_3_name_zh: 'ZEBRA', nihonshu_3_price: '2000', nihonshu_3_image: '/assets/drink_zebra.webp',
         // Alcohol items
         alcohol_content: 'サントリー　プレミアムモルツ生／880\nサッポロラガー中瓶／ 900\n\n角ハイボール／770\n知多／1600\n白州／1800\n山﨑／1800\n\nガリサワー／770\nレモンサワー／770\n濃厚緑茶ハイ／770\nさんぴん茶ハイ／770\nウーロンハイ／770\nコーン茶ハイ／770\n\nグラスワイン\n赤・白／1000～1300\n\nボトルワイン\n白・ヴェルメンティーノ・グアド・アル・タッソ／10000\n\nシャンパン\nペリエ　ジュエ　グラン　ブリュット/25000',
         alcohol_content_en: 'Suntory Premium Malt\'s Draught / 880\nSapporo Lager Bottle / 900\n\nKaku Highball / 770\nChita / 1600\nHakushu / 1800\nYamazaki / 1800\n\nGari (Ginger) Sour / 770\nLemon Sour / 770\nGreen Tea High / 770\nSanpin Tea High / 770\nOolong High / 770\nCorn Tea High / 770\n\nGlass Wine\nRed/White / 1000-1300\n\nBottle Wine\nWhite Vermentino / 10000\n\nChampagne\nPerrier Jouet / 25000',
@@ -870,7 +870,7 @@ export function LandingPage({
                     if (parsed.affiliated && parsed.affiliated.value === oldUnsplashUrl) {
                         delete parsed.affiliated;
                     }
-                    if (parsed.home && (parsed.home.value === '/assets/home_hero.jpg' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) {
+                    if (parsed.home && (parsed.home.value === '/assets/home_hero.webp' || parsed.home.value === 'https://images.unsplash.com/photo-1700324822763-956100f79b0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80')) {
                         delete parsed.home;
                     }
                     setLocalBackgroundSettings(parsed);
@@ -1161,7 +1161,7 @@ export function LandingPage({
                     {/* Logo */}
                     <div className="mb-12 flex justify-center">
                         <ImageWithFallback
-                            src="/assets/logo.png"
+                            src="/assets/logo.webp"
                             alt={`${textSettings.home?.title || 'KABUKI寿司'} ${textSettings.home?.subtitle || ''} ロゴ`}
                             className="w-auto h-28 md:h-36 object-contain"
                         />
@@ -1249,7 +1249,7 @@ export function LandingPage({
                     <div className="flex flex-col items-center gap-12 mt-12">
                         <div className="w-full max-w-4xl relative group">
                             <ImageWithFallback
-                                src={textSettings.about?.content_image || '/assets/about_content_new.jpg'}
+                                src={textSettings.about?.content_image || '/assets/about_content_new.webp'}
                                 alt={textSettings.about?.title || 'KABUKI寿司'}
                                 className="rounded-lg shadow-xl w-full h-auto"
                             />
@@ -1442,7 +1442,7 @@ export function LandingPage({
                         </div>
                         <div className="rounded-lg overflow-hidden shadow-xl">
                             <ImageWithFallback
-                                src="/assets/access_map.jpg"
+                                src="/assets/access_map.webp"
                                 alt="Map"
                                 className="w-full h-auto"
                             />
@@ -2016,7 +2016,7 @@ export function LandingPage({
                                                     )}
                                                     <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
                                                         <ImageWithFallback
-                                                            src={image || '/assets/placeholder.jpg'}
+                                                            src={image || '/assets/placeholder.webp'}
                                                             alt={name}
                                                             className="w-full h-full object-cover"
                                                         />
@@ -2183,7 +2183,7 @@ export function LandingPage({
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
                             <div className="relative group">
                                 <ImageWithFallback
-                                    src={textSettings.affiliated?.store1_image || '/assets/honten_card_new.jpg'}
+                                    src={textSettings.affiliated?.store1_image || '/assets/honten_card_new.webp'}
                                     alt="KABUKI寿司 本店"
                                     className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
                                 />
@@ -2254,7 +2254,7 @@ export function LandingPage({
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
                             <div className="relative group">
                                 <ImageWithFallback
-                                    src={textSettings.affiliated?.store2_image || '/assets/soba_card_new.jpg'}
+                                    src={textSettings.affiliated?.store2_image || '/assets/soba_card_new.webp'}
                                     alt="KABUKI SOBA"
                                     className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
                                 />
@@ -2306,7 +2306,7 @@ export function LandingPage({
                     {/* New Map Image */}
                     <div className="mt-8 rounded-lg overflow-hidden shadow-xl max-w-4xl mx-auto relative group">
                         <ImageWithFallback
-                            src={textSettings.affiliated?.map_image || '/assets/affiliated_map.jpg'}
+                            src={textSettings.affiliated?.map_image || '/assets/affiliated_map.webp'}
                             alt="Affiliated Stores Map"
                             className="w-full h-auto"
                         />
