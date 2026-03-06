@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Alert, AlertDescription } from '../../components/ui/alert';
 
 export function LoginPage() {
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(import.meta.env.DEV ? 'kabukisushi2026' : '');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

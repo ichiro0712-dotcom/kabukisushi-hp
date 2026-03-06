@@ -53,6 +53,21 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
         fileInputRef.current?.click();
     };
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            onSelect(url);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white w-[900px] h-[650px] rounded-lg shadow-2xl flex flex-col relative overflow-hidden border border-gray-200">
@@ -93,7 +108,11 @@ export default function ImageAssetLibrary({ isOpen, onClose, onSelect, mediaType
                 <div className="flex-1 overflow-hidden flex flex-col bg-[#fcfcfc]">
                     {activeTab === 'upload' && (
                         <div className="flex-1 flex flex-col items-center justify-center p-12">
-                            <div className="w-full max-w-2xl border-2 border-dashed border-gray-200 rounded-xl bg-white p-16 flex flex-col items-center text-center shadow-sm">
+                            <div
+                                className="w-full max-w-2xl border-2 border-dashed border-gray-200 rounded-xl bg-white p-16 flex flex-col items-center text-center shadow-sm"
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
+                            >
                                 <div className="text-xl font-bold text-gray-800 mb-2">ファイルをここへドラッグしてください</div>
                                 <div className="text-gray-400 mb-8 font-medium">もしくは</div>
                                 <button

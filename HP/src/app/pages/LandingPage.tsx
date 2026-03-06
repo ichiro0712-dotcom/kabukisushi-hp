@@ -51,6 +51,7 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
     },
     about: {
         title: 'ABOUT US',
+        content_image: '/assets/about_content_new.jpg',
         content: 'KABUKI寿司の2号店となる 「KABUKI寿司 1番通り店」 をオープンいたしました。\n\n1番通り店では、これまでの伝統を受け継ぎながらも、さらなる進化を目指しています。\n\n店主を務めるのは、新進気鋭の若手寿司職人増田。\n\n繊細な技術と斬新なアイデアで、新しい「KABUKI寿司」の世界を皆さまにお届けいたします。\n\nお店の特徴の一つは、カウンター付きの個室です。職人の技を間近で堪能しながら、ゆったりとしたプライベート空間でお食事をお楽しみいただけます。特別な日のお祝いから接待まで、幅広いシーンでご利用いただけます。\n\n伝統と革新が融合したKABUKI寿司 1番通り店で、特別なひとときをお過ごしください。'
     },
     gallery: {
@@ -139,6 +140,9 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
     affiliated: {
         title: 'Affiliated store of KABUKI SUSHI',
         subtitle: '姉妹店',
+        store1_image: '/assets/honten_card_new.jpg',
+        store2_image: '/assets/soba_card_new.jpg',
+        map_image: '/assets/affiliated_map.jpg',
         store1_name: 'KABUKI寿司 本店',
         store1_address: '〒160-0021 東京都新宿区歌舞伎町2丁目25-8 エコプレイス新宿1F',
         store1_phone: 'TEL：03-6457-6612',
@@ -1242,12 +1246,23 @@ export function LandingPage({
                         />
                     </div>
                     <div className="flex flex-col items-center gap-12 mt-12">
-                        <div className="w-full max-w-4xl">
+                        <div className="w-full max-w-4xl relative group">
                             <ImageWithFallback
-                                src="/assets/about_content_new.jpg"
+                                src={textSettings.about?.content_image || '/assets/about_content_new.jpg'}
                                 alt={textSettings.about?.title || 'KABUKI寿司'}
                                 className="rounded-lg shadow-xl w-full h-auto"
                             />
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('about', 'content_image', 0); }}
+                                        className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                        title="画像を変更"
+                                    >
+                                        <ImageIcon size={20} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         <div className="space-y-4 text-center max-w-3xl mx-auto" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
                             <div className="text-lg">
@@ -2165,11 +2180,24 @@ export function LandingPage({
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
-                            <ImageWithFallback
-                                src="/assets/honten_card_new.jpg"
-                                alt="KABUKI寿司 本店"
-                                className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
-                            />
+                            <div className="relative group">
+                                <ImageWithFallback
+                                    src={textSettings.affiliated?.store1_image || '/assets/honten_card_new.jpg'}
+                                    alt="KABUKI寿司 本店"
+                                    className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
+                                />
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store1_image', 0); }}
+                                            className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                            title="画像を変更"
+                                        >
+                                            <ImageIcon size={20} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#fcebc5]">
                                 ■<InlineEditableText
                                     value={textSettings.affiliated?.store1_name || 'KABUKI寿司 本店'}
@@ -2211,11 +2239,24 @@ export function LandingPage({
                         </div>
 
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
-                            <ImageWithFallback
-                                src="/assets/soba_card_new.jpg"
-                                alt="KABUKI SOBA"
-                                className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
-                            />
+                            <div className="relative group">
+                                <ImageWithFallback
+                                    src={textSettings.affiliated?.store2_image || '/assets/soba_card_new.jpg'}
+                                    alt="KABUKI SOBA"
+                                    className="w-full aspect-[3/2] object-cover rounded-lg mb-4"
+                                />
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store2_image', 0); }}
+                                            className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                            title="画像を変更"
+                                        >
+                                            <ImageIcon size={20} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             <h3 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-3 text-[#fcebc5]">
                                 ■<InlineEditableText
                                     value={textSettings.affiliated?.store2_name || 'KABUKI SOBA'}
@@ -2250,12 +2291,23 @@ export function LandingPage({
                     </div>
 
                     {/* New Map Image */}
-                    <div className="mt-8 rounded-lg overflow-hidden shadow-xl max-w-4xl mx-auto">
+                    <div className="mt-8 rounded-lg overflow-hidden shadow-xl max-w-4xl mx-auto relative group">
                         <ImageWithFallback
-                            src="/assets/affiliated_map.jpg"
+                            src={textSettings.affiliated?.map_image || '/assets/affiliated_map.jpg'}
                             alt="Affiliated Stores Map"
                             className="w-full h-auto"
                         />
+                        {isEditing && (
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'map_image', 0); }}
+                                    className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                    title="画像を変更"
+                                >
+                                    <ImageIcon size={20} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
