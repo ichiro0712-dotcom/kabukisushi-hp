@@ -77,12 +77,26 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         address: '東京都新宿区歌舞伎町2丁目45−16',
         building: 'GEST34ビル4F',
         phone: '03-6302-1477',
-        hours: 'OPEN : 18:00-24:00'
+        hours: 'OPEN : 18:00-24:00',
+        map_image: '/assets/access_map.webp'
     },
     menu: {
         title: 'Menu',
         subtitle: 'Course',
         description: 'まずは当店お勧めのコースからお選びください',
+        course_0_label: 'Standard',
+        course_0_name: 'おまかせにぎり８貫',
+        course_0_price: '¥4,980',
+        course_0_desc: 'お勧め握り８貫と本日の１品、お椀',
+        course_1_label: 'Premium',
+        course_1_name: '特選にぎり８貫',
+        course_1_price: '¥6,980',
+        course_1_desc: '贅沢なお勧め握り８貫と本日の１品、お椀',
+        course_2_label: 'Special',
+        course_2_badge: 'Deluxe',
+        course_2_name: '特選にぎり１０貫',
+        course_2_price: '¥9,900',
+        course_2_desc: '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀',
         nigiri_title: 'NIGIRI',
         nigiri_subtitle: 'Fish in Season',
         nigiri_description: '季節の魚',
@@ -1417,12 +1431,23 @@ export function LandingPage({
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-lg overflow-hidden shadow-xl">
+                        <div className="rounded-lg overflow-hidden shadow-xl relative group">
                             <ImageWithFallback
-                                src="/assets/access_map.webp"
+                                src={textSettings.access?.map_image || '/assets/access_map.webp'}
                                 alt="Map"
                                 className="w-full h-auto"
                             />
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('access', 'map_image', 0); }}
+                                        className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                        title="画像を変更"
+                                    >
+                                        <ImageIcon size={20} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1478,23 +1503,101 @@ export function LandingPage({
 
                         <div className="grid md:grid-cols-3 gap-4">
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Standard</div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">おまかせにぎり８貫</h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥4,980</p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">お勧め握り８貫と本日の１品、お椀</p>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_0_label || 'Standard'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_0_label', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_0_name || 'おまかせにぎり８貫'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_0_name', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_0_price || '¥4,980'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_0_price', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_0_desc || 'お勧め握り８貫と本日の１品、お椀'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_0_desc', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </p>
                             </div>
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Premium</div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">特選にぎり８貫</h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥6,980</p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">贅沢なお勧め握り８貫と本日の１品、お椀</p>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_1_label || 'Premium'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_1_label', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_1_name || '特選にぎり８貫'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_1_name', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_1_price || '¥6,980'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_1_price', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_1_desc || '贅沢なお勧め握り８貫と本日の１品、お椀'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_1_desc', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </p>
                             </div>
                             <div className="group border border-[#deb55a]/40 p-6 hover:border-[#deb55a] transition-all duration-300 relative">
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}>Deluxe</div>
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Special</div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">特選にぎり１０貫</h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥9,900</p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">贅沢なお勧め握り１０貫と本日の１品<br />厳選刺身５種盛り合わせ、お椀</p>
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_2_badge || 'Deluxe'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_2_badge', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </div>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_2_label || 'Special'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_2_label', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_2_name || '特選にぎり１０貫'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_2_name', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_2_price || '¥9,900'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_2_price', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">
+                                    <InlineEditableText
+                                        value={textSettings.menu?.course_2_desc || '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀'}
+                                        onChange={(val) => onTextChange?.('menu', 'course_2_desc', val)}
+                                        isEditing={isEditing}
+                                    />
+                                </p>
                             </div>
                         </div>
                     </div>
