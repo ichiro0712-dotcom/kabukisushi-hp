@@ -994,52 +994,35 @@ export default function EditorPage() {
                         {lastSavedTime && (
                             <span className="text-[10px] text-gray-400">{lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         )}
-                        {/* More menu */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowMoreMenu(!showMoreMenu)}
-                                className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
-                                title="その他"
-                            >
-                                <MoreHorizontal size={16} />
-                            </button>
-                            {showMoreMenu && (
-                                <>
-                                    <div className="fixed inset-0 z-30" onClick={() => setShowMoreMenu(false)} />
-                                    <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-40">
-                                        <button
-                                            onClick={() => { window.open('https://kabuki-sushi.co.jp/', '_blank'); setShowMoreMenu(false); }}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <ExternalLink size={15} className="text-gray-400" />
-                                            サイトを表示
-                                        </button>
-                                        <button
-                                            onClick={() => { setShowHelpModal(true); setShowMoreMenu(false); }}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <HelpCircle size={15} className="text-gray-400" />
-                                            使い方ガイド
-                                        </button>
-                                        <button
-                                            onClick={() => { setShowMarketingTagGuide(true); setShowMoreMenu(false); }}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <FileText size={15} className="text-gray-400" />
-                                            タグ埋め込み指示書
-                                        </button>
-                                        <div className="h-px bg-gray-100 my-1" />
-                                        <button
-                                            onClick={() => { logout(); navigate('/admin/login'); setShowMoreMenu(false); }}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                                        >
-                                            <LogOut size={15} />
-                                            ログアウト
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                        <div className="h-5 w-px bg-gray-200" />
+                        <button
+                            onClick={() => window.open('https://kabuki-sushi.co.jp/', '_blank')}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all"
+                            title="サイトを表示"
+                        >
+                            <ExternalLink size={15} />
+                        </button>
+                        <button
+                            onClick={() => setShowHelpModal(true)}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
+                            title="使い方ガイド"
+                        >
+                            <HelpCircle size={15} />
+                        </button>
+                        <button
+                            onClick={() => setShowMarketingTagGuide(true)}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-purple-500 hover:bg-purple-50 transition-all"
+                            title="タグ埋め込み指示書"
+                        >
+                            <FileText size={15} />
+                        </button>
+                        <button
+                            onClick={() => { logout(); navigate('/admin/login'); }}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                            title="ログアウト"
+                        >
+                            <LogOut size={15} />
+                        </button>
                     </div>
                 </div>
 
