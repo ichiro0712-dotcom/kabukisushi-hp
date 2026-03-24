@@ -99,6 +99,8 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         course_2_name: '特選にぎり１０貫',
         course_2_price: '¥9,900',
         course_2_desc: '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀',
+        special_catchphrase: '職人が握る、至高の一貫',
+        special_image: '/assets/gallery_1.webp',
         nigiri_title: 'NIGIRI',
         nigiri_subtitle: 'Fish in Season',
         nigiri_description: '季節の魚',
@@ -1648,6 +1650,38 @@ export function LandingPage({
                                     />
                                 </p>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Special Section */}
+                    <div className="py-20 px-4 -mx-4 bg-[#1C1C1C] flex flex-col items-center">
+                        <p
+                            style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
+                            className="text-2xl md:text-3xl text-center text-[#e8eaec] mb-10 leading-relaxed tracking-wider"
+                        >
+                            <InlineEditableText
+                                value={textSettings.menu?.special_catchphrase || '職人が握る、至高の一貫'}
+                                onChange={(val) => onTextChange?.('menu', 'special_catchphrase', val)}
+                                isEditing={isEditing}
+                            />
+                        </p>
+                        <div className="w-full max-w-2xl relative group rounded-lg overflow-hidden shadow-2xl">
+                            <ImageWithFallback
+                                src={textSettings.menu?.special_image || '/assets/gallery_1.webp'}
+                                alt="Special"
+                                className="w-full h-auto"
+                            />
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('menu', 'special_image', 0); }}
+                                        className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                        title="画像を変更"
+                                    >
+                                        <ImageIcon size={20} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
