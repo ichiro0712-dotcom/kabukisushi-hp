@@ -101,6 +101,7 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         course_2_desc: '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀',
         special_catchphrase: '職人が握る、至高の一貫',
         special_image: '/assets/gallery_1.webp',
+        special_caption: '',
         nigiri_title: 'NIGIRI',
         nigiri_subtitle: 'Fish in Season',
         nigiri_description: '季節の魚',
@@ -1683,6 +1684,19 @@ export function LandingPage({
                                 </div>
                             )}
                         </div>
+                        {(textSettings.menu?.special_caption || isEditing) && (
+                            <p
+                                style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
+                                className="text-lg text-center text-[#e8eaec]/70 mt-8 leading-relaxed"
+                            >
+                                <InlineEditableText
+                                    value={textSettings.menu?.special_caption || ''}
+                                    onChange={(val) => onTextChange?.('menu', 'special_caption', val)}
+                                    isEditing={isEditing}
+                                    placeholder="画像下テキストを入力..."
+                                />
+                            </p>
+                        )}
                     </div>
 
                     {/* NIGIRI Section */}
