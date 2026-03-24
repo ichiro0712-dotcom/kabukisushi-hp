@@ -436,6 +436,15 @@ export default function EditorPage() {
     };
 
 
+    const handleReorderMenuItem = (sectionId: string, category: string, newOrder: number[]) => {
+        pushToHistory();
+        setTextSettings(prev => {
+            const currentSection = { ...prev[sectionId] };
+            currentSection[`${category}_order`] = newOrder.join(',');
+            return { ...prev, [sectionId]: currentSection };
+        });
+    };
+
     const handleMenuImageEdit = (sectionId: string, category: string, index: number) => {
         setEditingMenuImage({ sectionId, category, index });
         setShowAssetLibrary(true);
@@ -1052,6 +1061,7 @@ export default function EditorPage() {
                                         onAddMenuItem={handleAddMenuItem}
                                         onDeleteMenuItem={handleDeleteMenuItem}
                                         onMenuImageEdit={handleMenuImageEdit}
+                                        onReorderMenuItem={handleReorderMenuItem}
                                         onLayoutChange={handleLayoutChange}
                                         activeSection={activeSection}
                                         backgroundSettings={backgroundSettings}

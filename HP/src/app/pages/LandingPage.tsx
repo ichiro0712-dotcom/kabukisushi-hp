@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText, Trash2, EyeOff, Ban, Globe, Plus } from 'lucide-react';
+import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenter, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, FileText, Trash2, EyeOff, Ban, Globe, Plus, GripVertical } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
@@ -22,6 +23,7 @@ interface LandingPageProps {
     textSettings?: Record<string, Record<string, string>>;
     onLayoutChange?: (sectionId: string, config: Partial<LayoutConfig>) => void;
     onMenuImageEdit?: (sectionId: string, category: string, index: number) => void;
+    onReorderMenuItem?: (sectionId: string, category: string, newOrder: number[]) => void;
 }
 
 
@@ -714,11 +716,22 @@ interface MenuItemControlsProps {
     onToggleSoldOut: () => void;
     isHidden: boolean;
     onToggleHidden: () => void;
+    dragHandleProps?: { attributes: Record<string, any>; listeners: Record<string, any> | undefined };
 }
 
-export function MenuItemControls({ onDelete, isSoldOut, onToggleSoldOut, isHidden, onToggleHidden }: MenuItemControlsProps) {
+export function MenuItemControls({ onDelete, isSoldOut, onToggleSoldOut, isHidden, onToggleHidden, dragHandleProps }: MenuItemControlsProps) {
     return (
         <div className="absolute top-2 left-2 z-20 flex gap-2 pointer-events-auto">
+            {dragHandleProps && (
+                <div
+                    {...dragHandleProps.attributes}
+                    {...dragHandleProps.listeners}
+                    className="editor-control-button cursor-grab active:cursor-grabbing"
+                    title="ドラッグして並び替え"
+                >
+                    <GripVertical size={14} />
+                </div>
+            )}
             <button
                 onClick={(e) => { e.stopPropagation(); onToggleSoldOut(); }}
                 className={`editor-control-button ${isSoldOut ? 'active-sold-out' : ''}`}
@@ -825,10 +838,32 @@ export function LandingPage({
     onAddMenuItem,
     onDeleteMenuItem,
     onMenuImageEdit,
+    onReorderMenuItem,
     onLayoutChange
 }: LandingPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const links = STORE_CONFIGS[storeId].links;
+
+    // Helper: get ordered indices for a menu category, respecting saved order
+    const getOrderedIndices = (section: Record<string, string> | undefined, category: string, keyPrefix?: string) => {
+        if (!section) return [];
+        const prefix = keyPrefix || category;
+        const isGallery = category === 'image';
+        const indices = Object.keys(section)
+            .filter(key => isGallery ? (key.startsWith('image_') && !key.includes('_image')) : (key.startsWith(`${prefix}_`) && key.endsWith('_name')))
+            .map(key => isGallery ? parseInt(key.split('_')[1]) : parseInt(key.split('_')[1]))
+            .filter(num => !isNaN(num));
+
+        const orderKey = `${category}_order`;
+        const savedOrder = section[orderKey];
+        if (savedOrder) {
+            const orderArr = savedOrder.split(',').map(Number).filter(n => !isNaN(n));
+            // Include any indices not in saved order (newly added items)
+            const missing = indices.filter(i => !orderArr.includes(i));
+            return [...orderArr.filter(i => indices.includes(i)), ...missing];
+        }
+        return indices.sort((a, b) => a - b);
+    };
 
     // Local state for settings when running in public mode (not editing)
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
@@ -1302,19 +1337,32 @@ export function LandingPage({
                             isEditing={isEditing}
                         />
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {Object.keys(textSettings.gallery || {})
-                            .filter(key => key.startsWith('image_'))
-                            .map(key => ({ key, index: parseInt(key.split('_')[1]) }))
-                            .sort((a, b) => a.index - b.index)
-                            .map(({ key, index }) => (
-                                <div key={key} className="group relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
-                                    <ImageWithFallback
-                                        src={textSettings.gallery![key]}
-                                        alt={`Gallery ${index + 1}`}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                    {isEditing && (
+                    <SortableMenuGrid
+                        items={getOrderedIndices(textSettings.gallery, 'image')}
+                        isEditing={isEditing}
+                        gridClassName="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+                        onReorder={(newOrder) => onReorderMenuItem?.('gallery', 'image', newOrder)}
+                        renderItem={(index, dragHandleProps) => (
+                            <div className="group relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                                <ImageWithFallback
+                                    src={textSettings.gallery![`image_${index}`]}
+                                    alt={`Gallery ${index + 1}`}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                {isEditing && (
+                                    <>
+                                        <div className="absolute top-2 left-2 z-20 flex gap-2 pointer-events-auto">
+                                            {dragHandleProps && (
+                                                <div
+                                                    {...dragHandleProps.attributes}
+                                                    {...dragHandleProps.listeners}
+                                                    className="editor-control-button cursor-grab active:cursor-grabbing"
+                                                    title="ドラッグして並び替え"
+                                                >
+                                                    <GripVertical size={14} />
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                             <button
                                                 onClick={(e) => {
@@ -1337,10 +1385,11 @@ export function LandingPage({
                                                 <X size={16} />
                                             </button>
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        {isEditing && (
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        addButton={isEditing ? (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -1351,8 +1400,8 @@ export function LandingPage({
                                 <Plus size={24} />
                                 <span className="text-xs font-bold">項目を追加</span>
                             </button>
-                        )}
-                    </div>
+                        ) : undefined}
+                    />
                 </div>
             </section>
 
@@ -1626,116 +1675,111 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {(() => {
-                                const nigiriIndices = Object.keys(textSettings.menu || {})
-                                    .filter(key => key.startsWith('nigiri_') && key.endsWith('_name'))
-                                    .map(key => parseInt(key.split('_')[1]))
-                                    .filter(num => !isNaN(num))
-                                    .sort((a, b) => a - b);
+                        <SortableMenuGrid
+                            items={getOrderedIndices(textSettings.menu, 'nigiri')}
+                            isEditing={isEditing}
+                            gridClassName="grid grid-cols-2 md:grid-cols-3 gap-2"
+                            onReorder={(newOrder) => onReorderMenuItem?.('menu', 'nigiri', newOrder)}
+                            renderItem={(index, dragHandleProps) => {
+                                const name = textSettings.menu?.[`nigiri_${index}_name`] || '';
+                                const price = textSettings.menu?.[`nigiri_${index}_price`] || '';
+                                const image = textSettings.menu?.[`nigiri_${index}_image`];
+                                const note = textSettings.menu?.[`nigiri_${index}_note`] || '';
+                                const isSoldOut = textSettings.menu?.[`nigiri_${index}_soldOut`] === 'true';
+                                const isHidden = textSettings.menu?.[`nigiri_${index}_hidden`] === 'true';
 
-                                return nigiriIndices.map(index => {
-                                    const name = textSettings.menu?.[`nigiri_${index}_name`] || '';
-                                    const price = textSettings.menu?.[`nigiri_${index}_price`] || '';
-                                    const image = textSettings.menu?.[`nigiri_${index}_image`];
-                                    const note = textSettings.menu?.[`nigiri_${index}_note`] || '';
-                                    const isSoldOut = textSettings.menu?.[`nigiri_${index}_soldOut`] === 'true';
-                                    const isHidden = textSettings.menu?.[`nigiri_${index}_hidden`] === 'true';
+                                if (!isEditing && isHidden) return null;
 
-                                    if (!isEditing && isHidden) return null;
-
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
-                                        >
-                                            {isEditing && (
-                                                <>
-                                                    {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
-                                                    <MenuItemControls
-                                                        onDelete={() => onDeleteMenuItem?.('menu', 'nigiri', index)}
-                                                        isSoldOut={isSoldOut}
-                                                        onToggleSoldOut={() => onTextChange?.('menu', `nigiri_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                        isHidden={isHidden}
-                                                        onToggleHidden={() => onTextChange?.('menu', `nigiri_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                    />
-                                                </>
-                                            )}
-                                            {image && (
-                                                <div className="relative group aspect-square">
-                                                    <ImageWithFallback
-                                                        src={image}
-                                                        alt={name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {isEditing && (
-                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    onMenuImageEdit?.('menu', 'nigiri', index);
-                                                                }}
-                                                                className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
-                                                            >
-                                                                <ImageIcon size={14} />
-                                                                編集
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                    {/* Overlay with name and price */}
-                                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
-                                                        <h4
-                                                            style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
-                                                            className="font-bold text-sm text-white"
-                                                            onClick={(e) => e.stopPropagation()}
+                                return (
+                                    <div
+                                        className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                    >
+                                        {isEditing && (
+                                            <>
+                                                {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
+                                                <MenuItemControls
+                                                    onDelete={() => onDeleteMenuItem?.('menu', 'nigiri', index)}
+                                                    isSoldOut={isSoldOut}
+                                                    onToggleSoldOut={() => onTextChange?.('menu', `nigiri_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                    isHidden={isHidden}
+                                                    onToggleHidden={() => onTextChange?.('menu', `nigiri_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                    dragHandleProps={dragHandleProps}
+                                                />
+                                            </>
+                                        )}
+                                        {image && (
+                                            <div className="relative group aspect-square">
+                                                <ImageWithFallback
+                                                    src={image}
+                                                    alt={name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                {isEditing && (
+                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onMenuImageEdit?.('menu', 'nigiri', index);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
                                                         >
-                                                            <InlineEditableText
-                                                                value={name}
-                                                                onChange={(val) => onTextChange?.('menu', `nigiri_${index}_name`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </h4>
-                                                        <div
-                                                            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
-                                                            className="text-[#deb55a] font-bold text-xs"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            ¥<InlineEditableText
-                                                                value={price}
-                                                                onChange={(val) => onTextChange?.('menu', `nigiri_${index}_price`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </div>
+                                                            <ImageIcon size={14} />
+                                                            編集
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {/* Overlay with name and price */}
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
+                                                    <h4
+                                                        style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
+                                                        className="font-bold text-sm text-white"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <InlineEditableText
+                                                            value={name}
+                                                            onChange={(val) => onTextChange?.('menu', `nigiri_${index}_name`, val)}
+                                                            isEditing={isEditing}
+                                                        />
+                                                    </h4>
+                                                    <div
+                                                        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                                                        className="text-[#deb55a] font-bold text-xs"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        ¥<InlineEditableText
+                                                            value={price}
+                                                            onChange={(val) => onTextChange?.('menu', `nigiri_${index}_price`, val)}
+                                                            isEditing={isEditing}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                            <MenuTranslationsEditor
-                                                sectionId="menu"
-                                                category="nigiri"
-                                                index={index}
-                                                textSettings={textSettings}
-                                                onTextChange={onTextChange}
-                                                isEditing={isEditing}
-                                                hasSubName={true}
-                                            />
-                                            {(note || isEditing) && (
-                                                <div
-                                                    className="text-sm text-[#e8eaec]/60 mt-1 px-1"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <InlineEditableText
-                                                        value={note}
-                                                        onChange={(val) => onTextChange?.('menu', `nigiri_${index}_note`, val)}
-                                                        isEditing={isEditing}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                });
-                            })()}
-
-                            {isEditing && (
+                                            </div>
+                                        )}
+                                        <MenuTranslationsEditor
+                                            sectionId="menu"
+                                            category="nigiri"
+                                            index={index}
+                                            textSettings={textSettings}
+                                            onTextChange={onTextChange}
+                                            isEditing={isEditing}
+                                            hasSubName={true}
+                                        />
+                                        {(note || isEditing) && (
+                                            <div
+                                                className="text-sm text-[#e8eaec]/60 mt-1 px-1"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <InlineEditableText
+                                                    value={note}
+                                                    onChange={(val) => onTextChange?.('menu', `nigiri_${index}_note`, val)}
+                                                    isEditing={isEditing}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }}
+                            addButton={isEditing ? (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -1748,8 +1792,8 @@ export function LandingPage({
                                         <div className="font-bold text-sm">項目を追加</div>
                                     </div>
                                 </button>
-                            )}
-                        </div>
+                            ) : undefined}
+                        />
                     </div>
 
 
@@ -1770,115 +1814,110 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {(() => {
-                                const makimonoIndices = Object.keys(textSettings.menu || {})
-                                    .filter(key => key.startsWith('makimono_') && key.endsWith('_name'))
-                                    .map(key => parseInt(key.split('_')[1]))
-                                    .filter(num => !isNaN(num))
-                                    .sort((a, b) => a - b);
+                        <SortableMenuGrid
+                            items={getOrderedIndices(textSettings.menu, 'makimono')}
+                            isEditing={isEditing}
+                            gridClassName="grid grid-cols-2 md:grid-cols-3 gap-2"
+                            onReorder={(newOrder) => onReorderMenuItem?.('menu', 'makimono', newOrder)}
+                            renderItem={(index, dragHandleProps) => {
+                                const name = textSettings.menu?.[`makimono_${index}_name`] || '';
+                                const price = textSettings.menu?.[`makimono_${index}_price`] || '';
+                                const image = textSettings.menu?.[`makimono_${index}_image`];
+                                const note = textSettings.menu?.[`makimono_${index}_note`] || '';
+                                const isSoldOut = textSettings.menu?.[`makimono_${index}_soldOut`] === 'true';
+                                const isHidden = textSettings.menu?.[`makimono_${index}_hidden`] === 'true';
 
-                                return makimonoIndices.map(index => {
-                                    const name = textSettings.menu?.[`makimono_${index}_name`] || '';
-                                    const price = textSettings.menu?.[`makimono_${index}_price`] || '';
-                                    const image = textSettings.menu?.[`makimono_${index}_image`];
-                                    const note = textSettings.menu?.[`makimono_${index}_note`] || '';
-                                    const isSoldOut = textSettings.menu?.[`makimono_${index}_soldOut`] === 'true';
-                                    const isHidden = textSettings.menu?.[`makimono_${index}_hidden`] === 'true';
+                                if (!isEditing && isHidden) return null;
 
-                                    if (!isEditing && isHidden) return null;
-
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
-                                        >
-                                            {isEditing && (
-                                                <>
-                                                    {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
-                                                    <MenuItemControls
-                                                        onDelete={() => onDeleteMenuItem?.('menu', 'makimono', index)}
-                                                        isSoldOut={isSoldOut}
-                                                        onToggleSoldOut={() => onTextChange?.('menu', `makimono_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                        isHidden={isHidden}
-                                                        onToggleHidden={() => onTextChange?.('menu', `makimono_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                    />
-                                                </>
-                                            )}
-                                            {image && (
-                                                <div className="relative group aspect-square">
-                                                    <ImageWithFallback
-                                                        src={image}
-                                                        alt={name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {isEditing && (
-                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    onMenuImageEdit?.('menu', 'makimono', index);
-                                                                }}
-                                                                className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
-                                                            >
-                                                                <ImageIcon size={14} />
-                                                                編集
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                    {/* Overlay with name and price */}
-                                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
-                                                        <h4
-                                                            style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
-                                                            className="font-bold text-sm text-white"
-                                                            onClick={(e) => e.stopPropagation()}
+                                return (
+                                    <div
+                                        className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                    >
+                                        {isEditing && (
+                                            <>
+                                                {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
+                                                <MenuItemControls
+                                                    onDelete={() => onDeleteMenuItem?.('menu', 'makimono', index)}
+                                                    isSoldOut={isSoldOut}
+                                                    onToggleSoldOut={() => onTextChange?.('menu', `makimono_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                    isHidden={isHidden}
+                                                    onToggleHidden={() => onTextChange?.('menu', `makimono_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                    dragHandleProps={dragHandleProps}
+                                                />
+                                            </>
+                                        )}
+                                        {image && (
+                                            <div className="relative group aspect-square">
+                                                <ImageWithFallback
+                                                    src={image}
+                                                    alt={name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                {isEditing && (
+                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onMenuImageEdit?.('menu', 'makimono', index);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
                                                         >
-                                                            <InlineEditableText
-                                                                value={name}
-                                                                onChange={(val) => onTextChange?.('menu', `makimono_${index}_name`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </h4>
-                                                        <div
-                                                            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
-                                                            className="text-[#deb55a] font-bold text-xs"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            ¥<InlineEditableText
-                                                                value={price}
-                                                                onChange={(val) => onTextChange?.('menu', `makimono_${index}_price`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </div>
+                                                            <ImageIcon size={14} />
+                                                            編集
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {/* Overlay with name and price */}
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
+                                                    <h4
+                                                        style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
+                                                        className="font-bold text-sm text-white"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <InlineEditableText
+                                                            value={name}
+                                                            onChange={(val) => onTextChange?.('menu', `makimono_${index}_name`, val)}
+                                                            isEditing={isEditing}
+                                                        />
+                                                    </h4>
+                                                    <div
+                                                        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                                                        className="text-[#deb55a] font-bold text-xs"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        ¥<InlineEditableText
+                                                            value={price}
+                                                            onChange={(val) => onTextChange?.('menu', `makimono_${index}_price`, val)}
+                                                            isEditing={isEditing}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                            <MenuTranslationsEditor
-                                                sectionId="menu"
-                                                category="makimono"
-                                                index={index}
-                                                textSettings={textSettings}
-                                                onTextChange={onTextChange}
-                                                isEditing={isEditing}
-                                            />
-                                            {(note || isEditing) && (
-                                                <div
-                                                    className="text-sm text-[#e8eaec]/60 mt-1 px-1"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <InlineEditableText
-                                                        value={note}
-                                                        onChange={(val) => onTextChange?.('menu', `makimono_${index}_note`, val)}
-                                                        isEditing={isEditing}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                });
-                            })()}
-
-                            {isEditing && (
+                                            </div>
+                                        )}
+                                        <MenuTranslationsEditor
+                                            sectionId="menu"
+                                            category="makimono"
+                                            index={index}
+                                            textSettings={textSettings}
+                                            onTextChange={onTextChange}
+                                            isEditing={isEditing}
+                                        />
+                                        {(note || isEditing) && (
+                                            <div
+                                                className="text-sm text-[#e8eaec]/60 mt-1 px-1"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <InlineEditableText
+                                                    value={note}
+                                                    onChange={(val) => onTextChange?.('menu', `makimono_${index}_note`, val)}
+                                                    isEditing={isEditing}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }}
+                            addButton={isEditing ? (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -1891,8 +1930,8 @@ export function LandingPage({
                                         <div className="font-bold text-sm">項目を追加</div>
                                     </div>
                                 </button>
-                            )}
-                        </div>
+                            ) : undefined}
+                        />
                     </div>
 
 
@@ -1913,115 +1952,110 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {(() => {
-                                const ippinIndices = Object.keys(textSettings.menu || {})
-                                    .filter(key => key.startsWith('ippin_') && key.endsWith('_name'))
-                                    .map(key => parseInt(key.split('_')[1]))
-                                    .filter(num => !isNaN(num))
-                                    .sort((a, b) => a - b);
+                        <SortableMenuGrid
+                            items={getOrderedIndices(textSettings.menu, 'ippin')}
+                            isEditing={isEditing}
+                            gridClassName="grid grid-cols-2 md:grid-cols-3 gap-2"
+                            onReorder={(newOrder) => onReorderMenuItem?.('menu', 'ippin', newOrder)}
+                            renderItem={(index, dragHandleProps) => {
+                                const name = textSettings.menu?.[`ippin_${index}_name`] || '';
+                                const price = textSettings.menu?.[`ippin_${index}_price`] || '';
+                                const image = textSettings.menu?.[`ippin_${index}_image`];
+                                const note = textSettings.menu?.[`ippin_${index}_note`] || '';
+                                const isSoldOut = textSettings.menu?.[`ippin_${index}_soldOut`] === 'true';
+                                const isHidden = textSettings.menu?.[`ippin_${index}_hidden`] === 'true';
 
-                                return ippinIndices.map(index => {
-                                    const name = textSettings.menu?.[`ippin_${index}_name`] || '';
-                                    const price = textSettings.menu?.[`ippin_${index}_price`] || '';
-                                    const image = textSettings.menu?.[`ippin_${index}_image`];
-                                    const note = textSettings.menu?.[`ippin_${index}_note`] || '';
-                                    const isSoldOut = textSettings.menu?.[`ippin_${index}_soldOut`] === 'true';
-                                    const isHidden = textSettings.menu?.[`ippin_${index}_hidden`] === 'true';
+                                if (!isEditing && isHidden) return null;
 
-                                    if (!isEditing && isHidden) return null;
-
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
-                                        >
-                                            {isEditing && (
-                                                <>
-                                                    {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
-                                                    <MenuItemControls
-                                                        onDelete={() => onDeleteMenuItem?.('menu', 'ippin', index)}
-                                                        isSoldOut={isSoldOut}
-                                                        onToggleSoldOut={() => onTextChange?.('menu', `ippin_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
-                                                        isHidden={isHidden}
-                                                        onToggleHidden={() => onTextChange?.('menu', `ippin_${index}_hidden`, isHidden ? 'false' : 'true')}
-                                                    />
-                                                </>
-                                            )}
-                                            {image && (
-                                                <div className="relative group aspect-square">
-                                                    <ImageWithFallback
-                                                        src={image}
-                                                        alt={name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {isEditing && (
-                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    onMenuImageEdit?.('menu', 'ippin', index);
-                                                                }}
-                                                                className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
-                                                            >
-                                                                <ImageIcon size={14} />
-                                                                編集
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                    {/* Overlay with name and price */}
-                                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
-                                                        <h4
-                                                            style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
-                                                            className="font-bold text-sm text-white"
-                                                            onClick={(e) => e.stopPropagation()}
+                                return (
+                                    <div
+                                        className={`relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}
+                                    >
+                                        {isEditing && (
+                                            <>
+                                                {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
+                                                <MenuItemControls
+                                                    onDelete={() => onDeleteMenuItem?.('menu', 'ippin', index)}
+                                                    isSoldOut={isSoldOut}
+                                                    onToggleSoldOut={() => onTextChange?.('menu', `ippin_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
+                                                    isHidden={isHidden}
+                                                    onToggleHidden={() => onTextChange?.('menu', `ippin_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                    dragHandleProps={dragHandleProps}
+                                                />
+                                            </>
+                                        )}
+                                        {image && (
+                                            <div className="relative group aspect-square">
+                                                <ImageWithFallback
+                                                    src={image}
+                                                    alt={name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                {isEditing && (
+                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 pointer-events-none">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onMenuImageEdit?.('menu', 'ippin', index);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
                                                         >
-                                                            <InlineEditableText
-                                                                value={name}
-                                                                onChange={(val) => onTextChange?.('menu', `ippin_${index}_name`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </h4>
-                                                        <div
-                                                            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
-                                                            className="text-[#deb55a] font-bold text-xs"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            ¥<InlineEditableText
-                                                                value={price}
-                                                                onChange={(val) => onTextChange?.('menu', `ippin_${index}_price`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </div>
+                                                            <ImageIcon size={14} />
+                                                            編集
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {/* Overlay with name and price */}
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-3 pt-8">
+                                                    <h4
+                                                        style={{ fontFamily: "'Archivo Narrow', sans-serif", textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9)' }}
+                                                        className="font-bold text-sm text-white"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <InlineEditableText
+                                                            value={name}
+                                                            onChange={(val) => onTextChange?.('menu', `ippin_${index}_name`, val)}
+                                                            isEditing={isEditing}
+                                                        />
+                                                    </h4>
+                                                    <div
+                                                        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+                                                        className="text-[#deb55a] font-bold text-xs"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        ¥<InlineEditableText
+                                                            value={price}
+                                                            onChange={(val) => onTextChange?.('menu', `ippin_${index}_price`, val)}
+                                                            isEditing={isEditing}
+                                                        />
                                                     </div>
                                                 </div>
-                                            )}
-                                            <MenuTranslationsEditor
-                                                sectionId="menu"
-                                                category="ippin"
-                                                index={index}
-                                                textSettings={textSettings}
-                                                onTextChange={onTextChange}
-                                                isEditing={isEditing}
-                                            />
-                                            {(note || isEditing) && (
-                                                <div
-                                                    className="text-sm text-[#e8eaec]/60 mt-1 px-1"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <InlineEditableText
-                                                        value={note}
-                                                        onChange={(val) => onTextChange?.('menu', `ippin_${index}_note`, val)}
-                                                        isEditing={isEditing}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                });
-                            })()}
-
-                            {isEditing && (
+                                            </div>
+                                        )}
+                                        <MenuTranslationsEditor
+                                            sectionId="menu"
+                                            category="ippin"
+                                            index={index}
+                                            textSettings={textSettings}
+                                            onTextChange={onTextChange}
+                                            isEditing={isEditing}
+                                        />
+                                        {(note || isEditing) && (
+                                            <div
+                                                className="text-sm text-[#e8eaec]/60 mt-1 px-1"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <InlineEditableText
+                                                    value={note}
+                                                    onChange={(val) => onTextChange?.('menu', `ippin_${index}_note`, val)}
+                                                    isEditing={isEditing}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }}
+                            addButton={isEditing ? (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -2034,8 +2068,8 @@ export function LandingPage({
                                         <div className="font-bold text-sm">項目を追加</div>
                                     </div>
                                 </button>
-                            )}
-                        </div>
+                            ) : undefined}
+                        />
                     </div>
 
 
