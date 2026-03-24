@@ -854,20 +854,6 @@ export function LandingPage({
 }: LandingPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const defaultLinks = STORE_CONFIGS[storeId].links;
-    const links = {
-        ...defaultLinks,
-        ...(textSettings?.links ? {
-            phone: textSettings.links.phone || defaultLinks.phone,
-            phoneDisplay: textSettings.links.phoneDisplay || defaultLinks.phoneDisplay,
-            instagram: textSettings.links.instagram || defaultLinks.instagram,
-            facebook: textSettings.links.facebook || defaultLinks.facebook,
-            tiktok: textSettings.links.tiktok || defaultLinks.tiktok,
-            youtube: textSettings.links.youtube || defaultLinks.youtube,
-            line: textSettings.links.line || defaultLinks.line,
-            mapsUrl: textSettings.links.mapsUrl || defaultLinks.mapsUrl,
-            reserveUrl: textSettings.links.reserveUrl || defaultLinks.reserveUrl,
-        } : {}),
-    };
 
     // Helper: get ordered indices for a menu category, respecting saved order
     const getOrderedIndices = (section: Record<string, string> | undefined, category: string, keyPrefix?: string) => {
@@ -903,6 +889,21 @@ export function LandingPage({
         const defaults = getDefaultTextSettings(storeId);
         return localTextSettings ? mergeTextSettingsWithDefaults(localTextSettings, defaults) : defaults;
     })();
+
+    const links = {
+        ...defaultLinks,
+        ...(textSettings?.links ? {
+            phone: textSettings.links.phone || defaultLinks.phone,
+            phoneDisplay: textSettings.links.phoneDisplay || defaultLinks.phoneDisplay,
+            instagram: textSettings.links.instagram || defaultLinks.instagram,
+            facebook: textSettings.links.facebook || defaultLinks.facebook,
+            tiktok: textSettings.links.tiktok || defaultLinks.tiktok,
+            youtube: textSettings.links.youtube || defaultLinks.youtube,
+            line: textSettings.links.line || defaultLinks.line,
+            mapsUrl: textSettings.links.mapsUrl || defaultLinks.mapsUrl,
+            reserveUrl: textSettings.links.reserveUrl || defaultLinks.reserveUrl,
+        } : {}),
+    };
 
     // Load settings from Supabase (fallback to localStorage) if on public page
     useEffect(() => {
