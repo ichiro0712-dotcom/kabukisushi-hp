@@ -268,7 +268,7 @@ export default function EditorPage() {
     const handleImageSelect = (url: string) => {
         if (editingMenuImage) {
             const { sectionId, category, index } = editingMenuImage;
-            const field = sectionId === 'gallery' ? `${category}_${index}` : (sectionId === 'about' || sectionId === 'affiliated' || sectionId === 'access') ? category : `${category}_${index}_image`;
+            const field = sectionId === 'gallery' ? `${category}_${index}` : (sectionId === 'about' || sectionId === 'affiliated' || sectionId === 'access' || category.endsWith('_image')) ? category : `${category}_${index}_image`;
             handleInlineTextChange(sectionId, field, url);
             setEditingMenuImage(null);
         } else if (backgroundEditSection) {
