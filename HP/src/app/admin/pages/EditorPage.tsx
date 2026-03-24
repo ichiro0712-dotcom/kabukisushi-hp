@@ -27,7 +27,8 @@ import {
     UserCog,
     Lock,
     LogOut,
-    BarChart3
+    BarChart3,
+    MoreHorizontal
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
@@ -88,6 +89,7 @@ export default function EditorPage() {
     const selectedStoreRef = useRef<StoreId>(selectedStore);
     const [showMarketingTagGuide, setShowMarketingTagGuide] = useState(false);
     const [showInfoPanel, setShowInfoPanel] = useState(false);
+    const [showMoreMenu, setShowMoreMenu] = useState(false);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -887,116 +889,84 @@ export default function EditorPage() {
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 bg-[#e0e0e0]">
                 {/* Top Bar */}
-                <div className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2 ml-2">
-                            <button
-                                onClick={() => window.open('https://kabuki-sushi.co.jp/', '_blank')}
-                                className="flex items-center gap-2 p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all group"
-                                title="公開サイトを確認 (新しいタブで開く)"
-                            >
-                                <ExternalLink size={18} className="group-hover:scale-110 transition-transform" />
-                                <span className="text-xs font-bold">サイトを表示</span>
-                            </button>
-                            <select
-                                value={selectedStore}
-                                onChange={(e) => handleStoreSwitch(e.target.value as StoreId)}
-                                className="text-xs font-bold text-gray-900 bg-transparent border border-gray-200 rounded px-2 py-1 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                {(Object.values(STORE_CONFIGS) as Array<{ id: StoreId; displayName: string }>).map((store) => (
-                                    <option key={store.id} value={store.id}>
-                                        {store.displayName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="h-4 w-px bg-gray-300" />
-                        <button
-                            onClick={() => setShowInfoPanel(!showInfoPanel)}
-                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${showInfoPanel ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shadow-sm z-10">
+                    {/* Left: Store + Page + Device */}
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={selectedStore}
+                            onChange={(e) => handleStoreSwitch(e.target.value as StoreId)}
+                            className="text-xs font-bold text-gray-900 bg-transparent border border-gray-200 rounded-md px-2 py-1.5 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            <Settings size={14} />
-                            情報
-                        </button>
-                        <div className="h-4 w-px bg-gray-300" />
-                        <div className="flex items-center gap-4">
-                            <div className="flex bg-gray-100 p-1 rounded-lg">
-                                <button
-                                    onClick={() => setEditPage('landing')}
-                                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${editPage === 'landing' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    <FileText size={14} />
-                                    日本語
-                                </button>
-                                <button
-                                    onClick={() => setEditPage('traveler')}
-                                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${editPage === 'traveler' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    <Globe size={14} />
-                                    Foreign (English)
-                                </button>
-                            </div>
-
-                            <div className="flex bg-gray-100 p-1 rounded-lg">
-                                <button
-                                    onClick={() => setDevice('desktop')}
-                                    className={`p-1.5 rounded-md transition-all ${device === 'desktop' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
-                                >
-                                    <Monitor size={18} />
-                                </button>
-                                <button
-                                    onClick={() => setDevice('mobile')}
-                                    className={`p-1.5 rounded-md transition-all ${device === 'mobile' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
-                                >
-                                    <Smartphone size={18} />
-                                </button>
-                            </div>
+                            {(Object.values(STORE_CONFIGS) as Array<{ id: StoreId; displayName: string }>).map((store) => (
+                                <option key={store.id} value={store.id}>
+                                    {store.shortName}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="h-5 w-px bg-gray-200" />
+                        <div className="flex bg-gray-100 p-0.5 rounded-md">
+                            <button
+                                onClick={() => setEditPage('landing')}
+                                className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${editPage === 'landing' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                JP
+                            </button>
+                            <button
+                                onClick={() => setEditPage('traveler')}
+                                className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${editPage === 'traveler' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                EN
+                            </button>
+                        </div>
+                        <div className="flex bg-gray-100 p-0.5 rounded-md">
+                            <button
+                                onClick={() => setDevice('desktop')}
+                                className={`p-1 rounded transition-all ${device === 'desktop' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
+                                title="デスクトップ"
+                            >
+                                <Monitor size={14} />
+                            </button>
+                            <button
+                                onClick={() => setDevice('mobile')}
+                                className={`p-1 rounded transition-all ${device === 'mobile' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
+                                title="モバイル"
+                            >
+                                <Smartphone size={14} />
+                            </button>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setShowHelpModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#deb55a] to-[#c9a347] text-[#1C1C1C] rounded-md hover:from-[#c9a347] to-[#b89236] transition-all shadow-md font-bold text-sm"
-                            title="使い方ガイド"
-                        >
-                            <HelpCircle size={18} />
-                            使い方
-                        </button>
+                    {/* Center: Info toggle */}
+                    <button
+                        onClick={() => setShowInfoPanel(!showInfoPanel)}
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${showInfoPanel ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    >
+                        <Settings size={13} />
+                        店舗情報
+                    </button>
 
-                        <button
-                            onClick={() => setShowMarketingTagGuide(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md font-bold text-sm"
-                            title="タグ埋め込み指示書"
-                        >
-                            <FileText size={18} />
-                            タグ埋め込み指示書
-                        </button>
-
-                        <div className="flex items-center gap-2 bg-gray-50 rounded-md p-1">
+                    {/* Right: Undo/Redo + Save + More menu */}
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-0.5">
                             <button
                                 onClick={undo}
                                 disabled={past.length === 0}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${past.length > 0 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
-                                title="元に戻す (Undo)"
+                                className={`p-1.5 rounded-md transition-all ${past.length > 0 ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}`}
+                                title="元に戻す"
                             >
-                                <Undo size={16} />
-                                <span className="text-[11px] font-bold">戻る</span>
+                                <Undo size={15} />
                             </button>
                             <button
                                 onClick={redo}
                                 disabled={future.length === 0}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${future.length > 0 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
-                                title="やり直す (Redo)"
+                                className={`p-1.5 rounded-md transition-all ${future.length > 0 ? 'text-gray-600 hover:bg-gray-100' : 'text-gray-300 cursor-not-allowed'}`}
+                                title="やり直す"
                             >
-                                <span className="text-[11px] font-bold">進む</span>
-                                <Redo size={16} />
+                                <Redo size={15} />
                             </button>
                         </div>
-
                         <button
                             onClick={async () => {
-                                // Flush pending debounce
                                 if (supabaseSaveTimerRef.current) {
                                     clearTimeout(supabaseSaveTimerRef.current);
                                     supabaseSaveTimerRef.current = undefined;
@@ -1014,32 +984,62 @@ export default function EditorPage() {
                                 }
                                 alert(success ? '保存しました!' : '保存に失敗しました。再度お試しください。');
                             }}
-                            className="px-5 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded shadow transition-colors"
+                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-md shadow-sm transition-colors"
                         >
                             保存
                         </button>
-
                         {supabaseSaveError && (
-                            <span className="text-[10px] text-red-500 font-bold animate-pulse" title="Supabase保存に失敗しています">
-                                保存エラー
-                            </span>
+                            <span className="text-[10px] text-red-500 font-bold animate-pulse">!</span>
                         )}
-
-                        <button
-                            onClick={() => {
-                                logout();
-                                navigate('/admin/login');
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
-                            title="ログアウト"
-                        >
-                            <LogOut size={16} />
-                            <span>終了</span>
-                        </button>
-
-                        <span className="text-[10px] text-gray-400 italic">
-                            最終保存: {lastSavedTime ? lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '未保存'}
-                        </span>
+                        {lastSavedTime && (
+                            <span className="text-[10px] text-gray-400">{lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        )}
+                        {/* More menu */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                                className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                                title="その他"
+                            >
+                                <MoreHorizontal size={16} />
+                            </button>
+                            {showMoreMenu && (
+                                <>
+                                    <div className="fixed inset-0 z-30" onClick={() => setShowMoreMenu(false)} />
+                                    <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-40">
+                                        <button
+                                            onClick={() => { window.open('https://kabuki-sushi.co.jp/', '_blank'); setShowMoreMenu(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <ExternalLink size={15} className="text-gray-400" />
+                                            サイトを表示
+                                        </button>
+                                        <button
+                                            onClick={() => { setShowHelpModal(true); setShowMoreMenu(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <HelpCircle size={15} className="text-gray-400" />
+                                            使い方ガイド
+                                        </button>
+                                        <button
+                                            onClick={() => { setShowMarketingTagGuide(true); setShowMoreMenu(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <FileText size={15} className="text-gray-400" />
+                                            タグ埋め込み指示書
+                                        </button>
+                                        <div className="h-px bg-gray-100 my-1" />
+                                        <button
+                                            onClick={() => { logout(); navigate('/admin/login'); setShowMoreMenu(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                                        >
+                                            <LogOut size={15} />
+                                            ログアウト
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 

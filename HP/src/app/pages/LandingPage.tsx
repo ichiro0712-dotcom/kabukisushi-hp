@@ -1265,12 +1265,12 @@ export function LandingPage({
                         </a>
 
                         {/* Social Icons */}
-                        <div className="flex items-center gap-3 mt-6">
-                            {links.line && <a href={links.line} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><LineIcon size={14} /></a>}
-                            <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Instagram size={14} /></a>
-                            <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Facebook size={14} /></a>
-                            <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Music2 size={14} /></a>
-                            <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="text-[#e8eaec]/60 hover:text-[#deb55a] transition-colors"><Youtube size={14} /></a>
+                        <div className="flex items-center gap-4 mt-8">
+                            {links.line && <a href={links.line} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec]/80 hover:text-[#deb55a] transition-all"><LineIcon size={20} /></a>}
+                            <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec]/80 hover:text-[#deb55a] transition-all"><Instagram size={20} /></a>
+                            <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec]/80 hover:text-[#deb55a] transition-all"><Facebook size={20} /></a>
+                            <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec]/80 hover:text-[#deb55a] transition-all"><Music2 size={20} /></a>
+                            <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#deb55a]/20 text-[#e8eaec]/80 hover:text-[#deb55a] transition-all"><Youtube size={20} /></a>
                         </div>
                     </div>
                 </div>
