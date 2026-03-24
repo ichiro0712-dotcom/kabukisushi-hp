@@ -9,6 +9,7 @@ export interface StoreLinks {
   facebook: string;
   tiktok: string;
   youtube: string;
+  line: string;
 }
 
 export interface StoreConfig {
@@ -38,6 +39,7 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
       facebook: 'https://www.facebook.com/profile.php?id=100068484907117&locale=hi_IN',
       tiktok: 'https://www.tiktok.com/@kabukisushi1',
       youtube: 'https://www.youtube.com/@KABUKI-ev3sy',
+      line: '',
     },
   },
   ichiban: {
@@ -56,6 +58,7 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
       facebook: 'https://www.facebook.com/profile.php?id=100068484907117',
       tiktok: 'https://www.tiktok.com/@kabukisushi1',
       youtube: 'https://www.youtube.com/@KABUKI-ev3sy',
+      line: '',
     },
   },
 };

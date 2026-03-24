@@ -87,6 +87,7 @@ export default function EditorPage() {
     const [selectedStore, setSelectedStore] = useState<StoreId>('honten');
     const selectedStoreRef = useRef<StoreId>(selectedStore);
     const [showMarketingTagGuide, setShowMarketingTagGuide] = useState(false);
+    const [showInfoPanel, setShowInfoPanel] = useState(false);
 
     // Background settings state
     const [backgroundSettings, setBackgroundSettings] = useState<Record<string, BackgroundConfig>>({
@@ -910,6 +911,14 @@ export default function EditorPage() {
                             </select>
                         </div>
                         <div className="h-4 w-px bg-gray-300" />
+                        <button
+                            onClick={() => setShowInfoPanel(!showInfoPanel)}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${showInfoPanel ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            <Settings size={14} />
+                            情報
+                        </button>
+                        <div className="h-4 w-px bg-gray-300" />
                         <div className="flex items-center gap-4">
                             <div className="flex bg-gray-100 p-1 rounded-lg">
                                 <button
@@ -1033,6 +1042,108 @@ export default function EditorPage() {
                         </span>
                     </div>
                 </div>
+
+                {/* Info Panel */}
+                {showInfoPanel && (
+                    <div className="bg-white border-b border-gray-200 px-6 py-4 overflow-y-auto max-h-[50vh]">
+                        <div className="max-w-4xl mx-auto">
+                            <h3 className="text-sm font-bold text-gray-800 mb-4">店舗情報（{STORE_CONFIGS[selectedStore].displayName}）</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">電話番号（表示用）</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.phoneDisplay || STORE_CONFIGS[selectedStore].links.phoneDisplay}
+                                        onChange={(e) => handleInlineTextChange('links', 'phoneDisplay', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="03-6457-6612"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">電話番号（発信用）</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.phone || STORE_CONFIGS[selectedStore].links.phone}
+                                        onChange={(e) => handleInlineTextChange('links', 'phone', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="0364576612"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">LINE</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.line || STORE_CONFIGS[selectedStore].links.line}
+                                        onChange={(e) => handleInlineTextChange('links', 'line', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://line.me/..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">Instagram</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.instagram || STORE_CONFIGS[selectedStore].links.instagram}
+                                        onChange={(e) => handleInlineTextChange('links', 'instagram', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://www.instagram.com/..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">Facebook</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.facebook || STORE_CONFIGS[selectedStore].links.facebook}
+                                        onChange={(e) => handleInlineTextChange('links', 'facebook', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://www.facebook.com/..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">TikTok</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.tiktok || STORE_CONFIGS[selectedStore].links.tiktok}
+                                        onChange={(e) => handleInlineTextChange('links', 'tiktok', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://www.tiktok.com/..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">YouTube</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.youtube || STORE_CONFIGS[selectedStore].links.youtube}
+                                        onChange={(e) => handleInlineTextChange('links', 'youtube', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://www.youtube.com/..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">Google Map</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.mapsUrl || STORE_CONFIGS[selectedStore].links.mapsUrl}
+                                        onChange={(e) => handleInlineTextChange('links', 'mapsUrl', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://maps.app.goo.gl/..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">予約URL</label>
+                                    <input
+                                        type="text"
+                                        value={textSettings.links?.reserveUrl || STORE_CONFIGS[selectedStore].links.reserveUrl}
+                                        onChange={(e) => handleInlineTextChange('links', 'reserveUrl', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://www.tablecheck.com/..."
+                                    />
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-3">変更後「保存」ボタンを押すとサイトに反映されます</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Preview Canvas */}
                 <div className="flex-1 overflow-hidden relative flex justify-center bg-[#e0e0e0] p-8">
