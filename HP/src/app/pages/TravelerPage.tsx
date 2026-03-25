@@ -286,7 +286,11 @@ export function TravelerPage({
 
                     {/* Tagline */}
                     <p style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-sm md:text-base text-[#e8eaec]/80 mb-12 max-w-md mx-auto leading-relaxed">
-                        Authentic Edo-mae sushi in Shinjuku
+                        <InlineEditableText
+                            value={textSettings.home?.tagline_en || 'Authentic Edo-mae sushi in Shinjuku'}
+                            onChange={(val) => onTextChange?.('home', 'tagline_en', val)}
+                            isEditing={isEditing}
+                        />
                     </p>
 
                     {/* Actions Row */}
@@ -350,17 +354,22 @@ export function TravelerPage({
                     />
                 )}
                 <div className={`mx-auto ${getContainerWidthClass('about')}`}>
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 uppercase">ABOUT US</h2>
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 uppercase"><InlineEditableText value={textSettings.about?.title_en || textSettings.about?.title || 'ABOUT US'} onChange={(val) => onTextChange?.('about', 'title_en', val)} isEditing={isEditing} /></h2>
                     <div className="flex flex-col items-center gap-12">
-                        <div className="w-full max-w-4xl">
+                        <div className="w-full max-w-4xl relative group">
                             <ImageWithFallback
-                                src="/assets/about_content_new.webp"
+                                src={textSettings.about?.content_image || '/assets/about_content_new.webp'}
                                 alt="Restaurant Interior"
                                 className="rounded-lg shadow-xl w-full h-auto"
                             />
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('about', 'content', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                </div>
+                            )}
                         </div>
                         <div className="space-y-6 text-center max-w-3xl mx-auto text-lg leading-relaxed" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
-                            <p>The up-and-coming manager, who learnt Edo-mae techniques at a famous restaurant that originated in the region and is part of the Ryukyu stream, has coloured Edo-mae sushi with the present in the hope that you will enjoy authentic Edo-mae sushi without any pretensions. Enjoy a dining experience that is both authentic and innovative.</p>
+                            <p><InlineEditableText value={textSettings.about?.content_en || 'The up-and-coming manager, who learnt Edo-mae techniques at a famous restaurant that originated in the region and is part of the Ryukyu stream, has coloured Edo-mae sushi with the present in the hope that you will enjoy authentic Edo-mae sushi without any pretensions. Enjoy a dining experience that is both authentic and innovative.'} onChange={(val) => onTextChange?.('about', 'content_en', val)} isEditing={isEditing} multiline={true} /></p>
                         </div>
                     </div>
                 </div>
@@ -378,24 +387,25 @@ export function TravelerPage({
                     />
                 )}
                 <div className="max-w-7xl mx-auto px-4">
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C] uppercase">GALLERY</h2>
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C] uppercase"><InlineEditableText value={textSettings.gallery?.title_en || textSettings.gallery?.title || 'GALLERY'} onChange={(val) => onTextChange?.('gallery', 'title_en', val)} isEditing={isEditing} /></h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {[
-                            '/assets/gallery_2.webp',
-                            '/assets/gallery_4.webp',
-                            '/assets/gallery_3.webp',
-                            '/assets/gallery_5.webp',
-                            '/assets/gallery_1.webp',
-                            '/assets/gallery_6.webp',
-                            '/assets/gallery_7.webp',
-                            '/assets/gallery_8.webp',
-                            '/assets/gallery_9.webp',
-                            '/assets/gallery_10.webp',
-                        ].map((src, i) => (
-                            <div key={i} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                                <ImageWithFallback src={src} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                            </div>
-                        ))}
+                        {(() => {
+                            const galleryIndices = Object.keys(textSettings.gallery || {})
+                                .filter(key => key.startsWith('image_') && !key.includes('_order'))
+                                .map(key => parseInt(key.split('_')[1]))
+                                .filter(num => !isNaN(num))
+                                .sort((a, b) => a - b);
+                            return galleryIndices.map(index => (
+                                <div key={index} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow relative group">
+                                    <ImageWithFallback src={textSettings.gallery![`image_${index}`]} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                                    {isEditing && (
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('gallery', 'image', index); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                        </div>
+                                    )}
+                                </div>
+                            ));
+                        })()}
                     </div>
                 </div>
             </section>
@@ -407,38 +417,38 @@ export function TravelerPage({
             >
                 <div className={`mx-auto ${getContainerWidthClass('menu')}`}>
                     <div className="py-8 px-4 -mx-4 bg-[#1C1C1C]">
-                        <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#e8eaec]">Menu</h2>
+                        <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.title_en || textSettings.menu?.title || 'Menu'} onChange={(val) => onTextChange?.('menu', 'title_en', val)} isEditing={isEditing} /></h2>
                     </div>
                     {/* Course Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
-                        <div className="text-center text-xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}>Course</div>
-                        <div className="text-center text-[#e8eaec]/70 mb-12">Please select from our recommended courses</div>
+                        <div className="text-center text-xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}><InlineEditableText value={textSettings.menu?.subtitle_en || textSettings.menu?.subtitle || 'Course'} onChange={(val) => onTextChange?.('menu', 'subtitle_en', val)} isEditing={isEditing} /></div>
+                        <div className="text-center text-[#e8eaec]/70 mb-12"><InlineEditableText value={textSettings.menu?.description_en || 'Please select from our recommended courses'} onChange={(val) => onTextChange?.('menu', 'description_en', val)} isEditing={isEditing} /></div>
 
                         <div className="grid md:grid-cols-3 gap-4 mb-8">
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Standard</div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">OMAKASE 8 pieces</h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥4,980</p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">8 recommended nigiri, 1 Appetizer, Miso soup</p>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_0_label_en || textSettings.menu?.course_0_label || 'Standard'} onChange={(val) => onTextChange?.('menu', 'course_0_label_en', val)} isEditing={isEditing} /></div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.course_0_name_en || 'OMAKASE 8 pieces'} onChange={(val) => onTextChange?.('menu', 'course_0_name_en', val)} isEditing={isEditing} /></h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_0_price || '¥4,980'} onChange={(val) => onTextChange?.('menu', 'course_0_price', val)} isEditing={isEditing} /></p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed"><InlineEditableText value={textSettings.menu?.course_0_desc_en || '8 recommended nigiri, 1 Appetizer, Miso soup'} onChange={(val) => onTextChange?.('menu', 'course_0_desc_en', val)} isEditing={isEditing} /></p>
                             </div>
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Premium</div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">SPECIAL OMAKASE 8 pieces</h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥6,980</p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">8 special recommended nigiri, 1 Appetizer, Miso soup</p>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_1_label_en || textSettings.menu?.course_1_label || 'Premium'} onChange={(val) => onTextChange?.('menu', 'course_1_label_en', val)} isEditing={isEditing} /></div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.course_1_name_en || 'SPECIAL OMAKASE 8 pieces'} onChange={(val) => onTextChange?.('menu', 'course_1_name_en', val)} isEditing={isEditing} /></h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_1_price || '¥6,980'} onChange={(val) => onTextChange?.('menu', 'course_1_price', val)} isEditing={isEditing} /></p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed"><InlineEditableText value={textSettings.menu?.course_1_desc_en || '8 special recommended nigiri, 1 Appetizer, Miso soup'} onChange={(val) => onTextChange?.('menu', 'course_1_desc_en', val)} isEditing={isEditing} /></p>
                             </div>
                             <div className="group border border-[#deb55a]/40 p-6 hover:border-[#deb55a] transition-all duration-300 relative">
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}>Deluxe</div>
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Special</div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">SPECIAL OMAKASE 10 pieces</h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>¥9,900</p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">10 special recommended nigiri, 3 Pieces of Sashimi, 1 Appetizer, Miso soup</p>
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_2_badge_en || textSettings.menu?.course_2_badge || 'Deluxe'} onChange={(val) => onTextChange?.('menu', 'course_2_badge_en', val)} isEditing={isEditing} /></div>
+                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_2_label_en || textSettings.menu?.course_2_label || 'Special'} onChange={(val) => onTextChange?.('menu', 'course_2_label_en', val)} isEditing={isEditing} /></div>
+                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.course_2_name_en || 'SPECIAL OMAKASE 10 pieces'} onChange={(val) => onTextChange?.('menu', 'course_2_name_en', val)} isEditing={isEditing} /></h3>
+                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_2_price || '¥9,900'} onChange={(val) => onTextChange?.('menu', 'course_2_price', val)} isEditing={isEditing} /></p>
+                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed"><InlineEditableText value={textSettings.menu?.course_2_desc_en || '10 special recommended nigiri, 3 Pieces of Sashimi, 1 Appetizer, Miso soup'} onChange={(val) => onTextChange?.('menu', 'course_2_desc_en', val)} isEditing={isEditing} /></p>
                             </div>
                         </div>
 
                         <div className="text-center space-y-1 text-xs text-[#e8eaec]/50">
-                            <p>※All listed prices are excluding tax</p>
-                            <p>표시가격은 세금을 뺀 가격 입니다 / 表示的价格是不含税的</p>
+                            <p><InlineEditableText value={textSettings.menu?.tax_note_en || '※All listed prices are excluding tax'} onChange={(val) => onTextChange?.('menu', 'tax_note_en', val)} isEditing={isEditing} /></p>
+                            <p><InlineEditableText value={textSettings.menu?.tax_note_multi || '표시가격은 세금을 뺀 가격 입니다 / 表示的价格是不含税的'} onChange={(val) => onTextChange?.('menu', 'tax_note_multi', val)} isEditing={isEditing} /></p>
                         </div>
                     </div>
                 </div>
@@ -457,9 +467,9 @@ export function TravelerPage({
                 )}
                 <div className={`mx-auto ${getContainerWidthClass('menu')}`}>
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]">NIGIRI</h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>Fish in Season</div>
-                        <p className="text-center text-[#e8eaec]/70 mb-8">Kindly order at least 5 items per person</p>
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.nigiri_title_en || textSettings.menu?.nigiri_title || 'NIGIRI'} onChange={(val) => onTextChange?.('menu', 'nigiri_title_en', val)} isEditing={isEditing} /></h3>
+                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.nigiri_subtitle_en || textSettings.menu?.nigiri_subtitle || 'Fish in Season'} onChange={(val) => onTextChange?.('menu', 'nigiri_subtitle_en', val)} isEditing={isEditing} /></div>
+                        <p className="text-center text-[#e8eaec]/70 mb-8"><InlineEditableText value={textSettings.menu?.nigiri_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'nigiri_description_en', val)} isEditing={isEditing} /></p>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-24">
                             {(() => {
@@ -577,8 +587,8 @@ export function TravelerPage({
 
                     {/* MAKIMONO Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]">MAKIMONO</h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>Rolls</div>
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.makimono_title_en || textSettings.menu?.makimono_title || 'MAKIMONO'} onChange={(val) => onTextChange?.('menu', 'makimono_title_en', val)} isEditing={isEditing} /></h3>
+                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.makimono_subtitle_en || textSettings.menu?.makimono_subtitle || 'Rolls'} onChange={(val) => onTextChange?.('menu', 'makimono_subtitle_en', val)} isEditing={isEditing} /></div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const section = textSettings.menu || {};
@@ -685,8 +695,8 @@ export function TravelerPage({
 
                     {/* IPPIN Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
-                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]">IPPIN</h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>A La Carte</div>
+                        <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.ippin_title_en || textSettings.menu?.ippin_title || 'IPPIN'} onChange={(val) => onTextChange?.('menu', 'ippin_title_en', val)} isEditing={isEditing} /></h3>
+                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.ippin_subtitle_en || textSettings.menu?.ippin_subtitle || 'A La Carte'} onChange={(val) => onTextChange?.('menu', 'ippin_subtitle_en', val)} isEditing={isEditing} /></div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const section = textSettings.menu || {};
@@ -816,15 +826,15 @@ export function TravelerPage({
                     />
                 )}
                 <div className="max-w-6xl mx-auto px-4 relative z-10">
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#fcebc5] uppercase tracking-wider">DRINK</h2>
-                    <p className="text-center text-xl text-[#deb55a] italic mb-20 uppercase tracking-widest">Beverage Menu</p>
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-4 text-[#fcebc5] uppercase tracking-wider"><InlineEditableText value={textSettings.drink?.title_en || textSettings.drink?.title || 'DRINK'} onChange={(val) => onTextChange?.('drink', 'title_en', val)} isEditing={isEditing} /></h2>
+                    <p className="text-center text-xl text-[#deb55a] italic mb-20 uppercase tracking-widest"><InlineEditableText value={textSettings.drink?.subtitle_en || textSettings.drink?.subtitle || 'Beverage Menu'} onChange={(val) => onTextChange?.('drink', 'subtitle_en', val)} isEditing={isEditing} /></p>
 
                     <div className="space-y-24">
                         {/* NIHONSHU */}
                         <div>
                             <div className="flex items-center gap-4 mb-12">
                                 <div className="h-[2px] flex-1 bg-[#deb55a] opacity-30"></div>
-                                <h3 className="text-3xl font-bold uppercase tracking-wider text-[#deb55a]">NIHONSHU</h3>
+                                <h3 className="text-3xl font-bold uppercase tracking-wider text-[#deb55a]"><InlineEditableText value={textSettings.drink?.nihonshu_title_en || textSettings.drink?.nihonshu_title || 'NIHONSHU'} onChange={(val) => onTextChange?.('drink', 'nihonshu_title_en', val)} isEditing={isEditing} /></h3>
                                 <div className="h-[2px] flex-1 bg-[#deb55a] opacity-30"></div>
                             </div>
                             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -936,7 +946,7 @@ export function TravelerPage({
                         <div className="grid md:grid-cols-2 gap-16">
                             {/* ALCOHOL */}
                             <div>
-                                <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8">ALCOHOL</h3>
+                                <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8"><InlineEditableText value={textSettings.drink?.alcohol_title_en || textSettings.drink?.alcohol_title || 'ALCOHOL'} onChange={(val) => onTextChange?.('drink', 'alcohol_title_en', val)} isEditing={isEditing} /></h3>
                                 <div className="space-y-8">
                                     <InlineEditableText
                                         value={textSettings.drink?.alcohol_content_en || textSettings.drink?.alcohol_content || ''}
@@ -950,7 +960,7 @@ export function TravelerPage({
 
                             {/* SHOCHU */}
                             <div>
-                                <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8">SHOCHU</h3>
+                                <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8"><InlineEditableText value={textSettings.drink?.shochu_title_en || textSettings.drink?.shochu_title || 'SHOCHU'} onChange={(val) => onTextChange?.('drink', 'shochu_title_en', val)} isEditing={isEditing} /></h3>
                                 <div className="space-y-8">
                                     <InlineEditableText
                                         value={textSettings.drink?.shochu_content_en || textSettings.drink?.shochu_content || ''}
@@ -965,7 +975,7 @@ export function TravelerPage({
 
                         {/* OTHER */}
                         <div>
-                            <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8">SOFT DRINKS</h3>
+                            <h3 className="text-2xl font-bold uppercase tracking-widest text-[#deb55a] border-b border-[#deb55a]/30 pb-4 mb-8"><InlineEditableText value={textSettings.drink?.other_title_en || textSettings.drink?.other_title || 'SOFT DRINKS'} onChange={(val) => onTextChange?.('drink', 'other_title_en', val)} isEditing={isEditing} /></h3>
                             <div className="space-y-8">
                                 <InlineEditableText
                                     value={textSettings.drink?.other_content_en || textSettings.drink?.other_content || ''}
@@ -992,15 +1002,14 @@ export function TravelerPage({
                     />
                 )}
                 <div className="max-w-6xl mx-auto px-4 relative z-10">
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C] uppercase">ACCESS</h2>
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C] uppercase"><InlineEditableText value={textSettings.access?.title_en || textSettings.access?.title || 'ACCESS'} onChange={(val) => onTextChange?.('access', 'title_en', val)} isEditing={isEditing} /></h2>
                     <div className="grid md:grid-cols-2 gap-12 items-start">
                         <div className="space-y-8 text-lg text-[#1C1C1C]">
                             <div className="flex items-start gap-4">
                                 <MapPin className="text-[#deb55a] shrink-0 mt-1" />
                                 <div>
-                                    <p className="font-bold">160-0021</p>
-                                    <p>GEST34 Bldg 4F, 2-45-16 Kabukicho,</p>
-                                    <p>Shinjuku-ku, Tokyo</p>
+                                    <p className="font-bold"><InlineEditableText value={textSettings.access?.zip_en || textSettings.access?.zip || '160-0021'} onChange={(val) => onTextChange?.('access', 'zip_en', val)} isEditing={isEditing} /></p>
+                                    <InlineEditableText value={textSettings.access?.address_en || 'GEST34 Bldg 4F, 2-45-16 Kabukicho, Shinjuku-ku, Tokyo'} onChange={(val) => onTextChange?.('access', 'address_en', val)} isEditing={isEditing} multiline={true} />
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -1009,12 +1018,17 @@ export function TravelerPage({
                             </div>
                             <div className="flex items-center gap-4">
                                 <Clock className="text-[#deb55a]" />
-                                <p>OPEN : 18:00 - 24:00</p>
+                                <p><InlineEditableText value={textSettings.access?.hours_en || textSettings.access?.hours || 'OPEN : 18:00 - 24:00'} onChange={(val) => onTextChange?.('access', 'hours_en', val)} isEditing={isEditing} /></p>
                             </div>
                             <a href={links.mapsUrl} target="_blank" className="inline-block px-8 py-3 bg-[#1C1C1C] text-white rounded hover:bg-[#deb55a] transition-colors font-bold uppercase tracking-wider">Open in Google Maps</a>
                         </div>
-                        <div className="rounded-lg overflow-hidden shadow-2xl">
-                            <ImageWithFallback src="/assets/access_map.webp" alt="Map" className="w-full h-auto" />
+                        <div className="rounded-lg overflow-hidden shadow-2xl relative group">
+                            <ImageWithFallback src={textSettings.access?.map_image || '/assets/access_map.webp'} alt="Map" className="w-full h-auto" />
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('access', 'map', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1032,32 +1046,51 @@ export function TravelerPage({
                     />
                 )}
                 <div className="max-w-6xl mx-auto px-4 relative z-10">
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-4 text-[#fcebc5] uppercase">Affiliated store of KABUKI SUSHI</h2>
-                    <p className="text-center text-xl mb-12 text-gray-400 italic uppercase">Sister Stores</p>
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-4 text-[#fcebc5] uppercase"><InlineEditableText value={textSettings.affiliated?.title_en || textSettings.affiliated?.title || 'Affiliated store of KABUKI SUSHI'} onChange={(val) => onTextChange?.('affiliated', 'title_en', val)} isEditing={isEditing} /></h2>
+                    <p className="text-center text-xl mb-12 text-gray-400 italic uppercase"><InlineEditableText value={textSettings.affiliated?.subtitle_en || textSettings.affiliated?.subtitle || 'Sister Stores'} onChange={(val) => onTextChange?.('affiliated', 'subtitle_en', val)} isEditing={isEditing} /></p>
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
-                            <ImageWithFallback src="/assets/honten_card_new.webp" alt="KABUKI Sushi Main Store" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
-                            <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo">■KABUKI Sushi Main Store</h3>
+                            <div className="relative group">
+                                <ImageWithFallback src={textSettings.affiliated?.store1_image || '/assets/honten_card_new.webp'} alt="KABUKI Sushi Main Store" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store1', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                    </div>
+                                )}
+                            </div>
+                            <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo"><InlineEditableText value={textSettings.affiliated?.store1_name_en || textSettings.affiliated?.store1_name || '■KABUKI Sushi Main Store'} onChange={(val) => onTextChange?.('affiliated', 'store1_name_en', val)} isEditing={isEditing} /></h3>
                             <div className="space-y-2 text-gray-300 font-archivo">
-                                <p>Eco Place Shinjuku 1F, 2-25-8 Kabukicho, Shinjuku-ku, Tokyo</p>
-                                <p>TEL：03-6457-6612 | OPEN：18:00-4:00</p>
-                                <p>Gluten-free options available</p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store1_address_en || 'Eco Place Shinjuku 1F, 2-25-8 Kabukicho, Shinjuku-ku, Tokyo'} onChange={(val) => onTextChange?.('affiliated', 'store1_address_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store1_phone_en || textSettings.affiliated?.store1_phone || 'TEL：03-6457-6612 | OPEN：18:00-4:00'} onChange={(val) => onTextChange?.('affiliated', 'store1_phone_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store1_note_en || textSettings.affiliated?.store1_note || 'Gluten-free options available'} onChange={(val) => onTextChange?.('affiliated', 'store1_note_en', val)} isEditing={isEditing} /></p>
                             </div>
                         </div>
 
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
-                            <ImageWithFallback src="/assets/soba_card_new.webp" alt="KABUKI SOBA" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
-                            <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo">■KABUKI SOBA</h3>
+                            <div className="relative group">
+                                <ImageWithFallback src={textSettings.affiliated?.store2_image || '/assets/soba_card_new.webp'} alt="KABUKI SOBA" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store2', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                    </div>
+                                )}
+                            </div>
+                            <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo"><InlineEditableText value={textSettings.affiliated?.store2_name_en || textSettings.affiliated?.store2_name || '■KABUKI SOBA'} onChange={(val) => onTextChange?.('affiliated', 'store2_name_en', val)} isEditing={isEditing} /></h3>
                             <div className="space-y-2 text-gray-300 font-archivo">
-                                <p>Lee2 Bldg 1F, 2-27-12 Kabukicho, Shinjuku-ku, Tokyo</p>
-                                <p>TEL：03-6457-3112 | OPEN：19:00-6:00</p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store2_address_en || 'Lee2 Bldg 1F, 2-27-12 Kabukicho, Shinjuku-ku, Tokyo'} onChange={(val) => onTextChange?.('affiliated', 'store2_address_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store2_phone_en || textSettings.affiliated?.store2_phone || 'TEL：03-6457-3112 | OPEN：19:00-6:00'} onChange={(val) => onTextChange?.('affiliated', 'store2_phone_en', val)} isEditing={isEditing} /></p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-12 rounded-lg overflow-hidden shadow-2xl max-w-4xl mx-auto">
-                        <ImageWithFallback src="/assets/affiliated_map.webp" alt="Stores Map" className="w-full h-auto" />
+                    <div className="mt-12 rounded-lg overflow-hidden shadow-2xl max-w-4xl mx-auto relative group">
+                        <ImageWithFallback src={textSettings.affiliated?.map_image || '/assets/affiliated_map.webp'} alt="Stores Map" className="w-full h-auto" />
+                        {isEditing && (
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'map', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
@@ -1091,7 +1124,7 @@ export function TravelerPage({
                     </div>
 
                     <div className="text-sm text-gray-400 space-y-4">
-                        <p>Restaurant © 2019</p>
+                        <p><InlineEditableText value={textSettings.footer?.copyright_en || textSettings.footer?.copyright || 'Restaurant © 2019'} onChange={(val) => onTextChange?.('footer', 'copyright_en', val)} isEditing={isEditing} /></p>
                     </div>
                 </div>
             </footer>
