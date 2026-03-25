@@ -210,6 +210,9 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         other_content_en: 'Sanpin Tea / 500\nOolong Tea / 500\nGreen Tea / 500\nCorn Tea / 500\nCoca Cola / 500\nSparkling Water / 500',
         other_content_ko: '산핀차 / 500\n우롱차 / 500\n녹차 / 500\n옥수수차 / 500\n코카콜라 / 500\n탄산수 / 500',
         other_content_zh: '香片茶 / 500\n乌龙茶 / 500\n绿茶 / 500\n玉米茶 / 500\n可口可乐 / 500\n苏打水 / 500'
+    },
+    footer: {
+        copyright: 'Restaurant © 2019'
     }
 };
 
@@ -1261,7 +1264,13 @@ export function LandingPage({
                             className="mt-8 inline-flex items-center gap-2 px-6 py-2 border border-[#e8eaec]/40 text-xs tracking-[0.1em] text-[#e8eaec]/80 hover:text-[#deb55a] hover:border-[#deb55a] transition-all duration-300"
                         >
                             <Globe size={14} />
-                            <span>English · 中文 · 한국어</span>
+                            <span>
+                                <InlineEditableText
+                                    value={textSettings.home?.language_label || 'English · 中文 · 한국어'}
+                                    onChange={(val) => onTextChange?.('home', 'language_label', val)}
+                                    isEditing={isEditing}
+                                />
+                            </span>
                         </a>
 
                         {/* Social Icons */}
@@ -2562,7 +2571,13 @@ export function LandingPage({
                     </div>
 
                     <div className="text-sm text-gray-400 space-y-4">
-                        <p>Restaurant © 2019</p>
+                        <p>
+                            <InlineEditableText
+                                value={textSettings.footer?.copyright || 'Restaurant © 2019'}
+                                onChange={(val) => onTextChange?.('footer', 'copyright', val)}
+                                isEditing={isEditing}
+                            />
+                        </p>
 
                     </div>
                 </div>
