@@ -364,7 +364,7 @@ export function TravelerPage({
                             />
                             {isEditing && (
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('about', 'content', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                    <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('about', 'content_image', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
                                 </div>
                             )}
                         </div>
@@ -1026,7 +1026,7 @@ export function TravelerPage({
                             <ImageWithFallback src={textSettings.access?.map_image || '/assets/access_map.webp'} alt="Map" className="w-full h-auto" />
                             {isEditing && (
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('access', 'map', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                    <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('access', 'map_image', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
                                 </div>
                             )}
                         </div>
@@ -1055,7 +1055,7 @@ export function TravelerPage({
                                 <ImageWithFallback src={textSettings.affiliated?.store1_image || '/assets/honten_card_new.webp'} alt="KABUKI Sushi Main Store" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
                                 {isEditing && (
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store1', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store1_image', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
                                     </div>
                                 )}
                             </div>
@@ -1072,7 +1072,7 @@ export function TravelerPage({
                                 <ImageWithFallback src={textSettings.affiliated?.store2_image || '/assets/soba_card_new.webp'} alt="KABUKI SOBA" className="w-full aspect-[3/2] object-cover rounded-lg mb-6" />
                                 {isEditing && (
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store2', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'store2_image', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
                                     </div>
                                 )}
                             </div>
@@ -1088,7 +1088,7 @@ export function TravelerPage({
                         <ImageWithFallback src={textSettings.affiliated?.map_image || '/assets/affiliated_map.webp'} alt="Stores Map" className="w-full h-auto" />
                         {isEditing && (
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'map', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
+                                <button onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('affiliated', 'map_image', 0); }} className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg"><ImageIcon size={20} /></button>
                             </div>
                         )}
                     </div>
