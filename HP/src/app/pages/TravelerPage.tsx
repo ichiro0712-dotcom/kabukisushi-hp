@@ -322,9 +322,9 @@ export function TravelerPage({
                     <a
                         href={STORE_CONFIGS[storeId].basePath}
                         style={{ fontFamily: "'Inter', sans-serif" }}
-                        className="mt-8 inline-flex items-center gap-2 px-6 py-2 border border-[#e8eaec]/40 text-xs tracking-[0.1em] text-[#e8eaec]/80 hover:text-[#deb55a] hover:border-[#deb55a] transition-all duration-300"
+                        className="mt-8 inline-flex items-center gap-3 px-12 py-5 rounded-full bg-[#deb55a] hover:bg-[#fcebc5] text-lg font-semibold tracking-[0.1em] text-[#1a1a1a] shadow-lg shadow-[#deb55a]/30 hover:shadow-xl hover:shadow-[#deb55a]/50 hover:scale-105 transition-all duration-300"
                     >
-                        <Globe size={14} />
+                        <Globe size={26} strokeWidth={2.5} />
                         <span>日本語</span>
                     </a>
 

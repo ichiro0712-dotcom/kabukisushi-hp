@@ -1261,9 +1261,9 @@ export function LandingPage({
                         <a
                             href={STORE_CONFIGS[storeId].travelerPath}
                             style={{ fontFamily: "'Inter', sans-serif" }}
-                            className="mt-8 inline-flex items-center gap-3 px-10 py-4 border-2 border-[#e8eaec]/40 text-base tracking-[0.1em] text-[#e8eaec]/80 hover:text-[#deb55a] hover:border-[#deb55a] transition-all duration-300"
+                            className="mt-8 inline-flex items-center gap-3 px-12 py-5 rounded-full bg-[#deb55a] hover:bg-[#fcebc5] text-lg font-semibold tracking-[0.1em] text-[#1a1a1a] shadow-lg shadow-[#deb55a]/30 hover:shadow-xl hover:shadow-[#deb55a]/50 hover:scale-105 transition-all duration-300"
                         >
-                            <Globe size={22} />
+                            <Globe size={26} strokeWidth={2.5} />
                             <span>
                                 <InlineEditableText
                                     value={textSettings.home?.language_label || 'English · 中文 · 한국어'}
