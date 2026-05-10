@@ -96,9 +96,11 @@ export function SortableMenuGrid({
     if (!isEditing) {
         return (
             <div className={gridClassName}>
-                {items.map(index => (
-                    <div key={index}>{renderItem(index)}</div>
-                ))}
+                {items.map(index => {
+                    const rendered = renderItem(index);
+                    if (rendered == null) return null;
+                    return <div key={index}>{rendered}</div>;
+                })}
             </div>
         );
     }

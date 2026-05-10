@@ -9,6 +9,35 @@ export const isDynamicKey = (k: string): boolean =>
     (k.startsWith('image_') || DYNAMIC_PREFIXES.some(p => k.startsWith(p))) && !k.includes('_content');
 
 /**
+ * Get ordered indices for a menu/gallery category, respecting saved order.
+ * Used to keep LandingPage and TravelerPage display order in sync.
+ */
+export function getOrderedIndices(
+    section: Record<string, string> | undefined,
+    category: string,
+    keyPrefix?: string
+): number[] {
+    if (!section) return [];
+    const prefix = keyPrefix || category;
+    const isGallery = category === 'image';
+    const indices = Object.keys(section)
+        .filter(key => isGallery
+            ? (key.startsWith('image_') && !key.includes('_image'))
+            : (key.startsWith(`${prefix}_`) && key.endsWith('_name')))
+        .map(key => parseInt(key.split('_')[1]))
+        .filter(num => !isNaN(num));
+
+    const orderKey = `${category}_order`;
+    const savedOrder = section[orderKey];
+    if (savedOrder) {
+        const orderArr = savedOrder.split(',').map(Number).filter(n => !isNaN(n));
+        const missing = indices.filter(i => !orderArr.includes(i));
+        return [...orderArr.filter(i => indices.includes(i)), ...missing];
+    }
+    return indices.sort((a, b) => a - b);
+}
+
+/**
  * Merge saved text settings with defaults.
  * - For sections with dynamic keys (menu items, gallery images), remove default dynamic keys and use saved ones.
  * - For static keys, defaults fill in any missing keys.

@@ -5,7 +5,7 @@ import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
-import { mergeTextSettingsWithDefaults, migrateBackgroundSettings } from '../../lib/textSettingsUtils';
+import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices } from '../../lib/textSettingsUtils';
 
 function LineIcon({ size = 16 }: { size?: number }) {
     return (
@@ -857,27 +857,6 @@ export function LandingPage({
 }: LandingPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const defaultLinks = STORE_CONFIGS[storeId].links;
-
-    // Helper: get ordered indices for a menu category, respecting saved order
-    const getOrderedIndices = (section: Record<string, string> | undefined, category: string, keyPrefix?: string) => {
-        if (!section) return [];
-        const prefix = keyPrefix || category;
-        const isGallery = category === 'image';
-        const indices = Object.keys(section)
-            .filter(key => isGallery ? (key.startsWith('image_') && !key.includes('_image')) : (key.startsWith(`${prefix}_`) && key.endsWith('_name')))
-            .map(key => isGallery ? parseInt(key.split('_')[1]) : parseInt(key.split('_')[1]))
-            .filter(num => !isNaN(num));
-
-        const orderKey = `${category}_order`;
-        const savedOrder = section[orderKey];
-        if (savedOrder) {
-            const orderArr = savedOrder.split(',').map(Number).filter(n => !isNaN(n));
-            // Include any indices not in saved order (newly added items)
-            const missing = indices.filter(i => !orderArr.includes(i));
-            return [...orderArr.filter(i => indices.includes(i)), ...missing];
-        }
-        return indices.sort((a, b) => a - b);
-    };
 
     // Local state for settings when running in public mode (not editing)
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);

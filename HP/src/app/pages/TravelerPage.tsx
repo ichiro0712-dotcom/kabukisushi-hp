@@ -5,7 +5,7 @@ import { InlineEditableText, MenuItemControls, SectionToolbar, DEFAULT_TEXT_SETT
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
-import { mergeTextSettingsWithDefaults, migrateBackgroundSettings } from '../../lib/textSettingsUtils';
+import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices } from '../../lib/textSettingsUtils';
 
 interface TravelerPageProps {
     storeId?: StoreId;
@@ -474,11 +474,7 @@ export function TravelerPage({
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-24">
                             {(() => {
                                 const section = textSettings.menu || {};
-                                const nigiriIndices = Object.keys(section)
-                                    .filter(key => key.startsWith('nigiri_') && key.endsWith('_name'))
-                                    .map(key => parseInt(key.split('_')[1]))
-                                    .filter((val, i, arr) => arr.indexOf(val) === i)
-                                    .sort((a, b) => a - b);
+                                const nigiriIndices = getOrderedIndices(section, 'nigiri');
 
                                 return nigiriIndices.map(index => {
                                     const name_en = section[`nigiri_${index}_name_en`] || section[`nigiri_${index}_name`] || '';
@@ -592,11 +588,7 @@ export function TravelerPage({
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const section = textSettings.menu || {};
-                                const makimonoIndices = Object.keys(section)
-                                    .filter(key => key.startsWith('makimono_') && key.endsWith('_name'))
-                                    .map(key => parseInt(key.split('_')[1]))
-                                    .filter((val, i, arr) => arr.indexOf(val) === i)
-                                    .sort((a, b) => a - b);
+                                const makimonoIndices = getOrderedIndices(section, 'makimono');
 
                                 return makimonoIndices.map(index => {
                                     const name_en = section[`makimono_${index}_name_en`] || section[`makimono_${index}_name`] || '';
@@ -700,11 +692,7 @@ export function TravelerPage({
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const section = textSettings.menu || {};
-                                const ippinIndices = Object.keys(section)
-                                    .filter(key => key.startsWith('ippin_') && key.endsWith('_name'))
-                                    .map(key => parseInt(key.split('_')[1]))
-                                    .filter((val, i, arr) => arr.indexOf(val) === i)
-                                    .sort((a, b) => a - b);
+                                const ippinIndices = getOrderedIndices(section, 'ippin');
 
                                 return ippinIndices.map(index => {
                                     const name_en = section[`ippin_${index}_name_en`] || section[`ippin_${index}_name`] || '';
