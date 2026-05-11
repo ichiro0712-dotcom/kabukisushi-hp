@@ -1577,92 +1577,92 @@ export function LandingPage({
                                         isEditing={isEditing}
                                     />
                                 </h4>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    {(() => {
-                                        const nihonshuIndices = Object.keys(textSettings.drink || {})
-                                            .filter(key => key.startsWith('nihonshu_') && key.endsWith('_name'))
-                                            .map(key => parseInt(key.split('_')[1]))
-                                            .filter(num => !isNaN(num))
-                                            .sort((a, b) => a - b);
+                                <SortableMenuGrid
+                                    items={getOrderedIndices(textSettings.drink, 'nihonshu')}
+                                    isEditing={isEditing}
+                                    gridClassName="grid grid-cols-2 sm:grid-cols-4 gap-4"
+                                    onReorder={(newOrder) => onReorderMenuItem?.('drink', 'nihonshu', newOrder)}
+                                    renderItem={(index, dragHandleProps) => {
+                                        const name = textSettings.drink?.[`nihonshu_${index}_name`] || '';
+                                        const price = textSettings.drink?.[`nihonshu_${index}_price`] || '';
+                                        const image = textSettings.drink?.[`nihonshu_${index}_image`];
+                                        const isSoldOut = textSettings.drink?.[`nihonshu_${index}_soldOut`] === 'true';
+                                        const isHidden = textSettings.drink?.[`nihonshu_${index}_hidden`] === 'true';
 
-                                        return nihonshuIndices.map(index => {
-                                            const name = textSettings.drink?.[`nihonshu_${index}_name`] || '';
-                                            const price = textSettings.drink?.[`nihonshu_${index}_price`] || '';
-                                            const image = textSettings.drink?.[`nihonshu_${index}_image`];
-                                            const isSoldOut = textSettings.drink?.[`nihonshu_${index}_soldOut`] === 'true';
-                                            const isHidden = textSettings.drink?.[`nihonshu_${index}_hidden`] === 'true';
+                                        if (!isEditing && isHidden) return null;
 
-                                            if (!isEditing && isHidden) return null;
-
-                                            return (
-                                                <div key={index} className={`flex flex-col items-center relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}>
-                                                    {isEditing && (
+                                        return (
+                                            <div className={`flex flex-col items-center relative ${isSoldOut ? 'menu-item-sold-out' : ''} ${isEditing && isHidden ? 'menu-item-hidden-editor' : ''}`}>
+                                                {isEditing && (
+                                                    <>
+                                                        {isHidden && <div className="menu-item-hidden-badge">非表示中</div>}
                                                         <MenuItemControls
                                                             onDelete={() => onDeleteMenuItem?.('drink', 'nihonshu', index)}
                                                             isSoldOut={isSoldOut}
                                                             onToggleSoldOut={() => onTextChange?.('drink', `nihonshu_${index}_soldOut`, isSoldOut ? 'false' : 'true')}
                                                             isHidden={isHidden}
                                                             onToggleHidden={() => onTextChange?.('drink', `nihonshu_${index}_hidden`, isHidden ? 'false' : 'true')}
+                                                            dragHandleProps={dragHandleProps}
                                                         />
+                                                    </>
+                                                )}
+                                                <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
+                                                    <ImageWithFallback
+                                                        src={image || '/assets/placeholder.webp'}
+                                                        alt={name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    {isEditing && (
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center pointer-events-none">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onMenuImageEdit?.('drink', 'nihonshu', index);
+                                                                }}
+                                                                className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
+                                                            >
+                                                                <ImageIcon size={14} />
+                                                                編集
+                                                            </button>
+                                                        </div>
                                                     )}
-                                                    <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
-                                                        <ImageWithFallback
-                                                            src={image || '/assets/placeholder.webp'}
-                                                            alt={name}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        {isEditing && (
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center pointer-events-none">
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        onMenuImageEdit?.('drink', 'nihonshu', index);
-                                                                    }}
-                                                                    className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
-                                                                >
-                                                                    <ImageIcon size={14} />
-                                                                    編集
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-center w-full">
-                                                        <div className="font-bold text-sm text-[#1C1C1C]">
-                                                            <InlineEditableText
-                                                                value={name}
-                                                                onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_name`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </div>
-                                                        <div className="text-[#deb55a] font-bold text-sm">
-                                                            ¥<InlineEditableText
-                                                                value={price}
-                                                                onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_price`, val)}
-                                                                isEditing={isEditing}
-                                                            />
-                                                        </div>
-                                                        <MenuTranslationsEditor
-                                                            sectionId="drink"
-                                                            category="nihonshu"
-                                                            index={index}
-                                                            textSettings={textSettings}
-                                                            onTextChange={onTextChange}
+                                                </div>
+                                                <div className="text-center w-full">
+                                                    <div className="font-bold text-sm text-[#1C1C1C]">
+                                                        <InlineEditableText
+                                                            value={name}
+                                                            onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_name`, val)}
                                                             isEditing={isEditing}
                                                         />
                                                     </div>
+                                                    <div className="text-[#deb55a] font-bold text-sm">
+                                                        ¥<InlineEditableText
+                                                            value={price}
+                                                            onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_price`, val)}
+                                                            isEditing={isEditing}
+                                                        />
+                                                    </div>
+                                                    <MenuTranslationsEditor
+                                                        sectionId="drink"
+                                                        category="nihonshu"
+                                                        index={index}
+                                                        textSettings={textSettings}
+                                                        onTextChange={onTextChange}
+                                                        isEditing={isEditing}
+                                                    />
                                                 </div>
-                                            );
-                                        });
-                                    })()}
-                                    {isEditing && (
+                                            </div>
+                                        );
+                                    }}
+                                    addButton={isEditing ? (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'nihonshu' as any); }}
                                             className="w-full aspect-[3/4] bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300"
                                         >
                                             <div className="text-gray-400 font-bold">+ 追加</div>
                                         </button>
-                                    )}
-                                </div>
+                                    ) : undefined}
+                                />
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-8">

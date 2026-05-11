@@ -447,11 +447,7 @@ export function TravelerPage({
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                         {(() => {
                                             const section = textSettings.drink || {};
-                                            const indices = Object.keys(section)
-                                                .filter(key => key.startsWith('nihonshu_') && key.endsWith('_name'))
-                                                .map(key => parseInt(key.split('_')[1]))
-                                                .filter((val, i, arr) => arr.indexOf(val) === i)
-                                                .sort((a, b) => a - b);
+                                            const indices = getOrderedIndices(section, 'nihonshu');
 
                                             return indices.map(index => {
                                                 const name_en = section[`nihonshu_${index}_name_en`] || section[`nihonshu_${index}_name`] || '';
