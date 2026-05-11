@@ -150,7 +150,7 @@ export function TravelerPage({
     return (
         <div className="min-h-screen bg-[#1C1C1C]">
             {/* Header / Nav */}
-            <nav className="fixed top-0 w-full bg-[#1C1C1C]/95 backdrop-blur-sm z-50 border-b border-white/5">
+            <nav className={`${isEditing ? 'absolute' : 'fixed'} top-0 w-full bg-[#1C1C1C]/95 backdrop-blur-sm z-50 border-b border-white/5`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center gap-4">
