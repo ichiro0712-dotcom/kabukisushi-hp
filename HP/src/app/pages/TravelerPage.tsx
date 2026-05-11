@@ -440,14 +440,10 @@ export function TravelerPage({
                                 </p>
                             </div>
 
-                            <div className="space-y-24">
+                            <div className="space-y-8">
                                 {/* NIHONSHU */}
-                                <div>
-                                    <div className="flex items-center gap-4 mb-12">
-                                        <div className="h-[2px] flex-1 bg-[#deb55a] opacity-30"></div>
-                                        <h3 className="text-3xl font-bold uppercase tracking-wider text-[#deb55a]"><InlineEditableText value={textSettings.drink?.nihonshu_title_en || textSettings.drink?.nihonshu_title || 'NIHONSHU'} onChange={(val) => onTextChange?.('drink', 'nihonshu_title_en', val)} isEditing={isEditing} /></h3>
-                                        <div className="h-[2px] flex-1 bg-[#deb55a] opacity-30"></div>
-                                    </div>
+                                <div className="bg-white rounded-lg shadow-lg p-6">
+                                    <h4 style={{ fontFamily: "'Archivo Narrow', sans-serif" }} className="text-2xl font-bold mb-4 text-[#1C1C1C]"><InlineEditableText value={textSettings.drink?.nihonshu_title_en || textSettings.drink?.nihonshu_title || 'NIHONSHU'} onChange={(val) => onTextChange?.('drink', 'nihonshu_title_en', val)} isEditing={isEditing} /></h4>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                         {(() => {
                                             const section = textSettings.drink || {};
@@ -507,29 +503,29 @@ export function TravelerPage({
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <h4 className="text-lg font-bold">
+                                                        <div className="text-center w-full">
+                                                            <div className="font-bold text-sm text-[#1C1C1C]">
                                                                 <InlineEditableText
                                                                     value={name_en}
                                                                     onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_name_en`, val)}
                                                                     isEditing={isEditing}
                                                                 />
-                                                            </h4>
-                                                            <div className="text-[#deb55a] font-bold">
+                                                            </div>
+                                                            <div className="text-[#deb55a] font-bold text-sm">
                                                                 ¥<InlineEditableText
                                                                     value={price}
                                                                     onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_price`, val)}
                                                                     isEditing={isEditing}
                                                                 />
                                                             </div>
-                                                            <p className="text-xs text-gray-400 font-medium">
+                                                            <p className="text-xs text-gray-600">
                                                                 <InlineEditableText
                                                                     value={name_ko}
                                                                     onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_name_ko`, val)}
                                                                     isEditing={isEditing}
                                                                 />
                                                             </p>
-                                                            <p className="text-xs text-gray-400 font-medium opacity-80">
+                                                            <p className="text-xs text-gray-500">
                                                                 <InlineEditableText
                                                                     value={name_zh}
                                                                     onChange={(val) => onTextChange?.('drink', `nihonshu_${index}_name_zh`, val)}
@@ -543,11 +539,10 @@ export function TravelerPage({
                                         })()}
                                         {isEditing && (
                                             <button
-                                                onClick={() => onAddMenuItem?.('drink', 'nihonshu')}
-                                                className="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-[#deb55a]/30 rounded-lg hover:border-[#deb55a]/60 hover:bg-[#deb55a]/5 transition-all text-[#deb55a]"
+                                                onClick={(e) => { e.stopPropagation(); onAddMenuItem?.('drink', 'nihonshu' as any); }}
+                                                className="w-full aspect-[3/4] bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300"
                                             >
-                                                <Plus size={32} strokeWidth={1} />
-                                                <span className="text-sm font-bold mt-2">日本酒を追加</span>
+                                                <div className="text-gray-400 font-bold">+ 追加</div>
                                             </button>
                                         )}
                                     </div>
