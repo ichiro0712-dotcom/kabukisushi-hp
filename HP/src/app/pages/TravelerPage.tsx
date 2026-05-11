@@ -439,6 +439,11 @@ export function TravelerPage({
                                 isEditing={isEditing}
                             />
                         </p>
+                        <div className="flex justify-center mb-10">
+                            <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
+                                <InlineEditableText value={textSettings.drink?.description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('drink', 'description_en', val)} isEditing={isEditing} />
+                            </p>
+                        </div>
 
                         <div className="max-w-4xl mx-auto space-y-8">
                             {/* Sake Section */}
