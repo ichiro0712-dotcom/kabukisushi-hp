@@ -479,8 +479,8 @@ export function TravelerPage({
                                                                 onToggleHidden={() => onTextChange?.('drink', `nihonshu_${index}_hidden`, isHidden ? 'false' : 'true')}
                                                             />
                                                         )}
-                                                        <div className="w-full aspect-[3/4] relative group mb-4">
-                                                            <ImageWithFallback src={image} alt={name_en} className="w-full h-full object-cover rounded shadow-lg border border-white/10" />
+                                                        <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
+                                                            <ImageWithFallback src={image} alt={name_en} className="w-full h-full object-cover" />
                                                             {isEditing && (
                                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center pointer-events-none">
                                                                     <button
