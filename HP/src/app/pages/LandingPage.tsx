@@ -393,7 +393,7 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
 }
 
 // Helper component for editing translations in the menu
-function MenuTranslationsEditor({
+export function MenuTranslationsEditor({
     sectionId,
     category,
     index,
@@ -772,15 +772,17 @@ interface MultiLanguageTextEditorProps {
     onTextChange?: (sectionId: string, field: string, value: string) => void;
     isEditing: boolean;
     className?: string;
+    publicLanguageSuffix?: string; // when set, non-editing mode displays this language with fallback to base
 }
 
-function MultiLanguageTextEditor({
+export function MultiLanguageTextEditor({
     baseFieldName,
     sectionId,
     textSettings,
     onTextChange,
     isEditing,
-    className = ''
+    className = '',
+    publicLanguageSuffix = ''
 }: MultiLanguageTextEditorProps) {
     const [activeLanguage, setActiveLanguage] = useState<'jp' | 'en' | 'ko' | 'zh'>('jp');
 
@@ -795,10 +797,11 @@ function MultiLanguageTextEditor({
     const currentValue = textSettings[sectionId]?.[currentFieldName] || '';
 
     if (!isEditing) {
-        // When not editing, show only Japanese version
+        const publicFieldName = `${baseFieldName}${publicLanguageSuffix}`;
+        const publicValue = textSettings[sectionId]?.[publicFieldName] || textSettings[sectionId]?.[baseFieldName] || '';
         return (
             <InlineEditableText
-                value={textSettings[sectionId]?.[baseFieldName] || ''}
+                value={publicValue}
                 onChange={() => { }}
                 isEditing={false}
                 multiline={true}

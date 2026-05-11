@@ -1177,6 +1177,7 @@ export default function EditorPage() {
                                         onMenuImageEdit={handleMenuImageEdit}
                                         onAddMenuItem={handleAddMenuItem}
                                         onDeleteMenuItem={handleDeleteMenuItem}
+                                        onReorderMenuItem={handleReorderMenuItem}
                                     />
                                 )}
                             </div>
