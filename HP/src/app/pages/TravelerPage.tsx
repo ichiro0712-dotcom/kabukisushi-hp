@@ -448,7 +448,7 @@ export function TravelerPage({
                                         <h3 className="text-3xl font-bold uppercase tracking-wider text-[#deb55a]"><InlineEditableText value={textSettings.drink?.nihonshu_title_en || textSettings.drink?.nihonshu_title || 'NIHONSHU'} onChange={(val) => onTextChange?.('drink', 'nihonshu_title_en', val)} isEditing={isEditing} /></h3>
                                         <div className="h-[2px] flex-1 bg-[#deb55a] opacity-30"></div>
                                     </div>
-                                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                         {(() => {
                                             const section = textSettings.drink || {};
                                             const indices = Object.keys(section)
