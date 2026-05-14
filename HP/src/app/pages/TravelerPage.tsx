@@ -647,6 +647,52 @@ export function TravelerPage({
                             <p><InlineEditableText value={textSettings.menu?.tax_note_multi || '표시가격은 세금을 뺀 가격 입니다 / 表示的价格是不含税的'} onChange={(val) => onTextChange?.('menu', 'tax_note_multi', val)} isEditing={isEditing} /></p>
                         </div>
                     </div>
+
+                    {/* Special Section */}
+                    <div className="py-20 px-4 -mx-4 bg-[#1C1C1C] flex flex-col items-center">
+                        <p
+                            style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
+                            className="text-2xl md:text-3xl text-center text-[#e8eaec] mb-10 leading-relaxed tracking-wider"
+                        >
+                            <InlineEditableText
+                                value={textSettings.menu?.special_catchphrase_en || textSettings.menu?.special_catchphrase || 'Uni-Dokku\nChoose your flavor: Soy Sauce, Truffle Salt, or Half & Half'}
+                                onChange={(val) => onTextChange?.('menu', 'special_catchphrase_en', val)}
+                                isEditing={isEditing}
+                                multiline={true}
+                            />
+                        </p>
+                        <div className="w-full max-w-2xl relative group rounded-lg overflow-hidden shadow-2xl">
+                            <ImageWithFallback
+                                src={textSettings.menu?.special_image || '/assets/gallery_1.webp'}
+                                alt="Special"
+                                className="w-full h-auto"
+                            />
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); onMenuImageEdit?.('menu', 'special_image', 0); }}
+                                        className="p-3 bg-white/90 hover:bg-white text-gray-800 rounded-full shadow-lg transition-all transform hover:scale-110"
+                                        title="画像を変更"
+                                    >
+                                        <ImageIcon size={20} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        {(textSettings.menu?.special_caption_en || textSettings.menu?.special_caption || isEditing) && (
+                            <p
+                                style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
+                                className="text-lg text-center text-[#e8eaec]/70 mt-8 leading-relaxed"
+                            >
+                                <InlineEditableText
+                                    value={textSettings.menu?.special_caption_en || textSettings.menu?.special_caption || '¥3,500'}
+                                    onChange={(val) => onTextChange?.('menu', 'special_caption_en', val)}
+                                    isEditing={isEditing}
+                                    placeholder="Enter caption..."
+                                />
+                            </p>
+                        )}
+                    </div>
                 </div>
             </section>
 
