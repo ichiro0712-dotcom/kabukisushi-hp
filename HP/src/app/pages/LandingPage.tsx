@@ -93,7 +93,7 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
     menu: {
         title: 'Menu',
         subtitle: 'Course',
-        description: 'まずは当店お勧めのコースからお選びください',
+        description: 'コースでも、単品でもご注文いただけます',
         course_0_label: 'Standard',
         course_0_name: 'おまかせにぎり８貫',
         course_0_price: '¥4,980',
@@ -1739,7 +1739,7 @@ export function LandingPage({
 
                     {/* Course Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
-                        <div className="text-center text-xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}>
+                        <div className="text-center text-4xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}>
                             <InlineEditableText
                                 value={textSettings.menu?.subtitle || 'Course'}
                                 onChange={(val) => onTextChange?.('menu', 'subtitle', val)}
@@ -1748,7 +1748,7 @@ export function LandingPage({
                         </div>
                         <div className="text-center text-[#e8eaec]/70 mb-12">
                             <InlineEditableText
-                                value={textSettings.menu?.description || 'まずは当店お勧めのコースからお選びください'}
+                                value={textSettings.menu?.description || 'コースでも、単品でもご注文いただけます'}
                                 onChange={(val) => onTextChange?.('menu', 'description', val)}
                                 isEditing={isEditing}
                             />

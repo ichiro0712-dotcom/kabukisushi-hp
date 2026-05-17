@@ -617,8 +617,8 @@ export function TravelerPage({
 
                     {/* Course Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
-                        <div className="text-center text-xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}><InlineEditableText value={textSettings.menu?.subtitle_en || textSettings.menu?.subtitle || 'Course'} onChange={(val) => onTextChange?.('menu', 'subtitle_en', val)} isEditing={isEditing} /></div>
-                        <div className="text-center text-[#e8eaec]/70 mb-12"><InlineEditableText value={textSettings.menu?.description_en || 'Please select from our recommended courses'} onChange={(val) => onTextChange?.('menu', 'description_en', val)} isEditing={isEditing} /></div>
+                        <div className="text-center text-4xl mb-4 text-[#deb55a]" style={{ fontFamily: "'Bad Script', cursive" }}><InlineEditableText value={textSettings.menu?.subtitle_en || textSettings.menu?.subtitle || 'Course'} onChange={(val) => onTextChange?.('menu', 'subtitle_en', val)} isEditing={isEditing} /></div>
+                        <div className="text-center text-[#e8eaec]/70 mb-12"><InlineEditableText value={textSettings.menu?.description_en || 'You may order either course or à la carte items.'} onChange={(val) => onTextChange?.('menu', 'description_en', val)} isEditing={isEditing} /></div>
 
                         <div className="grid md:grid-cols-3 gap-4 mb-8">
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
