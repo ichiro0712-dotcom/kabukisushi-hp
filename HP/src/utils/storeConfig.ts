@@ -12,6 +12,21 @@ export interface StoreLinks {
   line: string;
 }
 
+export interface StoreTheme {
+  /** 編集画面の最外背景・メインエリアの色 */
+  canvas: string;
+  /** トップバー（ヘッダー）の背景色 */
+  topBar: string;
+  /** トップバー下辺のボーダー色 */
+  topBarBorder: string;
+  /** トップバー上の文字色（セレクタ・アイコン等） */
+  topBarText: string;
+  /** 店舗識別バッジの背景色 */
+  badge: string;
+  /** 店舗識別バッジの文字色 */
+  badgeText: string;
+}
+
 export interface StoreConfig {
   id: StoreId;
   displayName: string;
@@ -19,6 +34,8 @@ export interface StoreConfig {
   storagePrefix: string;
   basePath: string;
   travelerPath: string;
+  /** 管理画面を店舗ごとに色分けして取り違えを防ぐためのテーマ */
+  theme: StoreTheme;
   links: StoreLinks;
 }
 
@@ -30,6 +47,14 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
     storagePrefix: 'honten',
     basePath: '/',
     travelerPath: '/traveler',
+    theme: {
+      canvas: 'bg-slate-100',
+      topBar: 'bg-white',
+      topBarBorder: 'border-slate-200',
+      topBarText: 'text-slate-900',
+      badge: 'bg-blue-600',
+      badgeText: 'text-white',
+    },
     links: {
       phone: '0364576612',
       phoneDisplay: '03-6457-6612',
@@ -49,6 +74,14 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
     storagePrefix: 'ichiban',
     basePath: '/ichiban-dori',
     travelerPath: '/ichiban-dori/traveler',
+    theme: {
+      canvas: 'bg-slate-900',
+      topBar: 'bg-slate-800',
+      topBarBorder: 'border-slate-700',
+      topBarText: 'text-slate-100',
+      badge: 'bg-blue-500',
+      badgeText: 'text-white',
+    },
     links: {
       phone: '0363021477',
       phoneDisplay: '03-6302-1477',

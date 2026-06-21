@@ -573,8 +573,11 @@ export default function EditorPage() {
         { id: 'affiliated', label: 'Affiliated Store' },
     ];
 
+    // 店舗ごとのテーマ色（管理画面の取り違え防止）
+    const storeTheme = STORE_CONFIGS[selectedStore].theme;
+
     return (
-        <div className="flex h-screen bg-[#e0e0e0] overflow-hidden font-sans">
+        <div className={`flex h-screen ${storeTheme.canvas} overflow-hidden font-sans`}>
 
             {/* Background Settings Side Panel (Overlay/Right) */}
             {showBackgroundPanel && (
@@ -887,18 +890,22 @@ export default function EditorPage() {
             )}
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#e0e0e0]">
+            <div className={`flex-1 flex flex-col min-w-0 ${storeTheme.canvas}`}>
                 {/* Top Bar */}
-                <div className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 shadow-sm z-10">
+                <div className={`h-12 ${storeTheme.topBar} border-b ${storeTheme.topBarBorder} ${storeTheme.topBarText} flex items-center justify-between px-4 shadow-sm z-10`}>
                     {/* Left: Store + Page + Device */}
                     <div className="flex items-center gap-2">
+                        {/* 編集中の店舗バッジ（取り違え防止） */}
+                        <span className={`text-[11px] font-bold px-2 py-1 rounded-md ${storeTheme.badge} ${storeTheme.badgeText} whitespace-nowrap`}>
+                            {STORE_CONFIGS[selectedStore].shortName}を編集中
+                        </span>
                         <select
                             value={selectedStore}
                             onChange={(e) => handleStoreSwitch(e.target.value as StoreId)}
-                            className="text-xs font-bold text-gray-900 bg-transparent border border-gray-200 rounded-md px-2 py-1.5 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className={`text-xs font-bold ${storeTheme.topBarText} bg-transparent border ${storeTheme.topBarBorder} rounded-md px-2 py-1.5 cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                         >
                             {(Object.values(STORE_CONFIGS) as Array<{ id: StoreId; displayName: string }>).map((store) => (
-                                <option key={store.id} value={store.id}>
+                                <option key={store.id} value={store.id} className="text-slate-900 bg-white">
                                     {store.shortName}
                                 </option>
                             ))}
@@ -1129,7 +1136,7 @@ export default function EditorPage() {
                 )}
 
                 {/* Preview Canvas */}
-                <div className="flex-1 overflow-hidden relative flex justify-center bg-[#e0e0e0] p-8">
+                <div className={`flex-1 overflow-hidden relative flex justify-center ${storeTheme.canvas} p-8`}>
                     <div
                         className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden relative ${device === 'mobile'
                             ? 'w-[375px] h-[667px] rounded-3xl border-8 border-gray-800'
