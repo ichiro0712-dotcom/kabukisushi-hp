@@ -98,15 +98,21 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         course_0_name: 'おまかせにぎり８貫',
         course_0_price: '¥4,980',
         course_0_desc: 'お勧め握り８貫と本日の１品、お椀',
+        course_0_image: '',
         course_1_label: 'Premium',
         course_1_name: '特選にぎり８貫',
         course_1_price: '¥6,980',
         course_1_desc: '贅沢なお勧め握り８貫と本日の１品、お椀',
+        course_1_image: '',
         course_2_label: 'Special',
         course_2_badge: 'Deluxe',
         course_2_name: '特選にぎり１０貫',
         course_2_price: '¥9,900',
         course_2_desc: '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀',
+        course_2_image: '',
+        course_image_note: '※この写真は一例です。コース内容は季節や入荷により異なります。',
+        course_image_note_en: '※Photos are for illustration only. Course contents vary with the season and daily market availability.',
+        course_image_note_multi: '※사진은 예시입니다. 코스 내용은 계절과 입하 상황에 따라 달라집니다. / 照片僅供參考。套餐內容會依季節與進貨狀況而有所不同。',
         special_catchphrase: '職人が握る、至高の一貫',
         special_image: '/assets/gallery_1.webp',
         special_caption: '',
@@ -221,11 +227,50 @@ export function getDefaultTextSettings(storeId: StoreId = 'honten'): Record<stri
     const storeLinks = STORE_CONFIGS[storeId].links;
     // アクセス情報を店舗に合わせる
     base.access.phone = storeLinks.phoneDisplay;
+    // コース写真（８貫・１２貫は共通、１０貫のみ店舗ごとの写真）
+    base.menu.course_0_image = '/assets/course_omakase_8.jpg';
+    base.menu.course_1_image = storeId === 'ichiban'
+        ? '/assets/course_omakase_10_ichiban.jpg'
+        : '/assets/course_omakase_10.jpg';
+    base.menu.course_2_image = '/assets/course_omakase_12.jpg';
     if (storeId === 'honten') {
         base.home.subtitle = '本店';
         base.about.content = base.about.content.replace(/1番通り店/g, '本店');
     }
     return base;
+}
+
+interface CourseImageProps {
+    src?: string;
+    alt: string;
+    isEditing: boolean;
+    onEdit?: () => void;
+}
+
+export function CourseImage({ src, alt, isEditing, onEdit }: CourseImageProps) {
+    if (!src && !isEditing) return null;
+    return (
+        <div className="relative group/img mb-4 aspect-[3/2] overflow-hidden">
+            {src ? (
+                <ImageWithFallback src={src} alt={alt} className="w-full h-full object-cover" />
+            ) : (
+                <div className="w-full h-full flex items-center justify-center border border-dashed border-[#e8eaec]/30 text-[#e8eaec]/40 text-xs">
+                    画像未設定
+                </div>
+            )}
+            {isEditing && (
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
+                        className="px-3 py-1.5 bg-white text-gray-800 rounded text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-1 pointer-events-auto"
+                    >
+                        <ImageIcon size={14} />
+                        編集
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 }
 
 interface InlineEditableTextProps {
@@ -874,6 +919,10 @@ export function LandingPage({
         const defaults = getDefaultTextSettings(storeId);
         return localTextSettings ? mergeTextSettingsWithDefaults(localTextSettings, defaults) : defaults;
     })();
+
+    // コース写真が1枚でも設定されていれば注意書きを表示
+    const hasCourseImage = ['course_0_image', 'course_1_image', 'course_2_image']
+        .some(key => !!textSettings.menu?.[key]);
 
     const links = {
         ...defaultLinks,
@@ -1756,6 +1805,12 @@ export function LandingPage({
 
                         <div className="grid md:grid-cols-3 gap-4">
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
+                                <CourseImage
+                                    src={textSettings.menu?.course_0_image}
+                                    alt={textSettings.menu?.course_0_name || 'おまかせ握り８貫'}
+                                    isEditing={isEditing}
+                                    onEdit={() => onMenuImageEdit?.('menu', 'course_0_image', 0)}
+                                />
                                 <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                                     <InlineEditableText
                                         value={textSettings.menu?.course_0_label || 'Standard'}
@@ -1786,6 +1841,12 @@ export function LandingPage({
                                 </p>
                             </div>
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
+                                <CourseImage
+                                    src={textSettings.menu?.course_1_image}
+                                    alt={textSettings.menu?.course_1_name || 'おまかせ握り１０貫'}
+                                    isEditing={isEditing}
+                                    onEdit={() => onMenuImageEdit?.('menu', 'course_1_image', 0)}
+                                />
                                 <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                                     <InlineEditableText
                                         value={textSettings.menu?.course_1_label || 'Premium'}
@@ -1823,6 +1884,12 @@ export function LandingPage({
                                         isEditing={isEditing}
                                     />
                                 </div>
+                                <CourseImage
+                                    src={textSettings.menu?.course_2_image}
+                                    alt={textSettings.menu?.course_2_name || 'おまかせ握り１２貫'}
+                                    isEditing={isEditing}
+                                    onEdit={() => onMenuImageEdit?.('menu', 'course_2_image', 0)}
+                                />
                                 <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                                     <InlineEditableText
                                         value={textSettings.menu?.course_2_label || 'Special'}
@@ -1853,6 +1920,15 @@ export function LandingPage({
                                 </p>
                             </div>
                         </div>
+                        {(hasCourseImage || isEditing) && (
+                            <p className="mt-6 text-center text-[#e8eaec]/50 text-xs leading-relaxed">
+                                <InlineEditableText
+                                    value={textSettings.menu?.course_image_note || '※この写真は一例です。コース内容は季節や入荷により異なります。'}
+                                    onChange={(val) => onTextChange?.('menu', 'course_image_note', val)}
+                                    isEditing={isEditing}
+                                />
+                            </p>
+                        )}
                     </div>
 
                     {/* Special Section */}

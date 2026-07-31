@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, Globe, EyeOff, Ban, Plus } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
-import { InlineEditableText, MenuItemControls, MultiLanguageTextEditor, MenuTranslationsEditor, SectionToolbar, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
+import { InlineEditableText, MenuItemControls, MultiLanguageTextEditor, MenuTranslationsEditor, SectionToolbar, CourseImage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
@@ -74,6 +74,10 @@ export function TravelerPage({
         const defaults = getDefaultTextSettings(storeId);
         return localTextSettings ? mergeTextSettingsWithDefaults(localTextSettings, defaults) : defaults;
     })();
+
+    // コース写真が1枚でも設定されていれば注意書きを表示
+    const hasCourseImage = ['course_0_image', 'course_1_image', 'course_2_image']
+        .some(key => !!textSettings.menu?.[key]);
 
     useEffect(() => {
         if (!isEditing) {
@@ -622,12 +626,24 @@ export function TravelerPage({
 
                         <div className="grid md:grid-cols-3 gap-4 mb-8">
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
+                                <CourseImage
+                                    src={textSettings.menu?.course_0_image}
+                                    alt={textSettings.menu?.course_0_name_en || 'OMAKASE 8 pieces'}
+                                    isEditing={isEditing}
+                                    onEdit={() => onMenuImageEdit?.('menu', 'course_0_image', 0)}
+                                />
                                 <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_0_label_en || textSettings.menu?.course_0_label || 'Standard'} onChange={(val) => onTextChange?.('menu', 'course_0_label_en', val)} isEditing={isEditing} /></div>
                                 <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.course_0_name_en || 'OMAKASE 8 pieces'} onChange={(val) => onTextChange?.('menu', 'course_0_name_en', val)} isEditing={isEditing} /></h3>
                                 <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_0_price || '¥4,980'} onChange={(val) => onTextChange?.('menu', 'course_0_price', val)} isEditing={isEditing} /></p>
                                 <p className="text-[#e8eaec]/60 text-sm leading-relaxed"><InlineEditableText value={textSettings.menu?.course_0_desc_en || '8 recommended nigiri, 1 Appetizer, Miso soup'} onChange={(val) => onTextChange?.('menu', 'course_0_desc_en', val)} isEditing={isEditing} /></p>
                             </div>
                             <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
+                                <CourseImage
+                                    src={textSettings.menu?.course_1_image}
+                                    alt={textSettings.menu?.course_1_name_en || 'OMAKASE 10 Pieces'}
+                                    isEditing={isEditing}
+                                    onEdit={() => onMenuImageEdit?.('menu', 'course_1_image', 0)}
+                                />
                                 <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_1_label_en || textSettings.menu?.course_1_label || 'Premium'} onChange={(val) => onTextChange?.('menu', 'course_1_label_en', val)} isEditing={isEditing} /></div>
                                 <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.course_1_name_en || 'SPECIAL OMAKASE 8 pieces'} onChange={(val) => onTextChange?.('menu', 'course_1_name_en', val)} isEditing={isEditing} /></h3>
                                 <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_1_price || '¥6,980'} onChange={(val) => onTextChange?.('menu', 'course_1_price', val)} isEditing={isEditing} /></p>
@@ -635,12 +651,25 @@ export function TravelerPage({
                             </div>
                             <div className="group border border-[#deb55a]/40 p-6 hover:border-[#deb55a] transition-all duration-300 relative">
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_2_badge_en || textSettings.menu?.course_2_badge || 'Deluxe'} onChange={(val) => onTextChange?.('menu', 'course_2_badge_en', val)} isEditing={isEditing} /></div>
+                                <CourseImage
+                                    src={textSettings.menu?.course_2_image}
+                                    alt={textSettings.menu?.course_2_name_en || 'OMAKASE 12 pieces'}
+                                    isEditing={isEditing}
+                                    onEdit={() => onMenuImageEdit?.('menu', 'course_2_image', 0)}
+                                />
                                 <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_2_label_en || textSettings.menu?.course_2_label || 'Special'} onChange={(val) => onTextChange?.('menu', 'course_2_label_en', val)} isEditing={isEditing} /></div>
                                 <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.course_2_name_en || 'SPECIAL OMAKASE 10 pieces'} onChange={(val) => onTextChange?.('menu', 'course_2_name_en', val)} isEditing={isEditing} /></h3>
                                 <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}><InlineEditableText value={textSettings.menu?.course_2_price || '¥9,900'} onChange={(val) => onTextChange?.('menu', 'course_2_price', val)} isEditing={isEditing} /></p>
                                 <p className="text-[#e8eaec]/60 text-sm leading-relaxed"><InlineEditableText value={textSettings.menu?.course_2_desc_en || '10 special recommended nigiri, 3 Pieces of Sashimi, 1 Appetizer, Miso soup'} onChange={(val) => onTextChange?.('menu', 'course_2_desc_en', val)} isEditing={isEditing} /></p>
                             </div>
                         </div>
+
+                        {(hasCourseImage || isEditing) && (
+                            <div className="text-center space-y-1 text-xs text-[#e8eaec]/50 mb-6">
+                                <p><InlineEditableText value={textSettings.menu?.course_image_note_en || '※Photos are for illustration only. Course contents vary with the season and daily market availability.'} onChange={(val) => onTextChange?.('menu', 'course_image_note_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.menu?.course_image_note_multi || '※사진은 예시입니다. 코스 내용은 계절과 입하 상황에 따라 달라집니다. / 照片僅供參考。套餐內容會依季節與進貨狀況而有所不同。'} onChange={(val) => onTextChange?.('menu', 'course_image_note_multi', val)} isEditing={isEditing} /></p>
+                            </div>
+                        )}
 
                         <div className="text-center space-y-1 text-xs text-[#e8eaec]/50">
                             <p><InlineEditableText value={textSettings.menu?.tax_note_en || '※All listed prices are excluding tax'} onChange={(val) => onTextChange?.('menu', 'tax_note_en', val)} isEditing={isEditing} /></p>
