@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
-import { loadStoreSettings, saveAllSettings } from '../../../lib/settingsService';
+import { loadStoreSettings, saveAllSettings, type SettingsVersions } from '../../../lib/settingsService';
 import { mergeTextSettingsWithDefaults } from '../../../lib/textSettingsUtils';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
@@ -213,27 +213,46 @@ export default function EditorPage() {
         localStorage.setItem(currentKeys.backgroundSettings, JSON.stringify(backgroundSettings));
         localStorage.setItem(currentKeys.layoutSettings, JSON.stringify(layoutSettings));
         localStorage.setItem(currentKeys.textSettings, JSON.stringify(textSettings));
-        await saveAllSettings(selectedStore, backgroundSettings, layoutSettings, textSettings);
+
+        const saved = await persistToSupabase(selectedStore, backgroundSettings, layoutSettings, textSettings);
+        if (saved === 'conflict') {
+            alert('他の端末で先に更新されているため、この画面の変更は保存できませんでした。\n店舗の切り替えを中止します。ページを再読み込みしてから編集し直してください。');
+            return;
+        }
+        if (saved === 'error') {
+            alert('保存に失敗したため、店舗の切り替えを中止しました。通信状況を確認してください。');
+            return;
+        }
 
         // Switch store
+        setLoadState('loading');
+        loadStateRef.current = 'loading';
         setSelectedStore(newStoreId);
         selectedStoreRef.current = newStoreId;
 
-        // Load new store data from Supabase (fallback to localStorage)
+        // Load new store data from Supabase（読めなければ編集させない。localStorage は使わない）
         const newDefaults = getDefaultTextSettings(newStoreId);
-        const supabaseData = await loadStoreSettings(newStoreId);
+        const loaded = await loadStoreSettings(newStoreId);
 
-        const newKeys = getStorageKeys(newStoreId);
-        const savedBg = supabaseData.backgroundSettings
-            || (() => { try { const v = localStorage.getItem(newKeys.backgroundSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
-        const savedLayout = supabaseData.layoutSettings
-            || (() => { try { const v = localStorage.getItem(newKeys.layoutSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
-        const savedText = supabaseData.textSettings
-            || (() => { try { const v = localStorage.getItem(newKeys.textSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+        if (!loaded.ok) {
+            setLoadErrorMessage(loaded.errorMessage || '設定の読み込みに失敗しました');
+            setLoadState('failed');
+            loadStateRef.current = 'failed';
+            return;
+        }
 
-        setBackgroundSettings(savedBg || { ...DEFAULT_BG });
-        setLayoutSettings(savedLayout || { ...DEFAULT_LAYOUT });
-        setTextSettings(savedText ? mergeTextWithDefaults(savedText, newDefaults) : newDefaults);
+        const nextBg = loaded.backgroundSettings || { ...DEFAULT_BG };
+        const nextLayout = loaded.layoutSettings || { ...DEFAULT_LAYOUT };
+        const nextText = loaded.textSettings ? mergeTextWithDefaults(loaded.textSettings, newDefaults) : newDefaults;
+
+        setBackgroundSettings(nextBg);
+        setLayoutSettings(nextLayout);
+        setTextSettings(nextText);
+
+        versionsRef.current = loaded.versions;
+        lastPersistedRef.current = signatureOf(nextBg, nextLayout, nextText);
+        setLoadState('ready');
+        loadStateRef.current = 'ready';
 
         // Clear undo/redo history
         setPast([]);
@@ -472,38 +491,83 @@ export default function EditorPage() {
         // This is a mock interaction since the UI is static
     };
 
+    /** 保存できない状態のとき、その理由をユーザー向けの文言で返す */
+    const blockedSaveMessage = () => {
+        if (loadState === 'failed') {
+            return '設定を読み込めていないため保存できません。\nこの状態で保存すると、サイトの内容が古い状態に巻き戻ってしまいます。\nページを再読み込みしてください。';
+        }
+        if (loadState === 'stale') {
+            return '他の端末で先に更新されているため保存できません。\nこのまま保存すると相手の変更を消してしまいます。\nページを再読み込みしてから編集し直してください。';
+        }
+        return '読み込み中です。少し待ってからお試しください。';
+    };
+
     const handlePublish = async () => {
+        if (!canSave) { alert(blockedSaveMessage()); return; }
         handleSaveBackground();
-        const success = await saveAllSettings(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
-        alert(success ? '公開しました！' : '公開に失敗しました。再度お試しください。');
+        const result = await persistToSupabase(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
+        if (result === 'ok') { alert('公開しました！'); return; }
+        if (result === 'conflict') { alert('他の端末で先に更新されていたため、公開を中止しました。\nページを再読み込みしてから編集し直してください。'); return; }
+        alert('公開に失敗しました。再度お試しください。');
     };
 
     // Use shared utility for text merge (see textSettingsUtils.ts)
     const mergeTextWithDefaults = mergeTextSettingsWithDefaults;
 
-    // Initialize from Supabase (fallback to localStorage) on mount
-    const [isInitialized, setIsInitialized] = useState(false);
+    // ---------------------------------------------------------------------
+    // 読み込み・保存のガード
+    //
+    // 2026-08-14 に「古い状態のブラウザが本番DBを丸ごと上書きし、7月に追加した
+    // メニューが消える」事故が起きた。原因は以下の3つで、すべてここで塞いでいる。
+    //   1. Supabase の読み込みに失敗すると古い localStorage を採用していた
+    //      → 読み込み失敗時は編集も保存も一切させない（localStorage は使わない）
+    //   2. 画面を開いた直後、未編集のまま自動保存が走っていた
+    //      → 読み込んだ内容と1文字も変わっていなければ保存しない
+    //   3. 他端末の更新を確認せず全体を上書きしていた
+    //      → 楽観ロック（versions）で、先を越されていたら中断する
+    // ---------------------------------------------------------------------
+    type LoadState = 'loading' | 'ready' | 'failed' | 'stale';
+    const [loadState, setLoadState] = useState<LoadState>('loading');
+    const [loadErrorMessage, setLoadErrorMessage] = useState<string>('');
+    /** 保存が許可されている状態か */
+    const canSave = loadState === 'ready';
+    /** 各行の updated_at。保存時に「読み込んだ時から変わっていないか」の照合に使う */
+    const versionsRef = useRef<SettingsVersions>({});
+    /** 最後にDBへ書いた（または読み込んだ）内容のシグネチャ。無変更保存を防ぐ */
+    const lastPersistedRef = useRef<string>('');
+
+    const signatureOf = (
+        bg: Record<string, any>,
+        layout: Record<string, any>,
+        text: Record<string, Record<string, string>>
+    ) => JSON.stringify({ bg, layout, text });
+
+    // Initialize from Supabase on mount
     useEffect(() => {
         async function initSettings() {
             const storeDefaults = getDefaultTextSettings(selectedStore);
+            const loaded = await loadStoreSettings(selectedStore);
 
-            // Try Supabase first
-            const supabaseData = await loadStoreSettings(selectedStore);
+            if (!loaded.ok) {
+                // 読み込めていない = 手元の状態が最新とは限らない。編集・保存を止める
+                setLoadErrorMessage(loaded.errorMessage || '設定の読み込みに失敗しました');
+                setLoadState('failed');
+                return;
+            }
 
-            // Fall back to localStorage if Supabase has no data
-            const initKeys = getStorageKeys(selectedStore);
-            const savedBg = supabaseData.backgroundSettings
-                || (() => { try { const v = localStorage.getItem(initKeys.backgroundSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
-            const savedLayout = supabaseData.layoutSettings
-                || (() => { try { const v = localStorage.getItem(initKeys.layoutSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
-            const savedText = supabaseData.textSettings
-                || (() => { try { const v = localStorage.getItem(initKeys.textSettings); return v ? JSON.parse(v) : null; } catch { return null; } })();
+            const nextBg = loaded.backgroundSettings || backgroundSettings;
+            const nextLayout = loaded.layoutSettings || layoutSettings;
+            const nextText = loaded.textSettings
+                ? mergeTextWithDefaults(loaded.textSettings, storeDefaults)
+                : storeDefaults;
 
-            if (savedBg) setBackgroundSettings(savedBg);
-            if (savedLayout) setLayoutSettings(savedLayout);
-            if (savedText) setTextSettings(mergeTextWithDefaults(savedText, storeDefaults));
+            setBackgroundSettings(nextBg);
+            setLayoutSettings(nextLayout);
+            setTextSettings(nextText);
 
-            setIsInitialized(true);
+            versionsRef.current = loaded.versions;
+            lastPersistedRef.current = signatureOf(nextBg, nextLayout, nextText);
+            setLoadState('ready');
         }
         initSettings();
     }, []);
@@ -519,32 +583,71 @@ export default function EditorPage() {
     latestLayoutRef.current = layoutSettings;
     latestTextRef.current = textSettings;
 
+    // 非同期処理の中から最新の loadState を参照するための ref
+    const loadStateRef = useRef<LoadState>(loadState);
+    loadStateRef.current = loadState;
+
+    /** 保存の唯一の入口。ガードと楽観ロックの後始末をここに集約する */
+    const persistToSupabase = async (
+        storeId: StoreId,
+        bg: Record<string, any>,
+        layout: Record<string, any>,
+        text: Record<string, Record<string, string>>
+    ): Promise<'ok' | 'conflict' | 'error' | 'blocked'> => {
+        if (loadStateRef.current !== 'ready') return 'blocked';
+
+        const result = await saveAllSettings(storeId, bg, layout, text, versionsRef.current);
+
+        if (result.status === 'ok') {
+            versionsRef.current = result.versions;
+            lastPersistedRef.current = signatureOf(bg, layout, text);
+            setSupabaseSaveError(false);
+            updateLastSaved();
+            return 'ok';
+        }
+
+        if (result.status === 'conflict') {
+            // 他端末が先に更新している。これ以上書き込ませない
+            loadStateRef.current = 'stale';
+            setLoadState('stale');
+            setSupabaseSaveError(true);
+            return 'conflict';
+        }
+
+        setSupabaseSaveError(true);
+        return 'error';
+    };
+
     useEffect(() => {
-        if (!isInitialized) return;
+        if (loadState !== 'ready') return;
+
         // Immediate localStorage write (local cache + preview sync)
+        // ※ここに書いた値を初期データとして読み戻すことはしない（事故の原因になったため）
         const persistKeys = getStorageKeys(selectedStoreRef.current);
         localStorage.setItem(persistKeys.backgroundSettings, JSON.stringify(backgroundSettings));
         localStorage.setItem(persistKeys.layoutSettings, JSON.stringify(layoutSettings));
         localStorage.setItem(persistKeys.textSettings, JSON.stringify(textSettings));
         window.dispatchEvent(new Event('storage'));
 
+        // 読み込んだ内容から変わっていなければ保存しない（開いただけで上書きしない）
+        if (signatureOf(backgroundSettings, layoutSettings, textSettings) === lastPersistedRef.current) return;
+
         // Debounced Supabase save (2 seconds)
         if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current);
-        supabaseSaveTimerRef.current = setTimeout(async () => {
-            const success = await saveAllSettings(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
-            setSupabaseSaveError(!success);
-            if (success) updateLastSaved();
+        supabaseSaveTimerRef.current = setTimeout(() => {
+            supabaseSaveTimerRef.current = undefined;
+            persistToSupabase(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
         }, 2000);
 
         return () => { if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current); };
-    }, [backgroundSettings, layoutSettings, textSettings, isInitialized]);
+    }, [backgroundSettings, layoutSettings, textSettings, loadState]);
 
     // Flush pending save on unmount to prevent data loss
     useEffect(() => {
         return () => {
             if (supabaseSaveTimerRef.current) {
                 clearTimeout(supabaseSaveTimerRef.current);
-                saveAllSettings(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
+                persistToSupabase(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
             }
         };
     }, []);
@@ -578,6 +681,33 @@ export default function EditorPage() {
 
     return (
         <div className={`flex h-screen ${storeTheme.canvas} overflow-hidden font-sans`}>
+
+            {/* 読み込み失敗・競合の警告。この状態では保存を一切させない */}
+            {(loadState === 'failed' || loadState === 'stale') && (
+                <div className="absolute inset-x-0 top-0 z-[100] bg-red-600 text-white px-6 py-3 shadow-lg">
+                    <div className="flex items-start gap-3 max-w-4xl mx-auto">
+                        <span className="text-lg leading-none mt-0.5">⚠️</span>
+                        <div className="flex-1 text-sm">
+                            <div className="font-bold mb-0.5">
+                                {loadState === 'failed'
+                                    ? '設定を読み込めませんでした（保存は停止しています）'
+                                    : '他の端末で先に更新されました（保存は停止しています）'}
+                            </div>
+                            <div className="text-red-100 text-xs leading-relaxed">
+                                {loadState === 'failed'
+                                    ? `この状態で編集・保存すると、サイトの内容が古い状態に巻き戻ります。ページを再読み込みしてください。${loadErrorMessage ? `（${loadErrorMessage}）` : ''}`
+                                    : 'このまま保存すると相手の変更を消してしまうため、書き込みを止めました。ページを再読み込みしてから編集し直してください。'}
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="shrink-0 px-3 py-1.5 bg-white text-red-700 rounded text-xs font-bold hover:bg-red-50 transition-colors"
+                        >
+                            再読み込み
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Background Settings Side Panel (Overlay/Right) */}
             {showBackgroundPanel && (
@@ -974,6 +1104,7 @@ export default function EditorPage() {
                         </div>
                         <button
                             onClick={async () => {
+                                if (!canSave) { alert(blockedSaveMessage()); return; }
                                 if (supabaseSaveTimerRef.current) {
                                     clearTimeout(supabaseSaveTimerRef.current);
                                     supabaseSaveTimerRef.current = undefined;
@@ -984,14 +1115,13 @@ export default function EditorPage() {
                                 localStorage.setItem(btnKeys.layoutSettings, JSON.stringify(layoutSettings));
                                 localStorage.setItem(btnKeys.textSettings, JSON.stringify(textSettings));
                                 window.dispatchEvent(new Event('storage'));
-                                const success = await saveAllSettings(storeId, backgroundSettings, layoutSettings, textSettings);
-                                if (success) {
-                                    setSupabaseSaveError(false);
-                                    updateLastSaved();
-                                }
-                                alert(success ? '保存しました!' : '保存に失敗しました。再度お試しください。');
+                                const result = await persistToSupabase(storeId, backgroundSettings, layoutSettings, textSettings);
+                                if (result === 'ok') { alert('保存しました!'); return; }
+                                if (result === 'conflict') { alert('他の端末で先に更新されていたため、保存を中止しました。\nページを再読み込みしてから編集し直してください。'); return; }
+                                alert('保存に失敗しました。再度お試しください。');
                             }}
-                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 rounded-md shadow-sm transition-colors"
+                            disabled={!canSave}
+                            className={`px-4 py-1.5 text-xs font-bold text-white rounded-md shadow-sm transition-colors ${canSave ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'}`}
                         >
                             保存
                         </button>
