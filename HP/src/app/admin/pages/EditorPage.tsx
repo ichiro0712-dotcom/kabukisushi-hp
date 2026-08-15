@@ -33,6 +33,7 @@ import {
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
 import { loadStoreSettings, saveAllSettings, type SettingsVersions } from '../../../lib/settingsService';
+import { connectedProjectRef, isProductionDb } from '../../../lib/supabase';
 import { mergeTextSettingsWithDefaults } from '../../../lib/textSettingsUtils';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
@@ -681,6 +682,16 @@ export default function EditorPage() {
 
     return (
         <div className={`flex h-screen ${storeTheme.canvas} overflow-hidden font-sans`}>
+
+            {/* 本番以外のDBに繋がっている時の警告。ここでの編集は公開サイトに反映されない */}
+            {!isProductionDb && (
+                <div className="absolute inset-x-0 bottom-0 z-[100] bg-amber-500 text-amber-950 px-6 py-2 shadow-lg">
+                    <div className="max-w-4xl mx-auto text-xs font-bold text-center">
+                        ⚠️ 本番ではないデータベースに接続しています（{connectedProjectRef || '未設定'}）。
+                        ここでの編集は kabuki-sushi.co.jp には反映されません。
+                    </div>
+                </div>
+            )}
 
             {/* 読み込み失敗・競合の警告。この状態では保存を一切させない */}
             {(loadState === 'failed' || loadState === 'stale') && (
