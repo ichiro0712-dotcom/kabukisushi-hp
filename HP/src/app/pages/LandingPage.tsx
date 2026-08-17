@@ -311,6 +311,24 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
      */
     const normalize = (html: string) => (multiline ? html : sanitizeInlineHtml(html));
 
+    /**
+     * 貼り付けは必ず「書式なし」で入れる。
+     *
+     * contentEditable は既定でコピー元の HTML をそのまま取り込むため、資料や
+     * チャットから商品名を貼ると <font color face> や Word/Pages の
+     * <p class="p1"> が一緒に入り、その項目だけフォントと色が変わって表示されて
+     * いた（データは dangerouslySetInnerHTML でそのまま描画されるため）。
+     */
+    const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData('text/plain');
+        if (!text) return;
+        // 1行の項目は改行を潰す。残すと <br> としてデータに入り「価格が 2000<br>」になる
+        const insert = multiline ? text : text.replace(/[\r\n\t]+/g, ' ').replace(/ {2,}/g, ' ').trim();
+        document.execCommand('insertText', false, insert);
+        if (editorRef.current) onChange(normalize(editorRef.current.innerHTML));
+    };
+
     const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
         const newValue = normalize(e.target.innerHTML);
         // Use timeout to check if the relatedTarget is part of the toolbar
@@ -352,6 +370,7 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                 suppressContentEditableWarning
                 onFocus={() => setIsFocused(true)}
                 onBlur={handleBlur}
+                onPaste={handlePaste}
                 className={`${className} outline - none transition - all duration - 200 min - h - [1em] min - w - [20px] 
                     ${isFocused ? 'ring-2 ring-blue-500/50 bg-white/5 rounded-sm p-1 -m-1 shadow-inner relative z-30' : 'hover:bg-white/5 rounded-sm cursor-text'}
                     ${multiline ? 'whitespace-pre-line block' : 'inline-block'} `}
