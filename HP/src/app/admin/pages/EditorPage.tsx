@@ -33,7 +33,7 @@ import {
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
 import { loadStoreSettings, saveAllSettings, type SettingsVersions } from '../../../lib/settingsService';
-import { connectedProjectRef, isProductionDb } from '../../../lib/supabase';
+import { connectedProjectRef, isProductionDb, isLocalReadOnly } from '../../../lib/supabase';
 import { mergeTextSettingsWithDefaults, PLACEHOLDER_IMAGE } from '../../../lib/textSettingsUtils';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
@@ -494,6 +494,9 @@ export default function EditorPage() {
 
     /** 保存できない状態のとき、その理由をユーザー向けの文言で返す */
     const blockedSaveMessage = () => {
+        if (isLocalReadOnly) {
+            return 'ローカル環境（開発サーバー）では本番データを変更できません。\n本番の内容を編集する場合は kabuki-sushi.co.jp/admin から行ってください。';
+        }
         if (loadState === 'failed') {
             return '設定を読み込めていないため保存できません。\nこの状態で保存すると、サイトの内容が古い状態に巻き戻ってしまいます。\nページを再読み込みしてください。';
         }
@@ -531,7 +534,7 @@ export default function EditorPage() {
     const [loadState, setLoadState] = useState<LoadState>('loading');
     const [loadErrorMessage, setLoadErrorMessage] = useState<string>('');
     /** 保存が許可されている状態か */
-    const canSave = loadState === 'ready';
+    const canSave = loadState === 'ready' && !isLocalReadOnly;
     /** 各行の updated_at。保存時に「読み込んだ時から変わっていないか」の照合に使う */
     const versionsRef = useRef<SettingsVersions>({});
     /** 最後にDBへ書いた（または読み込んだ）内容のシグネチャ。無変更保存を防ぐ */
@@ -594,7 +597,8 @@ export default function EditorPage() {
         bg: Record<string, any>,
         layout: Record<string, any>,
         text: Record<string, Record<string, string>>
-    ): Promise<'ok' | 'conflict' | 'error' | 'blocked'> => {
+    ): Promise<'ok' | 'conflict' | 'error' | 'blocked' | 'readonly'> => {
+        if (isLocalReadOnly) return 'readonly';
         if (loadStateRef.current !== 'ready') return 'blocked';
 
         const result = await saveAllSettings(storeId, bg, layout, text, versionsRef.current);
@@ -606,6 +610,8 @@ export default function EditorPage() {
             updateLastSaved();
             return 'ok';
         }
+
+        if (result.status === 'readonly') return 'readonly';
 
         if (result.status === 'conflict') {
             // 他端末が先に更新している。これ以上書き込ませない
@@ -682,6 +688,16 @@ export default function EditorPage() {
 
     return (
         <div className={`flex h-screen ${storeTheme.canvas} overflow-hidden font-sans`}>
+
+            {/* ローカル開発サーバーから本番DBを見ている時。閲覧はできるが保存は全面停止 */}
+            {isLocalReadOnly && (
+                <div className="absolute inset-x-0 bottom-0 z-[100] bg-sky-600 text-white px-6 py-2 shadow-lg">
+                    <div className="max-w-4xl mx-auto text-xs font-bold text-center">
+                        🔒 ローカル環境（閲覧専用）— 本番データを表示していますが、変更は保存されません。
+                        編集する場合は kabuki-sushi.co.jp/admin から行ってください。
+                    </div>
+                </div>
+            )}
 
             {/* 本番以外のDBに繋がっている時の警告。ここでの編集は公開サイトに反映されない */}
             {!isProductionDb && (

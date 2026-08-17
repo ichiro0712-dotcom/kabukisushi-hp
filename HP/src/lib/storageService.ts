@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, isLocalReadOnly } from './supabase'
 
 export async function uploadImage(
   file: File,
@@ -6,6 +6,12 @@ export async function uploadImage(
   category: string
 ): Promise<string | null> {
   if (!supabase) return null
+
+  // ローカル開発サーバーから本番ストレージへアップロードしない
+  if (isLocalReadOnly) {
+    console.warn('[readonly] ローカル環境のため画像アップロードを中止しました')
+    return null
+  }
 
   const ext = file.name.split('.').pop() || 'webp'
   const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`

@@ -23,3 +23,18 @@ export const connectedProjectRef =
 
 /** 本番DBに繋がっているか。false の場合、ここでの編集は本番サイトに反映されない */
 export const isProductionDb = connectedProjectRef === PRODUCTION_PROJECT_REF
+
+/**
+ * 開発サーバー（npm run dev）から本番DBへ書き込むのを禁止する。
+ *
+ * 管理画面は「保存」を押さなくても2秒後に自動保存する。ローカルで動作確認のつもりで
+ * 画面を触っただけで本番のメニューが書き換わってしまうため、開発中は読み取り専用にする。
+ * 修正中の未完成なコードが本番データを壊すのも防ぐ。
+ *
+ * import.meta.env.DEV は本番ビルドで必ず false になるので、公開中の管理画面は影響を受けない。
+ * どうしてもローカルから本番を編集したい場合だけ VITE_ALLOW_PROD_WRITES=true を明示する。
+ */
+export const isLocalReadOnly =
+  import.meta.env.DEV &&
+  isProductionDb &&
+  import.meta.env.VITE_ALLOW_PROD_WRITES !== 'true'

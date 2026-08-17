@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, isLocalReadOnly } from './supabase'
 
 type SettingsType = 'background' | 'layout' | 'text'
 
@@ -27,7 +27,7 @@ export type SaveResult = {
    * conflict = 読み込み後に他端末がDBを更新していた。上書きせず中断した
    * error    = 通信・権限エラー
    */
-  status: 'ok' | 'conflict' | 'error'
+  status: 'ok' | 'conflict' | 'error' | 'readonly'
   versions: SettingsVersions
   message?: string
 }
@@ -82,6 +82,12 @@ export async function saveAllSettings(
   expectedVersions: SettingsVersions
 ): Promise<SaveResult> {
   if (!supabase) return { status: 'error', versions: {}, message: 'Supabase 接続情報が設定されていません' }
+
+  // ローカル開発サーバーから本番DBへ書き込まない（最後の砦）
+  if (isLocalReadOnly) {
+    console.warn('[readonly] ローカル環境のため本番DBへの保存を中止しました')
+    return { status: 'readonly', versions: expectedVersions, message: 'ローカル環境では本番データを変更できません' }
+  }
 
   const now = new Date().toISOString()
   const payloads: Record<SettingsType, Record<string, any>> = {
