@@ -6,7 +6,7 @@ import { InlineEditableText, MenuItemControls, MultiLanguageTextEditor, MenuTran
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
-import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices } from '../../lib/textSettingsUtils';
+import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices, resolveMenuImage } from '../../lib/textSettingsUtils';
 
 interface TravelerPageProps {
     storeId?: StoreId;
@@ -490,7 +490,7 @@ export function TravelerPage({
                                                 )}
                                                 <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
                                                     <ImageWithFallback
-                                                        src={image || '/assets/placeholder.webp'}
+                                                        src={resolveMenuImage(image)}
                                                         alt={nameEn}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -757,7 +757,7 @@ export function TravelerPage({
                                     const name_ko = section[`nigiri_${index}_name_ko`] || '';
                                     const name_zh = section[`nigiri_${index}_name_zh`] || '';
                                     const price = section[`nigiri_${index}_price`] || '0';
-                                    const image = section[`nigiri_${index}_image`] || '/assets/placeholder.webp';
+                                    const image = resolveMenuImage(section[`nigiri_${index}_image`]);
                                     const isSoldOut = section[`nigiri_${index}_soldOut`] === 'true';
                                     const isHidden = section[`nigiri_${index}_hidden`] === 'true';
 
@@ -875,7 +875,7 @@ export function TravelerPage({
                                     const name_ko = section[`makimono_${index}_name_ko`] || '';
                                     const name_zh = section[`makimono_${index}_name_zh`] || '';
                                     const price = section[`makimono_${index}_price`] || '0';
-                                    const image = section[`makimono_${index}_image`] || '/assets/placeholder.webp';
+                                    const image = resolveMenuImage(section[`makimono_${index}_image`]);
                                     const isSoldOut = section[`makimono_${index}_soldOut`] === 'true';
                                     const isHidden = section[`makimono_${index}_hidden`] === 'true';
 
@@ -984,7 +984,7 @@ export function TravelerPage({
                                     const name_ko = section[`ippin_${index}_name_ko`] || '';
                                     const name_zh = section[`ippin_${index}_name_zh`] || '';
                                     const price = section[`ippin_${index}_price`] || '0';
-                                    const image = section[`ippin_${index}_image`] || '/assets/placeholder.webp';
+                                    const image = resolveMenuImage(section[`ippin_${index}_image`]);
                                     const note_en = section[`ippin_${index}_note_en`] || section[`ippin_${index}_note`] || '';
                                     const isSoldOut = section[`ippin_${index}_soldOut`] === 'true';
                                     const isHidden = section[`ippin_${index}_hidden`] === 'true';

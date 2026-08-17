@@ -5,7 +5,7 @@ import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
-import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices } from '../../lib/textSettingsUtils';
+import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices, resolveMenuImage, sanitizeInlineHtml } from '../../lib/textSettingsUtils';
 
 function LineIcon({ size = 16 }: { size?: number }) {
     return (
@@ -304,8 +304,15 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
         );
     }
 
+    /**
+     * 1行の項目（商品名・価格など）は、改行やスペースが <br> / &nbsp; として
+     * データに残ると「価格が 2000<br>」のように壊れるので取り除く。
+     * 複数行の項目は改行が意味を持つため、そのまま保存する。
+     */
+    const normalize = (html: string) => (multiline ? html : sanitizeInlineHtml(html));
+
     const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-        const newValue = e.target.innerHTML;
+        const newValue = normalize(e.target.innerHTML);
         // Use timeout to check if the relatedTarget is part of the toolbar
         setTimeout(() => {
             if (!document.activeElement?.closest('.inline-toolbar')) {
@@ -330,7 +337,7 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                 }
             }
             document.execCommand(command, false, value);
-            onChange(editorRef.current.innerHTML);
+            onChange(normalize(editorRef.current.innerHTML));
         }
     };
 
@@ -1414,7 +1421,7 @@ export function LandingPage({
                         renderItem={(index, dragHandleProps) => (
                             <div className="group relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
                                 <ImageWithFallback
-                                    src={textSettings.gallery![`image_${index}`]}
+                                    src={resolveMenuImage(textSettings.gallery![`image_${index}`])}
                                     alt={`Gallery ${index + 1}`}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
@@ -1660,7 +1667,7 @@ export function LandingPage({
                                                 )}
                                                 <div className="w-full aspect-[3/4] overflow-hidden rounded-lg mb-2 shadow-sm relative group">
                                                     <ImageWithFallback
-                                                        src={image || '/assets/placeholder.webp'}
+                                                        src={resolveMenuImage(image)}
                                                         alt={name}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -2035,7 +2042,7 @@ export function LandingPage({
                                         {image && (
                                             <div className="relative group aspect-square">
                                                 <ImageWithFallback
-                                                    src={image}
+                                                    src={resolveMenuImage(image)}
                                                     alt={name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -2174,7 +2181,7 @@ export function LandingPage({
                                         {image && (
                                             <div className="relative group aspect-square">
                                                 <ImageWithFallback
-                                                    src={image}
+                                                    src={resolveMenuImage(image)}
                                                     alt={name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -2312,7 +2319,7 @@ export function LandingPage({
                                         {image && (
                                             <div className="relative group aspect-square">
                                                 <ImageWithFallback
-                                                    src={image}
+                                                    src={resolveMenuImage(image)}
                                                     alt={name}
                                                     className="w-full h-full object-cover"
                                                 />

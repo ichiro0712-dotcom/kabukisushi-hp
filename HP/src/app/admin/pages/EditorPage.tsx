@@ -34,7 +34,7 @@ import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../.
 import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
 import { loadStoreSettings, saveAllSettings, type SettingsVersions } from '../../../lib/settingsService';
 import { connectedProjectRef, isProductionDb } from '../../../lib/supabase';
-import { mergeTextSettingsWithDefaults } from '../../../lib/textSettingsUtils';
+import { mergeTextSettingsWithDefaults, PLACEHOLDER_IMAGE } from '../../../lib/textSettingsUtils';
 import ImageAssetLibrary from '../components/editor/ImageAssetLibrary';
 import ImageEditorModal from '../components/editor/ImageEditorModal';
 import AddSectionModal from '../components/editor/AddSectionModal';
@@ -400,7 +400,7 @@ export default function EditorPage() {
                     ...prev,
                     [sectionId]: {
                         ...currentSection,
-                        [`image_${nextIndex}`]: 'https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800&h=800&auto=format&q=80',
+                        [`image_${nextIndex}`]: PLACEHOLDER_IMAGE,
                     }
                 };
             } else {
@@ -419,7 +419,7 @@ export default function EditorPage() {
                         [`${category}_${nextIndex}_name_ko`]: '새 메뉴',
                         [`${category}_${nextIndex}_name_zh`]: '新菜单',
                         [`${category}_${nextIndex}_price`]: '0',
-                        [`${category}_${nextIndex}_image`]: 'https://images.unsplash.com/photo-1763647756796-af9230245bf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&h=300&auto=format&q=80',
+                        [`${category}_${nextIndex}_image`]: PLACEHOLDER_IMAGE,
                         [`${category}_${nextIndex}_note`]: '',
                         [`${category}_${nextIndex}_soldOut`]: 'false',
                         [`${category}_${nextIndex}_hidden`]: 'false'

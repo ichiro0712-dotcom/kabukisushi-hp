@@ -5,6 +5,49 @@
 
 const DYNAMIC_PREFIXES = ['image_', 'nigiri_', 'makimono_', 'ippin_', 'nihonshu_', 'alcohol_', 'shochu_', 'other_'];
 
+/**
+ * 写真が未設定のときに表示する画像（KABUKI寿司のロゴ）。
+ *
+ * 以前は「+追加」で作った項目に海外のフリー素材写真が入る作りだったため、写真を
+ * 差し替えないまま公開すると、無関係な写真がそのままお客様に見えていた。
+ */
+export const PLACEHOLDER_IMAGE = '/assets/photo-placeholder.svg';
+
+/** 過去に仮画像として使われていたURL。データ側に残っていても未設定として扱う */
+const LEGACY_PLACEHOLDERS = [
+    'photo-1763647756796-af9230245bf8', // 旧・Unsplashの仮画像
+    '/assets/placeholder.webp',          // 存在しないファイルを指していた旧フォールバック
+];
+
+/** 写真が実質未設定か（空、または過去の仮画像） */
+export function isPlaceholderImage(url: string | undefined | null): boolean {
+    if (!url) return true;
+    return LEGACY_PLACEHOLDERS.some(p => url.includes(p));
+}
+
+/** 表示用の画像URLを解決する。未設定ならロゴのプレースホルダーを返す */
+export function resolveMenuImage(url: string | undefined | null): string {
+    return isPlaceholderImage(url) ? PLACEHOLDER_IMAGE : (url as string);
+}
+
+/**
+ * 見出し・商品名・価格などの1行テキストから、入力時に紛れ込む HTML を取り除く。
+ *
+ * 入力欄が contentEditable で innerHTML をそのまま保存しているため、改行すると <br>、
+ * スペースを打つと &nbsp; がデータに残り、「価格が 2000<br>」「名前が <br> だけ」と
+ * いった壊れ方をしていた。太字などの装飾は残したいので、対象は改行と空白のみに絞る。
+ */
+export function sanitizeInlineHtml(html: string): string {
+    return html
+        .replace(/<div>\s*<br\s*\/?>\s*<\/div>/gi, ' ')
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/ /g, ' ')
+        // 全角スペース(　)は意図的に使われることがあるので潰さない
+        .replace(/[ \t\r\n]+/g, ' ')
+        .replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '');
+}
+
 export const isDynamicKey = (k: string): boolean =>
     (k.startsWith('image_') || DYNAMIC_PREFIXES.some(p => k.startsWith(p))) && !k.includes('_content');
 
