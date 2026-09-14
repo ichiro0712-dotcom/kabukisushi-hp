@@ -335,11 +335,13 @@ export function CourseCard({ index, lang, featured = false, textSettings, isEdit
     const key = (field: string) => `course_${index}_${field}`;
     const enKey = (field: string) => `course_${index}_${field}_en`;
 
-    // 英語ページはラベル・バッジに英語専用の値が無ければ日本語側の値をそのまま使う
-    const label = isEn
-        ? (menu[enKey('label')] || menu[key('label')] || ja?.label || '')
-        : (menu[key('label')] || ja?.label || '');
-    // バッジだけは「空文字で消す」ができるように ?? で判定する
+    // 英語ページはラベル・バッジに英語専用の値が無ければ日本語側の値をそのまま使う。
+    // どちらも「空文字を入れたら消える」ようにするため、|| ではなく ?? で判定する
+    // （|| だと管理画面で空にしても既定値の STANDARD 等が復活してしまう）
+    const labelRaw = isEn
+        ? (menu[enKey('label')] ?? menu[key('label')] ?? ja?.label)
+        : (menu[key('label')] ?? ja?.label);
+    const label = labelRaw ?? '';
     const badgeRaw = isEn
         ? (menu[enKey('badge')] ?? menu[key('badge')] ?? ja?.badge)
         : (menu[key('badge')] ?? ja?.badge);
