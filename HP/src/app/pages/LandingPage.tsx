@@ -377,13 +377,15 @@ export function CourseCard({ index, lang, featured = false, textSettings, isEdit
                 onEdit={() => onMenuImageEdit?.('menu', key('image'), 0)}
                 large={featured}
             />
-            <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                <InlineEditableText
-                    value={label}
-                    onChange={(val) => onTextChange?.('menu', isEn ? enKey('label') : key('label'), val)}
-                    isEditing={isEditing}
-                />
-            </div>
+            {(label || isEditing) && (
+                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <InlineEditableText
+                        value={label}
+                        onChange={(val) => onTextChange?.('menu', isEn ? enKey('label') : key('label'), val)}
+                        isEditing={isEditing}
+                    />
+                </div>
+            )}
             <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className={`${featured ? 'text-2xl md:text-3xl' : 'text-xl'} font-medium mb-3 text-[#e8eaec]`}>
                 <InlineEditableText
                     value={name}
