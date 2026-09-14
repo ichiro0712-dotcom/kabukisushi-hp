@@ -245,12 +245,14 @@ interface CourseImageProps {
     alt: string;
     isEditing: boolean;
     onEdit?: () => void;
+    /** 先頭の大きいカードで使うとき、写真を横長に見せる */
+    large?: boolean;
 }
 
-export function CourseImage({ src, alt, isEditing, onEdit }: CourseImageProps) {
+export function CourseImage({ src, alt, isEditing, onEdit, large = false }: CourseImageProps) {
     if (!src && !isEditing) return null;
     return (
-        <div className="relative group/img mb-4 aspect-[3/2] overflow-hidden">
+        <div className={`relative group/img mb-4 ${large ? 'aspect-[16/9]' : 'aspect-[3/2]'} overflow-hidden`}>
             {src ? (
                 <ImageWithFallback src={src} alt={alt} className="w-full h-full object-cover" />
             ) : (
@@ -269,6 +271,186 @@ export function CourseImage({ src, alt, isEditing, onEdit }: CourseImageProps) {
                     </button>
                 </div>
             )}
+        </div>
+    );
+}
+
+/**
+ * コース（セットメニュー）枠の設定。
+ *
+ * 従来は3枚ベタ書きだったが、店舗ごとに枚数・並びを変えられるように
+ * DBの menu.course_count / menu.course_featured で制御する。
+ * キーが無ければ従来どおり「3枚を横並び」なので、本店の表示は変わらない。
+ */
+const COURSE_COUNT_DEFAULT = 3;
+const COURSE_COUNT_MAX = 8;
+
+export function getCourseCount(textSettings: any): number {
+    const n = parseInt(String(textSettings?.menu?.course_count ?? ''), 10);
+    if (!Number.isFinite(n)) return COURSE_COUNT_DEFAULT;
+    return Math.min(Math.max(n, 1), COURSE_COUNT_MAX);
+}
+
+/** 先頭1枚を大きく見せ、残りを横並びにするレイアウトか */
+export function isCourseFeatured(textSettings: any): boolean {
+    return String(textSettings?.menu?.course_featured ?? '') === '1';
+}
+
+/** コース写真の注意書きを出すかの判定に使うキー一覧 */
+export function getCourseImageKeys(textSettings: any): string[] {
+    return Array.from({ length: getCourseCount(textSettings) }, (_, i) => `course_${i}_image`);
+}
+
+/** 従来の3枚構成の既定値。DBに値が入っていない店舗のために残している */
+const COURSE_DEFAULTS_JA: { label: string; badge?: string; name: string; price: string; desc: string; alt: string }[] = [
+    { label: 'Standard', name: 'おまかせにぎり８貫', price: '¥4,980', desc: 'お勧め握り８貫と本日の１品、お椀', alt: 'おまかせ握り８貫' },
+    { label: 'Premium', name: '特選にぎり８貫', price: '¥6,980', desc: '贅沢なお勧め握り８貫と本日の１品、お椀', alt: 'おまかせ握り１０貫' },
+    { label: 'Special', badge: 'Deluxe', name: '特選にぎり１０貫', price: '¥9,900', desc: '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀', alt: 'おまかせ握り１２貫' },
+];
+
+const COURSE_DEFAULTS_EN: { name: string; desc: string; alt: string }[] = [
+    { name: 'OMAKASE 8 pieces', desc: '8 recommended nigiri, 1 Appetizer, Miso soup', alt: 'OMAKASE 8 pieces' },
+    { name: 'SPECIAL OMAKASE 8 pieces', desc: '8 special recommended nigiri, 1 Appetizer, Miso soup', alt: 'OMAKASE 10 Pieces' },
+    { name: 'SPECIAL OMAKASE 10 pieces', desc: '10 special recommended nigiri, 3 Pieces of Sashimi, 1 Appetizer, Miso soup', alt: 'OMAKASE 12 pieces' },
+];
+
+interface CourseCardProps {
+    index: number;
+    /** ja = トップページ、en = 外国人向けページ（_en のキーを優先して読む） */
+    lang: 'ja' | 'en';
+    /** 先頭の大きいカードとして描画するか */
+    featured?: boolean;
+    textSettings: any;
+    isEditing: boolean;
+    onTextChange?: (sectionId: string, field: string, value: string) => void;
+    onMenuImageEdit?: (sectionId: string, category: string, index: number) => void;
+}
+
+export function CourseCard({ index, lang, featured = false, textSettings, isEditing, onTextChange, onMenuImageEdit }: CourseCardProps) {
+    const menu = textSettings.menu || {};
+    const ja = COURSE_DEFAULTS_JA[index];
+    const en = COURSE_DEFAULTS_EN[index];
+    const isEn = lang === 'en';
+
+    const key = (field: string) => `course_${index}_${field}`;
+    const enKey = (field: string) => `course_${index}_${field}_en`;
+
+    // 英語ページはラベル・バッジに英語専用の値が無ければ日本語側の値をそのまま使う
+    const label = isEn
+        ? (menu[enKey('label')] || menu[key('label')] || ja?.label || '')
+        : (menu[key('label')] || ja?.label || '');
+    // バッジだけは「空文字で消す」ができるように ?? で判定する
+    const badgeRaw = isEn
+        ? (menu[enKey('badge')] ?? menu[key('badge')] ?? ja?.badge)
+        : (menu[key('badge')] ?? ja?.badge);
+    const badge = badgeRaw ?? '';
+    const name = isEn
+        ? (menu[enKey('name')] || en?.name || '')
+        : (menu[key('name')] || ja?.name || '');
+    const price = menu[key('price')] || ja?.price || '';
+    const desc = isEn
+        ? (menu[enKey('desc')] || en?.desc || '')
+        : (menu[key('desc')] || ja?.desc || '');
+    const alt = name || (isEn ? en?.alt : ja?.alt) || 'Course';
+
+    // バッジは値が入っているカードにだけ出す（編集画面で空枠が並ばないようにするため）
+    const hasBadge = !!badge;
+    const borderClass = hasBadge
+        ? 'border-[#deb55a]/40 hover:border-[#deb55a]'
+        : 'border-[#e8eaec]/20 hover:border-[#deb55a]/50';
+
+    return (
+        <div className={`group border ${borderClass} p-6 transition-all duration-300 relative`}>
+            {hasBadge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <InlineEditableText
+                        value={badge}
+                        onChange={(val) => onTextChange?.('menu', isEn ? enKey('badge') : key('badge'), val)}
+                        isEditing={isEditing}
+                    />
+                </div>
+            )}
+            <CourseImage
+                src={menu[key('image')]}
+                alt={alt}
+                isEditing={isEditing}
+                onEdit={() => onMenuImageEdit?.('menu', key('image'), 0)}
+                large={featured}
+            />
+            <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <InlineEditableText
+                    value={label}
+                    onChange={(val) => onTextChange?.('menu', isEn ? enKey('label') : key('label'), val)}
+                    isEditing={isEditing}
+                />
+            </div>
+            <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className={`${featured ? 'text-2xl md:text-3xl' : 'text-xl'} font-medium mb-3 text-[#e8eaec]`}>
+                <InlineEditableText
+                    value={name}
+                    onChange={(val) => onTextChange?.('menu', isEn ? enKey('name') : key('name'), val)}
+                    isEditing={isEditing}
+                />
+            </h3>
+            <p className={`${featured ? 'text-3xl md:text-4xl' : 'text-2xl'} text-[#deb55a] font-bold mb-4`} style={{ fontFamily: "'Inter', sans-serif" }}>
+                <InlineEditableText
+                    value={price}
+                    onChange={(val) => onTextChange?.('menu', key('price'), val)}
+                    isEditing={isEditing}
+                />
+            </p>
+            <p className={`text-[#e8eaec]/60 ${featured ? 'text-base' : 'text-sm'} leading-relaxed`}>
+                <InlineEditableText
+                    value={desc}
+                    onChange={(val) => onTextChange?.('menu', isEn ? enKey('desc') : key('desc'), val)}
+                    isEditing={isEditing}
+                />
+            </p>
+        </div>
+    );
+}
+
+/** 横並びの列数。Tailwind は動的クラス名を拾えないので静的に持つ */
+const COURSE_GRID_CLASS: Record<number, string> = {
+    1: 'grid-cols-1 max-w-md mx-auto',
+    2: 'md:grid-cols-2 max-w-3xl mx-auto',
+    3: 'md:grid-cols-3',
+    4: 'md:grid-cols-2 lg:grid-cols-4',
+};
+
+interface CourseCardsProps {
+    lang: 'ja' | 'en';
+    textSettings: any;
+    isEditing: boolean;
+    onTextChange?: (sectionId: string, field: string, value: string) => void;
+    onMenuImageEdit?: (sectionId: string, category: string, index: number) => void;
+}
+
+/** コース枠一式。course_featured が立っていれば先頭1枚を大きく、残りを横並びにする */
+export function CourseCards({ lang, textSettings, isEditing, onTextChange, onMenuImageEdit }: CourseCardsProps) {
+    const count = getCourseCount(textSettings);
+    const featured = isCourseFeatured(textSettings) && count > 1;
+    const indexes = Array.from({ length: count }, (_, i) => i);
+    const cardProps = { lang, textSettings, isEditing, onTextChange, onMenuImageEdit };
+
+    if (!featured) {
+        const gridClass = COURSE_GRID_CLASS[Math.min(count, 4)] || 'md:grid-cols-3';
+        return (
+            <div className={`grid ${gridClass} gap-4`}>
+                {indexes.map(i => <CourseCard key={i} index={i} {...cardProps} />)}
+            </div>
+        );
+    }
+
+    const rest = indexes.slice(1);
+    const restGridClass = COURSE_GRID_CLASS[Math.min(rest.length, 4)] || 'md:grid-cols-3';
+    return (
+        <div className="space-y-8">
+            <div className="max-w-2xl mx-auto">
+                <CourseCard index={0} featured {...cardProps} />
+            </div>
+            <div className={`grid ${restGridClass} gap-4`}>
+                {rest.map(i => <CourseCard key={i} index={i} {...cardProps} />)}
+            </div>
         </div>
     );
 }
@@ -947,7 +1129,7 @@ export function LandingPage({
     })();
 
     // コース写真が1枚でも設定されていれば注意書きを表示
-    const hasCourseImage = ['course_0_image', 'course_1_image', 'course_2_image']
+    const hasCourseImage = getCourseImageKeys(textSettings)
         .some(key => !!textSettings.menu?.[key]);
 
     const links = {
@@ -1829,123 +2011,13 @@ export function LandingPage({
                             />
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-4">
-                            <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
-                                <CourseImage
-                                    src={textSettings.menu?.course_0_image}
-                                    alt={textSettings.menu?.course_0_name || 'おまかせ握り８貫'}
-                                    isEditing={isEditing}
-                                    onEdit={() => onMenuImageEdit?.('menu', 'course_0_image', 0)}
-                                />
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_0_label || 'Standard'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_0_label', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_0_name || 'おまかせにぎり８貫'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_0_name', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_0_price || '¥4,980'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_0_price', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_0_desc || 'お勧め握り８貫と本日の１品、お椀'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_0_desc', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </p>
-                            </div>
-                            <div className="group border border-[#e8eaec]/20 p-6 hover:border-[#deb55a]/50 transition-all duration-300">
-                                <CourseImage
-                                    src={textSettings.menu?.course_1_image}
-                                    alt={textSettings.menu?.course_1_name || 'おまかせ握り１０貫'}
-                                    isEditing={isEditing}
-                                    onEdit={() => onMenuImageEdit?.('menu', 'course_1_image', 0)}
-                                />
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_1_label || 'Premium'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_1_label', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_1_name || '特選にぎり８貫'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_1_name', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_1_price || '¥6,980'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_1_price', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_1_desc || '贅沢なお勧め握り８貫と本日の１品、お椀'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_1_desc', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </p>
-                            </div>
-                            <div className="group border border-[#deb55a]/40 p-6 hover:border-[#deb55a] transition-all duration-300 relative">
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#deb55a] text-[#1C1C1C] text-[10px] tracking-[0.15em] uppercase px-3 py-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_2_badge || 'Deluxe'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_2_badge', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </div>
-                                <CourseImage
-                                    src={textSettings.menu?.course_2_image}
-                                    alt={textSettings.menu?.course_2_name || 'おまかせ握り１２貫'}
-                                    isEditing={isEditing}
-                                    onEdit={() => onMenuImageEdit?.('menu', 'course_2_image', 0)}
-                                />
-                                <div className="text-[#deb55a]/60 text-xs tracking-[0.2em] uppercase mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_2_label || 'Special'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_2_label', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </div>
-                                <h3 style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }} className="text-xl font-medium mb-3 text-[#e8eaec]">
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_2_name || '特選にぎり１０貫'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_2_name', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </h3>
-                                <p className="text-2xl text-[#deb55a] font-bold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_2_price || '¥9,900'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_2_price', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </p>
-                                <p className="text-[#e8eaec]/60 text-sm leading-relaxed">
-                                    <InlineEditableText
-                                        value={textSettings.menu?.course_2_desc || '贅沢なお勧め握り１０貫と本日の１品\n厳選刺身５種盛り合わせ、お椀'}
-                                        onChange={(val) => onTextChange?.('menu', 'course_2_desc', val)}
-                                        isEditing={isEditing}
-                                    />
-                                </p>
-                            </div>
-                        </div>
+                        <CourseCards
+                            lang="ja"
+                            textSettings={textSettings}
+                            isEditing={isEditing}
+                            onTextChange={onTextChange}
+                            onMenuImageEdit={onMenuImageEdit}
+                        />
                         {(hasCourseImage || isEditing) && (
                             <p className="mt-6 text-center text-[#e8eaec]/50 text-xs leading-relaxed">
                                 <InlineEditableText
