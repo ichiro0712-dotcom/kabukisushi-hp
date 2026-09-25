@@ -436,13 +436,16 @@ export function TravelerPage({
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <p className="text-center text-gray-300 mb-8">
-                            <InlineEditableText
-                                value={textSettings.drink?.subtitle_en || textSettings.drink?.subtitle || 'Beverage Menu'}
-                                onChange={(val) => onTextChange?.('drink', 'subtitle_en', val)}
-                                isEditing={isEditing}
-                            />
-                        </p>
+                        {/* 小見出しは空文字で消せるように ?? で判定する（|| だと既定値が復活する） */}
+                        {((textSettings.drink?.subtitle_en ?? textSettings.drink?.subtitle ?? 'Beverage Menu') || isEditing) && (
+                            <p className="text-center text-gray-300 mb-8">
+                                <InlineEditableText
+                                    value={textSettings.drink?.subtitle_en ?? textSettings.drink?.subtitle ?? 'Beverage Menu'}
+                                    onChange={(val) => onTextChange?.('drink', 'subtitle_en', val)}
+                                    isEditing={isEditing}
+                                />
+                            </p>
+                        )}
                         <div className="flex justify-center mb-10">
                             <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
                                 <InlineEditableText value={textSettings.drink?.description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('drink', 'description_en', val)} isEditing={isEditing} />
@@ -828,7 +831,9 @@ export function TravelerPage({
                     {/* MAKIMONO Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
                         <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.makimono_title_en || textSettings.menu?.makimono_title || 'MAKIMONO'} onChange={(val) => onTextChange?.('menu', 'makimono_title_en', val)} isEditing={isEditing} /></h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.makimono_subtitle_en || textSettings.menu?.makimono_subtitle || 'Rolls'} onChange={(val) => onTextChange?.('menu', 'makimono_subtitle_en', val)} isEditing={isEditing} /></div>
+                        {((textSettings.menu?.makimono_subtitle_en ?? textSettings.menu?.makimono_subtitle ?? 'Rolls') || isEditing) && (
+                            <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.makimono_subtitle_en ?? textSettings.menu?.makimono_subtitle ?? 'Rolls'} onChange={(val) => onTextChange?.('menu', 'makimono_subtitle_en', val)} isEditing={isEditing} /></div>
+                        )}
                         <div className="flex justify-center mb-10">
                             <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
                                 <InlineEditableText value={textSettings.menu?.makimono_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'makimono_description_en', val)} isEditing={isEditing} />
@@ -937,7 +942,9 @@ export function TravelerPage({
                     {/* IPPIN Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
                         <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.ippin_title_en || textSettings.menu?.ippin_title || 'IPPIN'} onChange={(val) => onTextChange?.('menu', 'ippin_title_en', val)} isEditing={isEditing} /></h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.ippin_subtitle_en || textSettings.menu?.ippin_subtitle || 'A La Carte'} onChange={(val) => onTextChange?.('menu', 'ippin_subtitle_en', val)} isEditing={isEditing} /></div>
+                        {((textSettings.menu?.ippin_subtitle_en ?? textSettings.menu?.ippin_subtitle ?? 'A La Carte') || isEditing) && (
+                            <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.ippin_subtitle_en ?? textSettings.menu?.ippin_subtitle ?? 'A La Carte'} onChange={(val) => onTextChange?.('menu', 'ippin_subtitle_en', val)} isEditing={isEditing} /></div>
+                        )}
                         <div className="flex justify-center mb-10">
                             <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
                                 <InlineEditableText value={textSettings.menu?.ippin_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'ippin_description_en', val)} isEditing={isEditing} />
@@ -1112,8 +1119,11 @@ export function TravelerPage({
                     />
                 )}
                 <div className="max-w-6xl mx-auto px-4 relative z-10">
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-4 text-[#fcebc5] uppercase"><InlineEditableText value={textSettings.affiliated?.title_en || textSettings.affiliated?.title || 'Affiliated store of KABUKI SUSHI'} onChange={(val) => onTextChange?.('affiliated', 'title_en', val)} isEditing={isEditing} /></h2>
-                    <p className="text-center text-xl mb-12 text-gray-400 italic uppercase"><InlineEditableText value={textSettings.affiliated?.subtitle_en || textSettings.affiliated?.subtitle || 'Sister Stores'} onChange={(val) => onTextChange?.('affiliated', 'subtitle_en', val)} isEditing={isEditing} /></p>
+                    {/* 小見出しを消したときは見出しの下の余白を小見出しの分だけ広げる */}
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className={`text-4xl text-center ${((textSettings.affiliated?.subtitle_en ?? textSettings.affiliated?.subtitle ?? 'Sister Stores') || isEditing) ? 'mb-4' : 'mb-12'} text-[#fcebc5] uppercase`}><InlineEditableText value={textSettings.affiliated?.title_en || textSettings.affiliated?.title || 'Affiliated store of KABUKI SUSHI'} onChange={(val) => onTextChange?.('affiliated', 'title_en', val)} isEditing={isEditing} /></h2>
+                    {((textSettings.affiliated?.subtitle_en ?? textSettings.affiliated?.subtitle ?? 'Sister Stores') || isEditing) && (
+                        <p className="text-center text-xl mb-12 text-gray-400 italic uppercase"><InlineEditableText value={textSettings.affiliated?.subtitle_en ?? textSettings.affiliated?.subtitle ?? 'Sister Stores'} onChange={(val) => onTextChange?.('affiliated', 'subtitle_en', val)} isEditing={isEditing} /></p>
+                    )}
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">

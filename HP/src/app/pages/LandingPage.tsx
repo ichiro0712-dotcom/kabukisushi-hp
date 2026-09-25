@@ -1823,13 +1823,16 @@ export function LandingPage({
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <p className="text-center text-gray-300 mb-8">
-                            <InlineEditableText
-                                value={textSettings.drink?.subtitle || 'お飲み物'}
-                                onChange={(val) => onTextChange?.('drink', 'subtitle', val)}
-                                isEditing={isEditing}
-                            />
-                        </p>
+                        {/* 小見出しは空文字で消せるように ?? で判定する（|| だと既定値が復活する） */}
+                        {((textSettings.drink?.subtitle ?? 'お飲み物') || isEditing) && (
+                            <p className="text-center text-gray-300 mb-8">
+                                <InlineEditableText
+                                    value={textSettings.drink?.subtitle ?? 'お飲み物'}
+                                    onChange={(val) => onTextChange?.('drink', 'subtitle', val)}
+                                    isEditing={isEditing}
+                                />
+                            </p>
+                        )}
 
                         <div className="max-w-4xl mx-auto space-y-8">
                             {/* Sake Section */}
@@ -2233,13 +2236,15 @@ export function LandingPage({
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <div className="text-center text-[#e8eaec]/70 mb-8">
-                            <InlineEditableText
-                                value={textSettings.menu?.makimono_subtitle || '巻物'}
-                                onChange={(val) => onTextChange?.('menu', 'makimono_subtitle', val)}
-                                isEditing={isEditing}
-                            />
-                        </div>
+                        {((textSettings.menu?.makimono_subtitle ?? '巻物') || isEditing) && (
+                            <div className="text-center text-[#e8eaec]/70 mb-8">
+                                <InlineEditableText
+                                    value={textSettings.menu?.makimono_subtitle ?? '巻物'}
+                                    onChange={(val) => onTextChange?.('menu', 'makimono_subtitle', val)}
+                                    isEditing={isEditing}
+                                />
+                            </div>
+                        )}
 
                         <SortableMenuGrid
                             items={getOrderedIndices(textSettings.menu, 'makimono')}
@@ -2371,13 +2376,15 @@ export function LandingPage({
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <div className="text-center text-[#e8eaec]/70 mb-8">
-                            <InlineEditableText
-                                value={textSettings.menu?.ippin_subtitle || '一品料理'}
-                                onChange={(val) => onTextChange?.('menu', 'ippin_subtitle', val)}
-                                isEditing={isEditing}
-                            />
-                        </div>
+                        {((textSettings.menu?.ippin_subtitle ?? '一品料理') || isEditing) && (
+                            <div className="text-center text-[#e8eaec]/70 mb-8">
+                                <InlineEditableText
+                                    value={textSettings.menu?.ippin_subtitle ?? '一品料理'}
+                                    onChange={(val) => onTextChange?.('menu', 'ippin_subtitle', val)}
+                                    isEditing={isEditing}
+                                />
+                            </div>
+                        )}
 
                         <SortableMenuGrid
                             items={getOrderedIndices(textSettings.menu, 'ippin')}
@@ -2520,20 +2527,23 @@ export function LandingPage({
                 )}
                 {(!backgroundSettings?.['affiliated']?.overlayOpacity) && <div className="absolute inset-0 bg-black/70"></div>}
                 <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-4 text-[#fcebc5]">
+                    {/* 小見出しを消したときは見出しの下の余白を小見出しの分だけ広げる */}
+                    <h2 style={{ fontFamily: "'Bad Script', cursive" }} className={`text-4xl text-center ${((textSettings.affiliated?.subtitle ?? '姉妹店') || isEditing) ? 'mb-4' : 'mb-12'} text-[#fcebc5]`}>
                         <InlineEditableText
                             value={textSettings.affiliated?.title || 'Affiliated store of KABUKI SUSHI'}
                             onChange={(val) => onTextChange?.('affiliated', 'title', val)}
                             isEditing={isEditing}
                         />
                     </h2>
-                    <div className="text-center text-xl mb-12 text-[#e8eaec]">
-                        <InlineEditableText
-                            value={textSettings.affiliated?.subtitle || '姉妹店'}
-                            onChange={(val) => onTextChange?.('affiliated', 'subtitle', val)}
-                            isEditing={isEditing}
-                        />
-                    </div>
+                    {((textSettings.affiliated?.subtitle ?? '姉妹店') || isEditing) && (
+                        <div className="text-center text-xl mb-12 text-[#e8eaec]">
+                            <InlineEditableText
+                                value={textSettings.affiliated?.subtitle ?? '姉妹店'}
+                                onChange={(val) => onTextChange?.('affiliated', 'subtitle', val)}
+                                isEditing={isEditing}
+                            />
+                        </div>
+                    )}
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-[#271c02] rounded-lg p-6 border border-[#deb55a]/30">
