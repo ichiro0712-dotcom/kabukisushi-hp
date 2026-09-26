@@ -34,6 +34,10 @@ export interface StoreConfig {
   storagePrefix: string;
   basePath: string;
   travelerPath: string;
+  /** 日本語ページのタブ名（検索結果の見出しにも使われる） */
+  pageTitle: string;
+  /** 訪日客向け（英語）ページのタブ名 */
+  travelerPageTitle: string;
   /** 管理画面を店舗ごとに色分けして取り違えを防ぐためのテーマ */
   theme: StoreTheme;
   links: StoreLinks;
@@ -47,6 +51,8 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
     storagePrefix: 'honten',
     basePath: '/',
     travelerPath: '/traveler',
+    pageTitle: 'KABUKI寿司 本店｜歌舞伎町の江戸前寿司・朝4時まで',
+    travelerPageTitle: 'KABUKISUSHI MAIN BRANCH | Edo-mae Sushi in Shinjuku',
     theme: {
       canvas: 'bg-slate-100',
       topBar: 'bg-white',
@@ -74,6 +80,8 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
     storagePrefix: 'ichiban',
     basePath: '/ichiban-dori',
     travelerPath: '/ichiban-dori/traveler',
+    pageTitle: 'KABUKI寿司 1番通り店｜新宿・歌舞伎町の寿司',
+    travelerPageTitle: 'KABUKISUSHI NO.1 STREET BRANCH | Sushi in Shinjuku',
     theme: {
       canvas: 'bg-slate-900',
       topBar: 'bg-slate-800',
