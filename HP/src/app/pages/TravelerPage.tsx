@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, Globe, EyeOff, Ban, Plus } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
-import { InlineEditableText, MenuItemControls, MultiLanguageTextEditor, MenuTranslationsEditor, SectionToolbar, CourseCards, getCourseImageKeys, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
+import { InlineEditableText, MenuItemControls, SpecialBlockToggle, MultiLanguageTextEditor, MenuTranslationsEditor, SectionToolbar, CourseCards, getCourseImageKeys, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
 import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
 import { loadStoreSettings } from '../../lib/settingsService';
@@ -78,6 +78,9 @@ export function TravelerPage({
     // コース写真が1枚でも設定されていれば注意書きを表示
     const hasCourseImage = getCourseImageKeys(textSettings)
         .some(key => !!textSettings.menu?.[key]);
+
+    // 特集ブロック（ウニドックなど）の非表示フラグ。公開ページでは true のとき丸ごと出さない
+    const specialHidden = textSettings.menu?.special_hidden === 'true';
 
     useEffect(() => {
         if (!isEditing) {
@@ -650,7 +653,14 @@ export function TravelerPage({
                     </div>
 
                     {/* Special Section */}
-                    <div className="py-20 px-4 -mx-4 bg-[#1C1C1C] flex flex-col items-center">
+                    {(isEditing || !specialHidden) && (
+                    <div className={`relative py-20 px-4 -mx-4 bg-[#1C1C1C] flex flex-col items-center ${isEditing && specialHidden ? 'menu-item-hidden-editor' : ''}`}>
+                        {isEditing && (
+                            <SpecialBlockToggle
+                                isHidden={specialHidden}
+                                onToggleHidden={() => onTextChange?.('menu', 'special_hidden', specialHidden ? 'false' : 'true')}
+                            />
+                        )}
                         <p
                             style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
                             className="text-2xl md:text-3xl text-center text-[#e8eaec] mb-10 leading-relaxed tracking-wider"
@@ -694,6 +704,7 @@ export function TravelerPage({
                             </p>
                         )}
                     </div>
+                    )}
                 </div>
             </section>
 

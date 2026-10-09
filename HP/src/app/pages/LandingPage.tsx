@@ -1022,6 +1022,30 @@ export function MenuItemControls({ onDelete, isSoldOut, onToggleSoldOut, isHidde
     );
 }
 
+interface SpecialBlockToggleProps {
+    isHidden: boolean;
+    onToggleHidden: () => void;
+}
+
+// 特集ブロック（ウニドックなど）の非表示スイッチ。編集画面でだけ出る。
+// 中身（写真・文言）は消さず、公開ページに出すかどうかだけを切り替える
+export function SpecialBlockToggle({ isHidden, onToggleHidden }: SpecialBlockToggleProps) {
+    return (
+        <div className="absolute top-2 left-2 z-20 flex items-center gap-2 pointer-events-auto">
+            <button
+                onClick={(e) => { e.stopPropagation(); onToggleHidden(); }}
+                className={`editor-control-button ${isHidden ? 'active-hidden' : ''}`}
+                title={isHidden ? "表示する" : "非表示にする"}
+            >
+                <EyeOff size={14} />
+            </button>
+            {isHidden && (
+                <span className="px-2 py-0.5 rounded bg-[#717182] text-white text-[10px] font-bold">非表示中</span>
+            )}
+        </div>
+    );
+}
+
 interface MultiLanguageTextEditorProps {
     baseFieldName: string;
     sectionId: string;
@@ -1135,6 +1159,9 @@ export function LandingPage({
     // コース写真が1枚でも設定されていれば注意書きを表示
     const hasCourseImage = getCourseImageKeys(textSettings)
         .some(key => !!textSettings.menu?.[key]);
+
+    // 特集ブロック（ウニドックなど）の非表示フラグ。公開ページでは true のとき丸ごと出さない
+    const specialHidden = textSettings.menu?.special_hidden === 'true';
 
     const links = {
         ...defaultLinks,
@@ -2037,7 +2064,14 @@ export function LandingPage({
                     </div>
 
                     {/* Special Section */}
-                    <div className="py-20 px-4 -mx-4 bg-[#1C1C1C] flex flex-col items-center">
+                    {(isEditing || !specialHidden) && (
+                    <div className={`relative py-20 px-4 -mx-4 bg-[#1C1C1C] flex flex-col items-center ${isEditing && specialHidden ? 'menu-item-hidden-editor' : ''}`}>
+                        {isEditing && (
+                            <SpecialBlockToggle
+                                isHidden={specialHidden}
+                                onToggleHidden={() => onTextChange?.('menu', 'special_hidden', specialHidden ? 'false' : 'true')}
+                            />
+                        )}
                         <p
                             style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
                             className="text-2xl md:text-3xl text-center text-[#e8eaec] mb-10 leading-relaxed tracking-wider"
@@ -2080,6 +2114,7 @@ export function LandingPage({
                             </p>
                         )}
                     </div>
+                    )}
 
                     {/* NIGIRI Section */}
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
