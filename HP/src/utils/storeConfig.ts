@@ -41,6 +41,17 @@ export interface StoreConfig {
   /** 管理画面を店舗ごとに色分けして取り違えを防ぐためのテーマ */
   theme: StoreTheme;
   links: StoreLinks;
+  /**
+   * データが読めないときの案内ページ用の基本情報（英語の店名・住所・営業時間）。
+   * メニューの中身はここに持たない（古い価格を出さないため）。
+   */
+  fallback: {
+    nameEn: string;
+    address: string;
+    addressEn: string;
+    hours: string;
+    hoursEn: string;
+  };
 }
 
 export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
@@ -72,6 +83,13 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
       youtube: 'https://www.youtube.com/@KABUKI-ev3sy',
       line: '',
     },
+    fallback: {
+      nameEn: 'KABUKISUSHI MAIN BRANCH',
+      address: '〒160-0021 東京都新宿区歌舞伎町2丁目25-8 エコプレイス新宿1F',
+      addressEn: 'Eco Place Shinjuku 1F, 2-25-8 Kabukicho, Shinjuku-ku, Tokyo',
+      hours: '18:00〜翌4:00',
+      hoursEn: '6:00 PM – 4:00 AM',
+    },
   },
   ichiban: {
     id: 'ichiban',
@@ -100,6 +118,13 @@ export const STORE_CONFIGS: Record<StoreId, StoreConfig> = {
       tiktok: 'https://www.tiktok.com/@kabukisushi1',
       youtube: 'https://www.youtube.com/@KABUKI-ev3sy',
       line: '',
+    },
+    fallback: {
+      nameEn: 'KABUKISUSHI NO.1 STREET BRANCH',
+      address: '〒160-0021 東京都新宿区歌舞伎町2丁目45-16 GEST34ビル4F',
+      addressEn: 'GEST34 Bldg 4F, 2-45-16 Kabukicho, Shinjuku-ku, Tokyo',
+      hours: '18:00〜24:00',
+      hoursEn: '6:00 PM – 12:00 AM',
     },
   },
 };

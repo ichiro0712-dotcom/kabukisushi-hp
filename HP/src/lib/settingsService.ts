@@ -32,6 +32,9 @@ export type SaveResult = {
   message?: string
 }
 
+/** 1回の読み込みを打ち切るまでの時間。通信が固まったまま真っ暗な画面にならないようにする */
+const LOAD_TIMEOUT_MS = 10000
+
 export async function loadStoreSettings(storeId: string): Promise<LoadResult> {
   const empty: LoadResult = {
     ok: false,
@@ -43,10 +46,14 @@ export async function loadStoreSettings(storeId: string): Promise<LoadResult> {
 
   if (!supabase) return { ...empty, reason: 'no-client', errorMessage: 'Supabase 接続情報が設定されていません' }
 
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), LOAD_TIMEOUT_MS)
   const { data, error } = await supabase
     .from('store_settings')
     .select('settings_type, data, updated_at')
     .eq('store_id', storeId)
+    .abortSignal(controller.signal)
+  clearTimeout(timer)
 
   if (error) {
     console.error('Failed to load settings from Supabase:', error)
@@ -65,6 +72,24 @@ export async function loadStoreSettings(storeId: string): Promise<LoadResult> {
   })
 
   return result
+}
+
+/**
+ * 公開ページ用の読み込み。お客さんのスマホの一時的な通信失敗に備えて、少し待って読み直す。
+ *
+ * 読めなかったときに端末の localStorage やコード内の古い既定値で代わりに描くと、
+ * 古い価格・別の店の住所が出てしまう（2026-07-13 の入れ替わり事故の原因）。
+ * そのため、ここで読めなければ呼び出し側は「表示できません」の案内を出す。
+ */
+export async function loadStoreSettingsForPublic(storeId: string): Promise<LoadResult> {
+  const waits = [0, 800, 2000]
+  let last: LoadResult | null = null
+  for (const wait of waits) {
+    if (wait) await new Promise(r => setTimeout(r, wait))
+    last = await loadStoreSettings(storeId)
+    if (last.ok && last.textSettings) return last
+  }
+  return { ...(last as LoadResult), ok: false }
 }
 
 /**

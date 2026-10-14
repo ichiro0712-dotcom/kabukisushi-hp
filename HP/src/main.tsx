@@ -3,26 +3,20 @@
   import App from "./app/App.tsx";
   import "./styles/index.css";
 
-  // Migrate old single-store localStorage keys to multi-store format
-  (function migrateToMultiStore() {
-    const MIGRATION_KEY = 'multi_store_migrated';
-    if (localStorage.getItem(MIGRATION_KEY)) return;
-
-    const oldKeys = [
-      ['site_background_settings', 'ichiban_background_settings'],
-      ['site_layout_settings', 'ichiban_layout_settings'],
-      ['site_text_settings', 'ichiban_text_settings'],
-    ];
-
-    for (const [oldKey, newKey] of oldKeys) {
-      const data = localStorage.getItem(oldKey);
-      if (data) {
-        localStorage.setItem(newKey, data);
+  // 昔の作りでブラウザに残した設定のコピーを消す。
+  // 今はDBだけを見るので使っていないが、残っていると古いメニュー（別の店の内容のこともある）が
+  // 端末に溜まったままになる。2026-07-13 の「端末によって店が入れ替わって見える」の元になったデータ。
+  (function removeOldSettingsCache() {
+    try {
+      for (const store of ['site', 'honten', 'ichiban']) {
+        for (const kind of ['background', 'layout', 'text']) {
+          localStorage.removeItem(`${store}_${kind}_settings`);
+        }
       }
+      localStorage.removeItem('multi_store_migrated');
+    } catch {
+      // プライベートモードなどで使えない時は何もしない
     }
-
-    localStorage.setItem(MIGRATION_KEY, 'true');
   })();
 
   createRoot(document.getElementById("root")!).render(<App />);
-  

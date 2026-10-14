@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, ChevronDown, ArrowUpToLine, ArrowDownToLine, AlignCenterVertical, RotateCcw, Instagram, Music2, Facebook, Youtube, Link as LinkIcon, Globe, EyeOff, Ban, Plus } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
-import { InlineEditableText, MenuItemControls, SpecialBlockToggle, MultiLanguageTextEditor, MenuTranslationsEditor, SectionToolbar, CourseCards, getCourseImageKeys, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from './LandingPage';
+import { InlineEditableText, MenuItemControls, SpecialBlockToggle, MultiLanguageTextEditor, MenuTranslationsEditor, SectionToolbar, CourseCards, getCourseImageKeys, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings, resolveStoreLinks, SiteUnavailable } from './LandingPage';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
-import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
-import { loadStoreSettings } from '../../lib/settingsService';
+import { type StoreId, STORE_CONFIGS } from '../../utils/storeConfig';
+import { loadStoreSettingsForPublic } from '../../lib/settingsService';
 import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices, resolveMenuImage } from '../../lib/textSettingsUtils';
 
 interface TravelerPageProps {
@@ -62,11 +62,11 @@ export function TravelerPage({
     onReorderMenuItem
 }: TravelerPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const links = STORE_CONFIGS[storeId].links;
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
     const [localLayoutSettings, setLocalLayoutSettings] = useState<Record<string, LayoutConfig> | undefined>(undefined);
     const [localTextSettings, setLocalTextSettings] = useState<Record<string, Record<string, string>> | undefined>(undefined);
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(isEditing);
+    const [loadFailed, setLoadFailed] = useState(false);
 
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
     const layoutSettings = propLayoutSettings || (localLayoutSettings ? { ...DEFAULT_LAYOUT_SETTINGS, ...localLayoutSettings } : DEFAULT_LAYOUT_SETTINGS);
@@ -82,28 +82,28 @@ export function TravelerPage({
     // 特集ブロック（ウニドックなど）の非表示フラグ。公開ページでは true のとき丸ごと出さない
     const specialHidden = textSettings.menu?.special_hidden === 'true';
 
+    // 管理画面の「店舗情報」で変えた電話・予約URL等を英語ページにも出す（以前は日本語ページだけに反映されていた）
+    const links = resolveStoreLinks(storeId, textSettings?.links);
+
+    // 公開ページはDBだけを見る。読めなければ「表示できません」の案内を出す（古い既定値や端末のキャッシュは使わない）
     useEffect(() => {
         if (!isEditing) {
             let cancelled = false;
+            setIsSettingsLoaded(false);
+            setLoadFailed(false);
+            setLocalBackgroundSettings(undefined);
+            setLocalLayoutSettings(undefined);
+            setLocalTextSettings(undefined);
             async function loadSettings() {
-                const supabaseData = await loadStoreSettings(storeId);
+                const supabaseData = await loadStoreSettingsForPublic(storeId);
                 if (cancelled) return;
-                const hasSupabaseData = supabaseData.backgroundSettings || supabaseData.layoutSettings || supabaseData.textSettings;
-                if (hasSupabaseData) {
+                if (supabaseData.ok) {
                     if (supabaseData.backgroundSettings) setLocalBackgroundSettings(migrateBackgroundSettings(supabaseData.backgroundSettings));
                     if (supabaseData.layoutSettings) setLocalLayoutSettings(supabaseData.layoutSettings);
                     if (supabaseData.textSettings) setLocalTextSettings(supabaseData.textSettings);
-                    setIsSettingsLoaded(true);
-                    return;
+                } else {
+                    setLoadFailed(true);
                 }
-                // Fallback to localStorage
-                const keys = getStorageKeys(storeId);
-                const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
-                const savedLayouts = localStorage.getItem(keys.layoutSettings);
-                const savedText = localStorage.getItem(keys.textSettings);
-                if (savedBackgrounds) try { setLocalBackgroundSettings(migrateBackgroundSettings(JSON.parse(savedBackgrounds))); } catch (e) { }
-                if (savedLayouts) try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { }
-                if (savedText) try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { }
                 setIsSettingsLoaded(true);
             }
             loadSettings();
@@ -152,6 +152,10 @@ export function TravelerPage({
     // Prevent FOUC: don't render until settings are loaded from Supabase
     if (!isSettingsLoaded) {
         return <div className="min-h-screen bg-[#1C1C1C]" />;
+    }
+
+    if (loadFailed) {
+        return <SiteUnavailable storeId={storeId} lang="en" />;
     }
 
     return (
@@ -400,11 +404,9 @@ export function TravelerPage({
                     <h2 style={{ fontFamily: "'Bad Script', cursive" }} className="text-5xl text-center mb-12 text-[#1C1C1C] uppercase"><InlineEditableText value={textSettings.gallery?.title_en || textSettings.gallery?.title || 'GALLERY'} onChange={(val) => onTextChange?.('gallery', 'title_en', val)} isEditing={isEditing} /></h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {(() => {
-                            const galleryIndices = Object.keys(textSettings.gallery || {})
-                                .filter(key => key.startsWith('image_') && !key.includes('_order'))
-                                .map(key => parseInt(key.split('_')[1]))
-                                .filter(num => !isNaN(num))
-                                .sort((a, b) => a - b);
+                            // 日本語ページと同じ並び順（image_order）で出す。旧形式の image_N_image は数えない
+                            const galleryIndices = getOrderedIndices(textSettings.gallery, 'image')
+                                .filter(index => !!textSettings.gallery?.[`image_${index}`]);
                             return galleryIndices.map(index => (
                                 <div key={index} className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow relative group">
                                     <ImageWithFallback src={textSettings.gallery![`image_${index}`]} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
@@ -646,9 +648,14 @@ export function TravelerPage({
                             </div>
                         )}
 
+                        {/* 税の注記。価格は税込（内税）なので、空なら何も出さない（以前は空にすると「税抜」の文言が戻っていた） */}
                         <div className="text-center space-y-1 text-xs text-[#e8eaec]/50">
-                            <p><InlineEditableText value={textSettings.menu?.tax_note_en || '※All listed prices are excluding tax'} onChange={(val) => onTextChange?.('menu', 'tax_note_en', val)} isEditing={isEditing} /></p>
-                            <p><InlineEditableText value={textSettings.menu?.tax_note_multi || '표시가격은 세금을 뺀 가격 입니다 / 表示的价格是不含税的'} onChange={(val) => onTextChange?.('menu', 'tax_note_multi', val)} isEditing={isEditing} /></p>
+                            {(textSettings.menu?.tax_note_en || isEditing) && (
+                                <p><InlineEditableText value={textSettings.menu?.tax_note_en ?? ''} onChange={(val) => onTextChange?.('menu', 'tax_note_en', val)} isEditing={isEditing} placeholder="税の注記（英語）" /></p>
+                            )}
+                            {(textSettings.menu?.tax_note_multi || isEditing) && (
+                                <p><InlineEditableText value={textSettings.menu?.tax_note_multi ?? ''} onChange={(val) => onTextChange?.('menu', 'tax_note_multi', val)} isEditing={isEditing} placeholder="税の注記（韓国語・中国語）" /></p>
+                            )}
                         </div>
                     </div>
 
@@ -722,7 +729,9 @@ export function TravelerPage({
                 <div className={`mx-auto ${getContainerWidthClass('menu')}`}>
                     <div className="py-16 px-4 -mx-4 bg-[#1C1C1C]">
                         <h3 style={{ fontFamily: "'Bad Script', cursive" }} className="text-4xl text-center mb-8 text-[#e8eaec]"><InlineEditableText value={textSettings.menu?.nigiri_title_en || textSettings.menu?.nigiri_title || 'NIGIRI'} onChange={(val) => onTextChange?.('menu', 'nigiri_title_en', val)} isEditing={isEditing} /></h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.nigiri_subtitle_en || textSettings.menu?.nigiri_subtitle || 'Fish in Season'} onChange={(val) => onTextChange?.('menu', 'nigiri_subtitle_en', val)} isEditing={isEditing} /></div>
+                        {((textSettings.menu?.nigiri_subtitle_en ?? textSettings.menu?.nigiri_subtitle ?? 'Fish in Season') || isEditing) && (
+                            <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.nigiri_subtitle_en ?? textSettings.menu?.nigiri_subtitle ?? 'Fish in Season'} onChange={(val) => onTextChange?.('menu', 'nigiri_subtitle_en', val)} isEditing={isEditing} /></div>
+                        )}
                         <div className="flex justify-center mb-10">
                             <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
                                 <InlineEditableText value={textSettings.menu?.nigiri_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'nigiri_description_en', val)} isEditing={isEditing} />
@@ -739,7 +748,7 @@ export function TravelerPage({
                                     const name_sub = section[`nigiri_${index}_name_sub`] || '';
                                     const name_ko = section[`nigiri_${index}_name_ko`] || '';
                                     const name_zh = section[`nigiri_${index}_name_zh`] || '';
-                                    const price = section[`nigiri_${index}_price`] || '0';
+                                    const price = section[`nigiri_${index}_price`] || '';
                                     const image = resolveMenuImage(section[`nigiri_${index}_image`]);
                                     const isSoldOut = section[`nigiri_${index}_soldOut`] === 'true';
                                     const isHidden = section[`nigiri_${index}_hidden`] === 'true';
@@ -771,11 +780,6 @@ export function TravelerPage({
                                                             <ImageIcon size={14} />
                                                             編集
                                                         </button>
-                                                    </div>
-                                                )}
-                                                {isSoldOut && (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                                                        <span className="bg-black/80 text-white px-4 py-2 font-black text-xl tracking-tighter border-2 border-white transform -rotate-12 italic">SOLD OUT</span>
                                                     </div>
                                                 )}
                                                 {isEditing && isHidden && (
@@ -859,7 +863,7 @@ export function TravelerPage({
                                     const name_en = section[`makimono_${index}_name_en`] || section[`makimono_${index}_name`] || '';
                                     const name_ko = section[`makimono_${index}_name_ko`] || '';
                                     const name_zh = section[`makimono_${index}_name_zh`] || '';
-                                    const price = section[`makimono_${index}_price`] || '0';
+                                    const price = section[`makimono_${index}_price`] || '';
                                     const image = resolveMenuImage(section[`makimono_${index}_image`]);
                                     const isSoldOut = section[`makimono_${index}_soldOut`] === 'true';
                                     const isHidden = section[`makimono_${index}_hidden`] === 'true';
@@ -891,11 +895,6 @@ export function TravelerPage({
                                                             <ImageIcon size={14} />
                                                             編集
                                                         </button>
-                                                    </div>
-                                                )}
-                                                {isSoldOut && (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                                                        <span className="bg-black/80 text-white px-4 py-2 font-black text-xl tracking-tighter border-2 border-white transform -rotate-12 italic">SOLD OUT</span>
                                                     </div>
                                                 )}
                                                 {isEditing && isHidden && (
@@ -970,7 +969,7 @@ export function TravelerPage({
                                     const name_en = section[`ippin_${index}_name_en`] || section[`ippin_${index}_name`] || '';
                                     const name_ko = section[`ippin_${index}_name_ko`] || '';
                                     const name_zh = section[`ippin_${index}_name_zh`] || '';
-                                    const price = section[`ippin_${index}_price`] || '0';
+                                    const price = section[`ippin_${index}_price`] || '';
                                     const image = resolveMenuImage(section[`ippin_${index}_image`]);
                                     const note_en = section[`ippin_${index}_note_en`] || section[`ippin_${index}_note`] || '';
                                     const isSoldOut = section[`ippin_${index}_soldOut`] === 'true';
@@ -1003,11 +1002,6 @@ export function TravelerPage({
                                                             <ImageIcon size={14} />
                                                             編集
                                                         </button>
-                                                    </div>
-                                                )}
-                                                {isSoldOut && (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                                                        <span className="bg-black/80 text-white px-4 py-2 font-black text-xl tracking-tighter border-2 border-white transform -rotate-12 italic">SOLD OUT</span>
                                                     </div>
                                                 )}
                                                 {isEditing && isHidden && (
@@ -1093,7 +1087,7 @@ export function TravelerPage({
                                 <MapPin className="text-[#deb55a] shrink-0 mt-1" />
                                 <div>
                                     <p className="font-bold"><InlineEditableText value={textSettings.access?.zip_en || textSettings.access?.zip || '160-0021'} onChange={(val) => onTextChange?.('access', 'zip_en', val)} isEditing={isEditing} /></p>
-                                    <InlineEditableText value={textSettings.access?.address_en || 'GEST34 Bldg 4F, 2-45-16 Kabukicho, Shinjuku-ku, Tokyo'} onChange={(val) => onTextChange?.('access', 'address_en', val)} isEditing={isEditing} multiline={true} />
+                                    <InlineEditableText value={textSettings.access?.address_en || STORE_CONFIGS[storeId].fallback.addressEn} onChange={(val) => onTextChange?.('access', 'address_en', val)} isEditing={isEditing} multiline={true} />
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -1102,7 +1096,7 @@ export function TravelerPage({
                             </div>
                             <div className="flex items-center gap-4">
                                 <Clock className="text-[#deb55a]" />
-                                <p><InlineEditableText value={textSettings.access?.hours_en || textSettings.access?.hours || 'OPEN : 18:00 - 24:00'} onChange={(val) => onTextChange?.('access', 'hours_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.access?.hours_en || textSettings.access?.hours || `OPEN : ${STORE_CONFIGS[storeId].fallback.hoursEn}`} onChange={(val) => onTextChange?.('access', 'hours_en', val)} isEditing={isEditing} /></p>
                             </div>
                             <a href={links.mapsUrl} target="_blank" className="inline-block px-8 py-3 bg-[#1C1C1C] text-white rounded hover:bg-[#deb55a] transition-colors font-bold uppercase tracking-wider">Open in Google Maps</a>
                         </div>
@@ -1146,10 +1140,10 @@ export function TravelerPage({
                                     </div>
                                 )}
                             </div>
-                            <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo"><InlineEditableText value={textSettings.affiliated?.store1_name_en || textSettings.affiliated?.store1_name || '■KABUKI Sushi Main Store'} onChange={(val) => onTextChange?.('affiliated', 'store1_name_en', val)} isEditing={isEditing} /></h3>
+                            <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo"><InlineEditableText value={textSettings.affiliated?.store1_name_en || textSettings.affiliated?.store1_name || STORE_CONFIGS[storeId === 'honten' ? 'ichiban' : 'honten'].fallback.nameEn} onChange={(val) => onTextChange?.('affiliated', 'store1_name_en', val)} isEditing={isEditing} /></h3>
                             <div className="space-y-2 text-gray-300 font-archivo">
-                                <p><InlineEditableText value={textSettings.affiliated?.store1_address_en || 'Eco Place Shinjuku 1F, 2-25-8 Kabukicho, Shinjuku-ku, Tokyo'} onChange={(val) => onTextChange?.('affiliated', 'store1_address_en', val)} isEditing={isEditing} /></p>
-                                <p><InlineEditableText value={textSettings.affiliated?.store1_phone_en || textSettings.affiliated?.store1_phone || 'TEL：03-6457-6612 | OPEN：18:00-4:00'} onChange={(val) => onTextChange?.('affiliated', 'store1_phone_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store1_address_en || STORE_CONFIGS[storeId === 'honten' ? 'ichiban' : 'honten'].fallback.addressEn} onChange={(val) => onTextChange?.('affiliated', 'store1_address_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store1_phone_en || textSettings.affiliated?.store1_phone || `TEL：${STORE_CONFIGS[storeId === 'honten' ? 'ichiban' : 'honten'].links.phoneDisplay}`} onChange={(val) => onTextChange?.('affiliated', 'store1_phone_en', val)} isEditing={isEditing} /></p>
                                 <p><InlineEditableText value={textSettings.affiliated?.store1_note_en || textSettings.affiliated?.store1_note || 'Gluten-free options available'} onChange={(val) => onTextChange?.('affiliated', 'store1_note_en', val)} isEditing={isEditing} /></p>
                             </div>
                         </div>
@@ -1166,7 +1160,7 @@ export function TravelerPage({
                             <h3 className="text-2xl font-bold mb-4 text-[#fcebc5] uppercase font-archivo"><InlineEditableText value={textSettings.affiliated?.store2_name_en || textSettings.affiliated?.store2_name || '■KABUKI SOBA'} onChange={(val) => onTextChange?.('affiliated', 'store2_name_en', val)} isEditing={isEditing} /></h3>
                             <div className="space-y-2 text-gray-300 font-archivo">
                                 <p><InlineEditableText value={textSettings.affiliated?.store2_address_en || 'Lee2 Bldg 1F, 2-27-12 Kabukicho, Shinjuku-ku, Tokyo'} onChange={(val) => onTextChange?.('affiliated', 'store2_address_en', val)} isEditing={isEditing} /></p>
-                                <p><InlineEditableText value={textSettings.affiliated?.store2_phone_en || textSettings.affiliated?.store2_phone || 'TEL：03-6457-3112 | OPEN：19:00-6:00'} onChange={(val) => onTextChange?.('affiliated', 'store2_phone_en', val)} isEditing={isEditing} /></p>
+                                <p><InlineEditableText value={textSettings.affiliated?.store2_phone_en || textSettings.affiliated?.store2_phone || 'TEL：03-6457-3112 | OPEN：11:00-6:00'} onChange={(val) => onTextChange?.('affiliated', 'store2_phone_en', val)} isEditing={isEditing} /></p>
                             </div>
                         </div>
                     </div>

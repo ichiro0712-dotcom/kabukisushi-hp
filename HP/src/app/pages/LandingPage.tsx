@@ -3,8 +3,8 @@ import { Menu, X, MapPin, Phone, Clock, Image as ImageIcon, Layout, Settings2, C
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { SortableMenuGrid } from '../components/ui/SortableMenuGrid';
 import type { BackgroundConfig, LayoutConfig } from '../admin/pages/EditorPage';
-import { type StoreId, getStorageKeys, STORE_CONFIGS } from '../../utils/storeConfig';
-import { loadStoreSettings } from '../../lib/settingsService';
+import { type StoreId, type StoreLinks, STORE_CONFIGS } from '../../utils/storeConfig';
+import { loadStoreSettingsForPublic } from '../../lib/settingsService';
 import { mergeTextSettingsWithDefaults, migrateBackgroundSettings, getOrderedIndices, resolveMenuImage, sanitizeInlineHtml } from '../../lib/textSettingsUtils';
 
 function LineIcon({ size = 16 }: { size?: number }) {
@@ -187,7 +187,7 @@ export const DEFAULT_TEXT_SETTINGS: Record<string, Record<string, string>> = {
         store2_name: 'KABUKI SOBA',
         store2_address: '〒160-0021 東京都新宿区歌舞伎町２丁目２７ １２Lee２ビル １F',
         store2_phone: 'TEL：03-6457-3112',
-        store2_hours: 'OPEN：19:00-6:00'
+        store2_hours: 'OPEN：11:00-6:00(L.O5:30)'
     },
     drink: {
         title: 'Drink',
@@ -236,6 +236,16 @@ export function getDefaultTextSettings(storeId: StoreId = 'honten'): Record<stri
     if (storeId === 'honten') {
         base.home.subtitle = '本店';
         base.about.content = base.about.content.replace(/1番通り店/g, '本店');
+        // 既定値は1番通り店の内容で書かれているので、本店の住所・営業時間・姉妹店に直す
+        // （DBに値が無い項目だけに使われる。以前は本店ページに1番通り店の住所が出る作りだった）
+        base.access.address = '東京都新宿区歌舞伎町2丁目25-8';
+        base.access.building = 'エコプレイス新宿1F';
+        base.access.hours = 'OPEN : 18:00 - 4:00';
+        base.affiliated.store1_name = 'KABUKI寿司 1番通り店';
+        base.affiliated.store1_address = '〒160-0021 東京都新宿区歌舞伎町2丁目45-16 GEST34ビル4F';
+        base.affiliated.store1_phone = 'TEL：03-6302-1477';
+        base.affiliated.store1_hours = 'OPEN：18:00-24:00(L.O23:00)';
+        base.affiliated.store1_url = 'https://kabuki-sushi.co.jp/ichiban-dori';
     }
     return base;
 }
@@ -346,13 +356,14 @@ export function CourseCard({ index, lang, featured = false, textSettings, isEdit
         ? (menu[enKey('badge')] ?? menu[key('badge')] ?? ja?.badge)
         : (menu[key('badge')] ?? ja?.badge);
     const badge = badgeRaw ?? '';
+    // 名前・価格・説明も「空にしたら空のまま」にする（|| だと空にしても旧コース ¥4,980 などが復活していた）
     const name = isEn
-        ? (menu[enKey('name')] || en?.name || '')
-        : (menu[key('name')] || ja?.name || '');
-    const price = menu[key('price')] || ja?.price || '';
+        ? (menu[enKey('name')] ?? en?.name ?? '')
+        : (menu[key('name')] ?? ja?.name ?? '');
+    const price = menu[key('price')] ?? ja?.price ?? '';
     const desc = isEn
-        ? (menu[enKey('desc')] || en?.desc || '')
-        : (menu[key('desc')] || ja?.desc || '');
+        ? (menu[enKey('desc')] ?? en?.desc ?? '')
+        : (menu[key('desc')] ?? ja?.desc ?? '');
     const alt = name || (isEn ? en?.alt : ja?.alt) || 'Course';
 
     // バッジは値が入っているカードにだけ出す（編集画面で空枠が並ばないようにするため）
@@ -472,13 +483,17 @@ interface InlineEditableTextProps {
 export function InlineEditableText({ value, onChange, isEditing, className = '', style, multiline = false, placeholder = '' }: InlineEditableTextProps) {
     const [isFocused, setIsFocused] = useState(false);
     const editorRef = useRef<HTMLDivElement>(null);
+    /** 欄に入った時点の中身。離れたときに比べて、変わっていなければ保存しない */
+    const htmlAtFocusRef = useRef<string>('');
 
     // Sync ref value with prop value only when not focused
+    // 見本の文字（placeholder）は中身に入れず CSS で見せる。以前は見本を中身として入れていたため、
+    // 空欄に触れて離れるだけで「한국어」「Optional description...」が本物として保存されていた
     useEffect(() => {
         if (editorRef.current && !isFocused) {
-            editorRef.current.innerHTML = value || (isFocused ? '' : placeholder);
+            editorRef.current.innerHTML = value || '';
         }
-    }, [value, isFocused, placeholder]);
+    }, [value, isFocused]);
 
     if (!isEditing) {
         return (
@@ -512,16 +527,27 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
         // 1行の項目は改行を潰す。残すと <br> としてデータに入り「価格が 2000<br>」になる
         const insert = multiline ? text : text.replace(/[\r\n\t]+/g, ' ').replace(/ {2,}/g, ' ').trim();
         document.execCommand('insertText', false, insert);
-        if (editorRef.current) onChange(normalize(editorRef.current.innerHTML));
+        if (editorRef.current) {
+            htmlAtFocusRef.current = editorRef.current.innerHTML;
+            onChange(normalize(editorRef.current.innerHTML));
+        }
+    };
+
+    const handleFocus = () => {
+        htmlAtFocusRef.current = editorRef.current?.innerHTML ?? '';
+        setIsFocused(true);
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-        const newValue = normalize(e.target.innerHTML);
+        const html = e.target.innerHTML;
+        // 触れただけで中身が変わっていなければ保存しない（履歴も積まない）
+        const changed = html !== htmlAtFocusRef.current;
+        const newValue = normalize(html);
         // Use timeout to check if the relatedTarget is part of the toolbar
         setTimeout(() => {
             if (!document.activeElement?.closest('.inline-toolbar')) {
                 setIsFocused(false);
-                onChange(newValue);
+                if (changed) onChange(newValue);
             }
         }, 100);
     };
@@ -541,6 +567,7 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                 }
             }
             document.execCommand(command, false, value);
+            htmlAtFocusRef.current = editorRef.current.innerHTML;
             onChange(normalize(editorRef.current.innerHTML));
         }
     };
@@ -554,10 +581,11 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
-                onFocus={() => setIsFocused(true)}
+                onFocus={handleFocus}
                 onBlur={handleBlur}
                 onPaste={handlePaste}
-                className={`${className} outline - none transition - all duration - 200 min - h - [1em] min - w - [20px] 
+                data-placeholder={placeholder || undefined}
+                className={`${className} outline-none transition-all duration-200 min-h-[1em] min-w-[20px] 
                     ${isFocused ? 'ring-2 ring-blue-500/50 bg-white/5 rounded-sm p-1 -m-1 shadow-inner relative z-30' : 'hover:bg-white/5 rounded-sm cursor-text'}
                     ${multiline ? 'whitespace-pre-line block' : 'inline-block'} `}
                 style={style}
@@ -580,14 +608,14 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                                 if (url) handleCommand('createLink', url);
                             }
                         },
-                        {
+                        ...(multiline ? [{
                             icon: <AlignCenter size={12} />,
                             label: '揃え',
                             onClick: () => {
                                 const isCenter = document.queryCommandState('justifyCenter');
                                 handleCommand(isCenter ? 'justifyLeft' : 'justifyCenter');
                             }
-                        },
+                        }] : []),
                     ] as { icon: string | React.ReactNode, label: string, command?: string, onClick?: () => void }[]).map((tool, i) => (
                         <button
                             key={i}
@@ -608,8 +636,8 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                             )}
                         </button>
                     ))}
-                    <div className="w-[1px] h-4 bg-white/10 mx-1" />
-                    <button
+                    {multiline && <div className="w-[1px] h-4 bg-white/10 mx-1" />}
+                    {multiline && <button
                         onClick={() => {
                             if (!editorRef.current) return;
 
@@ -636,13 +664,14 @@ export function InlineEditableText({ value, onChange, isEditing, className = '',
                             else if (currentTag === 'H3') nextTag = '<P>';
 
                             document.execCommand('formatBlock', false, nextTag);
+                            htmlAtFocusRef.current = editorRef.current.innerHTML;
                             onChange(editorRef.current.innerHTML);
                         }}
                         className="px-2 py-1 text-[10px] font-bold text-white hover:text-[#deb55a] uppercase transition-colors"
                         title="見出し・スタイルの切り替え"
                     >
                         STYLE
-                    </button>
+                    </button>}
                 </div>
             )}
         </WrapperElement>
@@ -1121,6 +1150,54 @@ export function MultiLanguageTextEditor({
     );
 }
 
+/** 管理画面の「店舗情報」（links）で、既定のリンクを上書きする。日本語・英語ページ共通 */
+export function resolveStoreLinks(storeId: StoreId, saved?: Record<string, string>): StoreLinks {
+    const base = STORE_CONFIGS[storeId].links;
+    if (!saved) return base;
+    const keys: (keyof StoreLinks)[] = ['phone', 'phoneDisplay', 'instagram', 'facebook', 'tiktok', 'youtube', 'line', 'mapsUrl', 'reserveUrl'];
+    return Object.fromEntries(keys.map(k => [k, saved[k] || base[k]])) as unknown as StoreLinks;
+}
+
+/**
+ * データが読めないときの案内。メニューや価格は出さない（古い情報を出さないため）。
+ * 店名・住所・営業時間・電話・予約だけを storeConfig から出す。
+ */
+export function SiteUnavailable({ storeId, lang }: { storeId: StoreId; lang: 'ja' | 'en' }) {
+    const cfg = STORE_CONFIGS[storeId];
+    const isEn = lang === 'en';
+    return (
+        <div className="min-h-screen bg-[#1C1C1C] text-[#e8eaec] flex items-center justify-center px-6 py-16">
+            <div className="max-w-md w-full text-center space-y-6">
+                <h1 className="text-2xl font-bold tracking-wider text-[#fcebc5]">{isEn ? cfg.fallback.nameEn : cfg.displayName}</h1>
+                <p className="text-sm text-[#e8eaec]/75 leading-relaxed">
+                    {isEn
+                        ? 'Our menu is temporarily unavailable. Please try again in a few minutes.'
+                        : 'ただいまメニューを表示できません。時間をおいて、もう一度お試しください。'}
+                </p>
+                <div className="text-sm space-y-1 text-[#e8eaec]/80">
+                    <p>{isEn ? cfg.fallback.addressEn : cfg.fallback.address}</p>
+                    <p>{isEn ? `Open ${cfg.fallback.hoursEn}` : `営業時間 ${cfg.fallback.hours}`}</p>
+                    <p>TEL {cfg.links.phoneDisplay}</p>
+                </div>
+                <div className="flex flex-col gap-3">
+                    <a href={cfg.links.reserveUrl} target="_blank" rel="noopener noreferrer" className="py-3 bg-[#deb55a] text-[#1C1C1C] font-bold rounded">
+                        {isEn ? 'Reserve' : '予約する'}
+                    </a>
+                    <a href={`tel:${cfg.links.phone}`} className="py-3 border border-[#deb55a]/50 text-[#deb55a] font-bold rounded">
+                        {isEn ? 'Call' : '電話する'}
+                    </a>
+                    <a href={cfg.links.mapsUrl} target="_blank" rel="noopener noreferrer" className="py-3 border border-white/20 rounded">
+                        {isEn ? 'Google Maps' : '地図を見る'}
+                    </a>
+                    <button onClick={() => window.location.reload()} className="py-2 text-xs text-[#e8eaec]/60 underline underline-offset-4">
+                        {isEn ? 'Reload' : '再読み込み'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export function LandingPage({
     storeId = 'honten',
     isEditing = false,
@@ -1140,13 +1217,13 @@ export function LandingPage({
     onLayoutChange
 }: LandingPageProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const defaultLinks = STORE_CONFIGS[storeId].links;
 
     // Local state for settings when running in public mode (not editing)
     const [localBackgroundSettings, setLocalBackgroundSettings] = useState<Record<string, BackgroundConfig> | undefined>(undefined);
     const [localLayoutSettings, setLocalLayoutSettings] = useState<Record<string, LayoutConfig> | undefined>(undefined);
     const [localTextSettings, setLocalTextSettings] = useState<Record<string, Record<string, string>> | undefined>(undefined);
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(isEditing); // Skip loading state in edit mode
+    const [loadFailed, setLoadFailed] = useState(false);
 
     // Use props if available (editing mode), otherwise use local state (public mode)
     const backgroundSettings = propBackgroundSettings || (localBackgroundSettings ? { ...DEFAULT_BACKGROUND_SETTINGS, ...localBackgroundSettings } : DEFAULT_BACKGROUND_SETTINGS);
@@ -1163,52 +1240,27 @@ export function LandingPage({
     // 特集ブロック（ウニドックなど）の非表示フラグ。公開ページでは true のとき丸ごと出さない
     const specialHidden = textSettings.menu?.special_hidden === 'true';
 
-    const links = {
-        ...defaultLinks,
-        ...(textSettings?.links ? {
-            phone: textSettings.links.phone || defaultLinks.phone,
-            phoneDisplay: textSettings.links.phoneDisplay || defaultLinks.phoneDisplay,
-            instagram: textSettings.links.instagram || defaultLinks.instagram,
-            facebook: textSettings.links.facebook || defaultLinks.facebook,
-            tiktok: textSettings.links.tiktok || defaultLinks.tiktok,
-            youtube: textSettings.links.youtube || defaultLinks.youtube,
-            line: textSettings.links.line || defaultLinks.line,
-            mapsUrl: textSettings.links.mapsUrl || defaultLinks.mapsUrl,
-            reserveUrl: textSettings.links.reserveUrl || defaultLinks.reserveUrl,
-        } : {}),
-    };
+    const links = resolveStoreLinks(storeId, textSettings?.links);
 
-    // Load settings from Supabase (fallback to localStorage) if on public page
+    // 公開ページはDBだけを見る。読めなければ「表示できません」の案内を出す
+    // （以前は端末の localStorage やコード内の古い既定値で描いていて、別の店の内容や旧価格が出た）
     useEffect(() => {
         if (!isEditing) {
             let cancelled = false;
+            setIsSettingsLoaded(false);
+            setLoadFailed(false);
+            setLocalBackgroundSettings(undefined);
+            setLocalLayoutSettings(undefined);
+            setLocalTextSettings(undefined);
             async function loadSettings() {
-                const supabaseData = await loadStoreSettings(storeId);
+                const supabaseData = await loadStoreSettingsForPublic(storeId);
                 if (cancelled) return;
-                const hasSupabaseData = supabaseData.backgroundSettings || supabaseData.layoutSettings || supabaseData.textSettings;
-
-                if (hasSupabaseData) {
+                if (supabaseData.ok) {
                     if (supabaseData.backgroundSettings) setLocalBackgroundSettings(migrateBackgroundSettings(supabaseData.backgroundSettings));
                     if (supabaseData.layoutSettings) setLocalLayoutSettings(supabaseData.layoutSettings);
                     if (supabaseData.textSettings) setLocalTextSettings(supabaseData.textSettings);
-                    setIsSettingsLoaded(true);
-                    return;
-                }
-
-                // Fallback to localStorage
-                const keys = getStorageKeys(storeId);
-                const savedBackgrounds = localStorage.getItem(keys.backgroundSettings);
-                const savedLayouts = localStorage.getItem(keys.layoutSettings);
-                const savedText = localStorage.getItem(keys.textSettings);
-
-                if (savedBackgrounds) {
-                    try { setLocalBackgroundSettings(migrateBackgroundSettings(JSON.parse(savedBackgrounds))); } catch (e) { console.error('Failed to parse saved background settings', e); }
-                }
-                if (savedLayouts) {
-                    try { setLocalLayoutSettings(JSON.parse(savedLayouts)); } catch (e) { console.error('Failed to parse saved layout settings', e); }
-                }
-                if (savedText) {
-                    try { setLocalTextSettings(JSON.parse(savedText)); } catch (e) { console.error('Failed to parse saved text settings', e); }
+                } else {
+                    setLoadFailed(true);
                 }
                 setIsSettingsLoaded(true);
             }
@@ -1345,6 +1397,10 @@ export function LandingPage({
     // Prevent FOUC: don't render until settings are loaded from Supabase
     if (!isSettingsLoaded) {
         return <div className="min-h-screen bg-[#1C1C1C]" />;
+    }
+
+    if (loadFailed) {
+        return <SiteUnavailable storeId={storeId} lang="ja" />;
     }
 
     return (
@@ -1685,7 +1741,10 @@ export function LandingPage({
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    onDeleteMenuItem?.('gallery', 'image', index);
+                                                    // 1回押すと即削除・2秒後に自動保存されていたので、確認を挟む
+                                                    if (window.confirm('この写真をギャラリーから削除しますか？')) {
+                                                        onDeleteMenuItem?.('gallery', 'image', index);
+                                                    }
                                                 }}
                                                 className="p-2 bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
                                                 title="削除"
@@ -2125,20 +2184,25 @@ export function LandingPage({
                                 isEditing={isEditing}
                             />
                         </h3>
-                        <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
-                            <InlineEditableText
-                                value={textSettings.menu?.nigiri_subtitle || 'Fish in Season'}
-                                onChange={(val) => onTextChange?.('menu', 'nigiri_subtitle', val)}
-                                isEditing={isEditing}
-                            />
-                        </div>
-                        <div className="text-center text-[#e8eaec]/70 mb-8">
-                            <InlineEditableText
-                                value={textSettings.menu?.nigiri_description || '季節の魚'}
-                                onChange={(val) => onTextChange?.('menu', 'nigiri_description', val)}
-                                isEditing={isEditing}
-                            />
-                        </div>
+                        {/* 小見出し・説明は空にしたら消える（|| だと既定の「Fish in Season」「季節の魚」が復活していた） */}
+                        {((textSettings.menu?.nigiri_subtitle ?? 'Fish in Season') || isEditing) && (
+                            <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}>
+                                <InlineEditableText
+                                    value={textSettings.menu?.nigiri_subtitle ?? 'Fish in Season'}
+                                    onChange={(val) => onTextChange?.('menu', 'nigiri_subtitle', val)}
+                                    isEditing={isEditing}
+                                />
+                            </div>
+                        )}
+                        {((textSettings.menu?.nigiri_description ?? '季節の魚') || isEditing) && (
+                            <div className="text-center text-[#e8eaec]/70 mb-8">
+                                <InlineEditableText
+                                    value={textSettings.menu?.nigiri_description ?? '季節の魚'}
+                                    onChange={(val) => onTextChange?.('menu', 'nigiri_description', val)}
+                                    isEditing={isEditing}
+                                />
+                            </div>
+                        )}
 
                         <SortableMenuGrid
                             items={getOrderedIndices(textSettings.menu, 'nigiri')}

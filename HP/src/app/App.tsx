@@ -26,16 +26,26 @@ function PageTitle() {
 
   useEffect(() => {
     const path = pathname.replace(/\/+$/, '') || '/';
+    const html = document.documentElement;
     if (path.startsWith('/admin')) {
       document.title = ADMIN_TITLE;
+      html.lang = 'ja';
+      // 管理画面は Chrome の自動翻訳を止める。翻訳がかかったまま編集すると、
+      // 翻訳用の <font> タグが入力欄に入り、そのまま保存されていた（1番通り店のタチウオドック）
+      html.setAttribute('translate', 'no');
       return;
     }
+    html.removeAttribute('translate');
     const store = Object.values(STORE_CONFIGS).find(s => s.basePath === path || s.travelerPath === path);
     if (!store) {
       document.title = DEFAULT_TITLE;
+      html.lang = 'ja';
       return;
     }
-    document.title = store.travelerPath === path ? store.travelerPageTitle : store.pageTitle;
+    const isTraveler = store.travelerPath === path;
+    document.title = isTraveler ? store.travelerPageTitle : store.pageTitle;
+    // ページの言語を中身に合わせる（以前は日本語ページも「英語のページ」と宣言されていた）
+    html.lang = isTraveler ? 'en' : 'ja';
   }, [pathname]);
 
   return null;

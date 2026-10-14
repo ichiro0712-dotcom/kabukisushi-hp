@@ -280,6 +280,13 @@
   border: 2px dashed #717182 !important;
 }
 
+/* 管理画面の空欄に出す見本の文字。中身には入れないので、触れても保存されない */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .menu-item-hidden-badge {
   position: absolute;
   top: 8px;

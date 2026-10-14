@@ -31,7 +31,7 @@ import {
     MoreHorizontal
 } from 'lucide-react';
 import { LandingPage, DEFAULT_TEXT_SETTINGS, getDefaultTextSettings } from '../../pages/LandingPage';
-import { type StoreId, STORE_CONFIGS, getStorageKeys } from '../../../utils/storeConfig';
+import { type StoreId, STORE_CONFIGS } from '../../../utils/storeConfig';
 import { loadStoreSettings, saveAllSettings, type SettingsVersions } from '../../../lib/settingsService';
 import { connectedProjectRef, isProductionDb, isLocalReadOnly } from '../../../lib/supabase';
 import { mergeTextSettingsWithDefaults, PLACEHOLDER_IMAGE } from '../../../lib/textSettingsUtils';
@@ -42,6 +42,41 @@ import TextEditorModal from '../components/editor/TextEditorModal';
 import { TravelerPage } from '../../pages/TravelerPage';
 import HelpModal from '../components/editor/HelpModal';
 import MarketingTagGuideModal from '../components/editor/MarketingTagGuideModal';
+
+type SettingsRow = 'background' | 'layout' | 'text';
+
+/** キーの順番に左右されない比較用の文字列（DB の jsonb はキーの順番が入れ替わるため） */
+function stableStringify(value: unknown): string {
+    const sortDeep = (v: any): any => {
+        if (Array.isArray(v)) return v.map(sortDeep);
+        if (v && typeof v === 'object') return Object.fromEntries(Object.keys(v).sort().map(k => [k, sortDeep(v[k])]));
+        return v;
+    };
+    return JSON.stringify(sortDeep(value ?? null));
+}
+
+/** 管理画面「店舗情報」の入力欄。打っている途中は保存せず、欄を離れた時（Enter でも）に確定する */
+function PanelInput({ value, onCommit, placeholder }: { value: string; onCommit: (v: string) => void; placeholder?: string }) {
+    const [draft, setDraft] = useState(value);
+    const focusedRef = useRef(false);
+    useEffect(() => { if (!focusedRef.current) setDraft(value); }, [value]);
+    return (
+        <input
+            type="text"
+            value={draft}
+            onFocus={() => { focusedRef.current = true; }}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={() => {
+                focusedRef.current = false;
+                const next = draft.trim();
+                if (next !== value) onCommit(next);
+            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={placeholder}
+        />
+    );
+}
 
 export type BackgroundType = 'color' | 'image' | 'video';
 
@@ -83,6 +118,8 @@ export default function EditorPage() {
         sectionId: string;
         category: string;
         index: number;
+        /** 写真を選び始めた時の店。終わる前に店を切り替えたら反映しない */
+        storeId: StoreId;
     } | null>(null);
     const [editPage, setEditPage] = useState<'landing' | 'traveler'>('landing');
     const [showHelpModal, setShowHelpModal] = useState(false);
@@ -124,11 +161,21 @@ export default function EditorPage() {
     const [past, setPast] = useState<any[]>([]);
     const [future, setFuture] = useState<any[]>([]);
 
+    // 最新の状態（非同期の処理や古い画面のクロージャから参照しても、今の店・今の中身を指すように）
+    const latestBgRef = useRef(backgroundSettings);
+    const latestLayoutRef = useRef(layoutSettings);
+    const latestTextRef = useRef(textSettings);
+    latestBgRef.current = backgroundSettings;
+    latestLayoutRef.current = layoutSettings;
+    latestTextRef.current = textSettings;
+
     const pushToHistory = () => {
+        // 画面の古い描画のときの値ではなく、今の値を積む。写真のアップロードなど時間のかかる処理が
+        // 店を切り替えた後に終わると、前の店の中身が履歴に入り「元に戻す」で今の店に上書きされていた
         const currentState = {
-            backgroundSettings,
-            layoutSettings,
-            textSettings: { ...textSettings }
+            backgroundSettings: latestBgRef.current,
+            layoutSettings: latestLayoutRef.current,
+            textSettings: { ...latestTextRef.current }
         };
         // Use a functional update to avoid stale state in history
         setPast(prev => {
@@ -144,9 +191,9 @@ export default function EditorPage() {
         if (past.length === 0) return;
 
         const currentState = {
-            backgroundSettings,
-            layoutSettings,
-            textSettings: { ...textSettings }
+            backgroundSettings: latestBgRef.current,
+            layoutSettings: latestLayoutRef.current,
+            textSettings: { ...latestTextRef.current }
         };
 
         const previousState = past[past.length - 1];
@@ -165,9 +212,9 @@ export default function EditorPage() {
         if (future.length === 0) return;
 
         const currentState = {
-            backgroundSettings,
-            layoutSettings,
-            textSettings: { ...textSettings }
+            backgroundSettings: latestBgRef.current,
+            layoutSettings: latestLayoutRef.current,
+            textSettings: { ...latestTextRef.current }
         };
 
         const nextState = future[0];
@@ -202,63 +249,82 @@ export default function EditorPage() {
         footer: { width: 'wide', alignment: 'center', fullHeight: false, topSpace: true, bottomSpace: true }
     };
 
+    /**
+     * 入力中の欄があれば確定させる。欄の中身は「欄を離れて約0.1秒後」に渡る作りなので、
+     * 保存ボタンや店の切り替えの前に確定させないと、打った内容を含まずに保存していた
+     */
+    const flushActiveEdit = async () => {
+        const el = document.activeElement as HTMLElement | null;
+        if (el && el.isContentEditable) el.blur();
+        // ボタンを押した時点で欄はもう離れている（確定は0.1秒後）ので、いつも少し待ってから読む
+        await new Promise(r => setTimeout(r, 180));
+    };
+
+    const [isSwitchingStore, setIsSwitchingStore] = useState(false);
+
     const handleStoreSwitch = async (newStoreId: StoreId) => {
-        // Flush any pending debounced save before switching
-        if (supabaseSaveTimerRef.current) {
-            clearTimeout(supabaseSaveTimerRef.current);
-            supabaseSaveTimerRef.current = undefined;
+        if (newStoreId === selectedStoreRef.current || isSwitchingStore) return;
+        setIsSwitchingStore(true);
+        try {
+            await flushActiveEdit();
+            // 待っている自動保存は止め、今の店を（変わっていれば）保存してから切り替える
+            if (supabaseSaveTimerRef.current) {
+                clearTimeout(supabaseSaveTimerRef.current);
+                supabaseSaveTimerRef.current = undefined;
+            }
+            const saved = await persistRef.current(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
+            if (saved === 'conflict') {
+                alert('他の端末で先に更新されているため、この画面の変更は保存できませんでした。\n店舗の切り替えを中止します。ページを再読み込みしてから編集し直してください。');
+                return;
+            }
+            if (saved === 'error') {
+                alert('保存に失敗したため、店舗の切り替えを中止しました。通信状況を確認してください。');
+                return;
+            }
+
+            // Switch store
+            const seq = ++loadSeqRef.current;
+            setLoadState('loading');
+            loadStateRef.current = 'loading';
+            setSelectedStore(newStoreId);
+            selectedStoreRef.current = newStoreId;
+            clearRetry();
+            setSupabaseSaveError(false);
+
+            // Load new store data from Supabase（読めなければ編集させない。localStorage は使わない）
+            const newDefaults = getDefaultTextSettings(newStoreId);
+            const loaded = await loadStoreSettings(newStoreId);
+            // 待っている間にさらに切り替えた場合、古い読み込み結果は使わない
+            if (seq !== loadSeqRef.current) return;
+
+            if (!loaded.ok) {
+                setLoadErrorMessage(loaded.errorMessage || '設定の読み込みに失敗しました');
+                setLoadState('failed');
+                loadStateRef.current = 'failed';
+                return;
+            }
+
+            const nextBg = loaded.backgroundSettings || { ...DEFAULT_BG };
+            const nextLayout = loaded.layoutSettings || { ...DEFAULT_LAYOUT };
+            const nextText = loaded.textSettings ? mergeTextWithDefaults(loaded.textSettings, newDefaults) : newDefaults;
+
+            setBackgroundSettings(nextBg);
+            setLayoutSettings(nextLayout);
+            setTextSettings(nextText);
+
+            versionsRef.current = loaded.versions;
+            lastPersistedRef.current = signatureOf(nextBg, nextLayout, nextText);
+            dbSnapshotRef.current = { background: loaded.backgroundSettings, layout: loaded.layoutSettings, text: loaded.textSettings };
+            setLoadState('ready');
+            loadStateRef.current = 'ready';
+
+            // Clear undo/redo history
+            setPast([]);
+            setFuture([]);
+            setLastSavedTime(null);
+        } finally {
+            setIsSwitchingStore(false);
         }
-
-        // Save current store data to localStorage + Supabase (awaited to prevent data loss)
-        const currentKeys = getStorageKeys(selectedStore);
-        localStorage.setItem(currentKeys.backgroundSettings, JSON.stringify(backgroundSettings));
-        localStorage.setItem(currentKeys.layoutSettings, JSON.stringify(layoutSettings));
-        localStorage.setItem(currentKeys.textSettings, JSON.stringify(textSettings));
-
-        const saved = await persistToSupabase(selectedStore, backgroundSettings, layoutSettings, textSettings);
-        if (saved === 'conflict') {
-            alert('他の端末で先に更新されているため、この画面の変更は保存できませんでした。\n店舗の切り替えを中止します。ページを再読み込みしてから編集し直してください。');
-            return;
-        }
-        if (saved === 'error') {
-            alert('保存に失敗したため、店舗の切り替えを中止しました。通信状況を確認してください。');
-            return;
-        }
-
-        // Switch store
-        setLoadState('loading');
-        loadStateRef.current = 'loading';
-        setSelectedStore(newStoreId);
-        selectedStoreRef.current = newStoreId;
-
-        // Load new store data from Supabase（読めなければ編集させない。localStorage は使わない）
-        const newDefaults = getDefaultTextSettings(newStoreId);
-        const loaded = await loadStoreSettings(newStoreId);
-
-        if (!loaded.ok) {
-            setLoadErrorMessage(loaded.errorMessage || '設定の読み込みに失敗しました');
-            setLoadState('failed');
-            loadStateRef.current = 'failed';
-            return;
-        }
-
-        const nextBg = loaded.backgroundSettings || { ...DEFAULT_BG };
-        const nextLayout = loaded.layoutSettings || { ...DEFAULT_LAYOUT };
-        const nextText = loaded.textSettings ? mergeTextWithDefaults(loaded.textSettings, newDefaults) : newDefaults;
-
-        setBackgroundSettings(nextBg);
-        setLayoutSettings(nextLayout);
-        setTextSettings(nextText);
-
-        versionsRef.current = loaded.versions;
-        lastPersistedRef.current = signatureOf(nextBg, nextLayout, nextText);
-        setLoadState('ready');
-        loadStateRef.current = 'ready';
-
-        // Clear undo/redo history
-        setPast([]);
-        setFuture([]);
-        setLastSavedTime(null);
     };
 
     const menuItems = [
@@ -290,7 +356,14 @@ export default function EditorPage() {
 
     const handleImageSelect = (url: string) => {
         if (editingMenuImage) {
-            const { sectionId, category, index } = editingMenuImage;
+            const { sectionId, category, index, storeId } = editingMenuImage;
+            if (storeId !== selectedStoreRef.current) {
+                // アップロード中に店を切り替えた。別の店の同じ番号の品に入ってしまうので反映しない
+                setEditingMenuImage(null);
+                setShowAssetLibrary(false);
+                alert('店舗が切り替わったため、この写真は反映しませんでした。もう一度選び直してください。');
+                return;
+            }
             const field = sectionId === 'gallery' ? `${category}_${index}` : (sectionId === 'about' || sectionId === 'affiliated' || sectionId === 'access' || category.endsWith('_image')) ? category : `${category}_${index}_image`;
             handleInlineTextChange(sectionId, field, url);
             setEditingMenuImage(null);
@@ -410,20 +483,32 @@ export default function EditorPage() {
                     .filter(num => !isNaN(num));
                 nextIndex = existingIndices.length > 0 ? Math.max(...existingIndices) + 1 : 0;
 
+                const nextSection: Record<string, string> = {
+                    ...currentSection,
+                    [`${category}_${nextIndex}_name`]: '新しいメニュー',
+                    // 英語・韓国語・中国語は空で作る。以前は「New Menu Item／새 메뉴／新菜单」が入っていて、
+                    // 直し忘れるとそのまま英語ページに出ていた（空なら英語は日本語名、韓中は行ごと出ない）
+                    [`${category}_${nextIndex}_name_en`]: '',
+                    [`${category}_${nextIndex}_name_ko`]: '',
+                    [`${category}_${nextIndex}_name_zh`]: '',
+                    [`${category}_${nextIndex}_price`]: '0',
+                    [`${category}_${nextIndex}_image`]: PLACEHOLDER_IMAGE,
+                    [`${category}_${nextIndex}_note`]: '',
+                    [`${category}_${nextIndex}_soldOut`]: 'false',
+                    // 追加した瞬間はまだ準備中。2秒後の自動保存で「新しいメニュー ¥0」が公開されないよう、
+                    // 非表示で作る。目のアイコンで表示に切り替えるまで公開ページには出ない
+                    [`${category}_${nextIndex}_hidden`]: 'true'
+                };
+                // 並び順があれば一番最後に足す（消した品の番号が残っていても、その位置に割り込まない）
+                const orderKey = `${category}_order`;
+                if (currentSection[orderKey]) {
+                    const order = currentSection[orderKey].split(',').map(x => x.trim()).filter(x => x !== '' && x !== String(nextIndex));
+                    nextSection[orderKey] = [...order, String(nextIndex)].join(',');
+                }
+
                 return {
                     ...prev,
-                    [sectionId]: {
-                        ...currentSection,
-                        [`${category}_${nextIndex}_name`]: '新しいメニュー',
-                        [`${category}_${nextIndex}_name_en`]: 'New Menu Item',
-                        [`${category}_${nextIndex}_name_ko`]: '새 메뉴',
-                        [`${category}_${nextIndex}_name_zh`]: '新菜单',
-                        [`${category}_${nextIndex}_price`]: '0',
-                        [`${category}_${nextIndex}_image`]: PLACEHOLDER_IMAGE,
-                        [`${category}_${nextIndex}_note`]: '',
-                        [`${category}_${nextIndex}_soldOut`]: 'false',
-                        [`${category}_${nextIndex}_hidden`]: 'false'
-                    }
+                    [sectionId]: nextSection
                 };
             }
         });
@@ -450,6 +535,11 @@ export default function EditorPage() {
                     }
                 });
             }
+            // 並び順からも番号を消す。残っていると、次に追加した品が消した品の位置に出ていた
+            const orderKey = `${category}_order`;
+            if (currentSection[orderKey]) {
+                currentSection[orderKey] = currentSection[orderKey].split(',').map(x => x.trim()).filter(x => x !== '' && x !== String(index)).join(',');
+            }
 
             return {
                 ...prev,
@@ -469,27 +559,13 @@ export default function EditorPage() {
     };
 
     const handleMenuImageEdit = (sectionId: string, category: string, index: number) => {
-        setEditingMenuImage({ sectionId, category, index });
+        setEditingMenuImage({ sectionId, category, index, storeId: selectedStoreRef.current });
         setShowAssetLibrary(true);
     };
 
     const handleSaveBackground = () => {
-        // Save settings to localStorage
-        const saveKeys = getStorageKeys(selectedStore);
-        localStorage.setItem(saveKeys.backgroundSettings, JSON.stringify(backgroundSettings));
-        localStorage.setItem(saveKeys.layoutSettings, JSON.stringify(layoutSettings));
-        localStorage.setItem(saveKeys.textSettings, JSON.stringify(textSettings));
-
-        // Show success message or feedback if needed (optional, existing UI has a static "Saved" indicator)
-        // For now just close the panel
+        // 背景の変更は自動保存される。このボタンはパネルを閉じるだけ
         setShowBackgroundPanel(false);
-
-        // Also trigger a window event so other components (if in same window) know to update, 
-        // though for separate tab/window reload is needed.
-        window.dispatchEvent(new Event('storage'));
-
-        // Force update the timestamp to show "Just now"
-        // This is a mock interaction since the UI is static
     };
 
     /** 保存できない状態のとき、その理由をユーザー向けの文言で返す */
@@ -546,21 +622,33 @@ export default function EditorPage() {
         text: Record<string, Record<string, string>>
     ) => JSON.stringify({ bg, layout, text });
 
+    /** 読み込みの通し番号。開いてすぐ・素早く店を切り替えたとき、古い読み込み結果を捨てるために使う */
+    const loadSeqRef = useRef(0);
+    /** DB に入っていると分かっている中身（行ごと）。保存が食い違ったとき、自分の書き込みのせいかを見分ける */
+    const dbSnapshotRef = useRef<Record<SettingsRow, any>>({ background: null, layout: null, text: null });
+    /** 通信エラーで終わった保存の中身。実はDBに届いていた場合の見分けに使う */
+    const failedAttemptRef = useRef<Record<SettingsRow, any> | null>(null);
+
     // Initialize from Supabase on mount
     useEffect(() => {
         async function initSettings() {
-            const storeDefaults = getDefaultTextSettings(selectedStore);
-            const loaded = await loadStoreSettings(selectedStore);
+            const seq = ++loadSeqRef.current;
+            const storeId = selectedStoreRef.current;
+            const storeDefaults = getDefaultTextSettings(storeId);
+            const loaded = await loadStoreSettings(storeId);
+            // 読み込み中に店を切り替えていたら、この結果は使わない（バッジと中身の店が食い違うのを防ぐ）
+            if (seq !== loadSeqRef.current) return;
 
             if (!loaded.ok) {
                 // 読み込めていない = 手元の状態が最新とは限らない。編集・保存を止める
                 setLoadErrorMessage(loaded.errorMessage || '設定の読み込みに失敗しました');
                 setLoadState('failed');
+                loadStateRef.current = 'failed';
                 return;
             }
 
-            const nextBg = loaded.backgroundSettings || backgroundSettings;
-            const nextLayout = loaded.layoutSettings || layoutSettings;
+            const nextBg = loaded.backgroundSettings || latestBgRef.current;
+            const nextLayout = loaded.layoutSettings || latestLayoutRef.current;
             const nextText = loaded.textSettings
                 ? mergeTextWithDefaults(loaded.textSettings, storeDefaults)
                 : storeDefaults;
@@ -571,42 +659,98 @@ export default function EditorPage() {
 
             versionsRef.current = loaded.versions;
             lastPersistedRef.current = signatureOf(nextBg, nextLayout, nextText);
+            dbSnapshotRef.current = { background: loaded.backgroundSettings, layout: loaded.layoutSettings, text: loaded.textSettings };
+            // 読み込みが終わる前の画面（コード内の古い初期メニュー）は履歴に残さない。
+            // 残っていると「元に戻す」で全メニューが古い初期値に戻り、2秒後にそのまま保存されていた
+            setPast([]);
+            setFuture([]);
             setLoadState('ready');
+            loadStateRef.current = 'ready';
         }
         initSettings();
     }, []);
 
     // Central persistence effect - uses ref to avoid stale store on rapid switching
-    const supabaseSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const supabaseSaveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const [supabaseSaveError, setSupabaseSaveError] = useState(false);
-    // Keep latest state in refs for unmount flush
-    const latestBgRef = useRef(backgroundSettings);
-    const latestLayoutRef = useRef(layoutSettings);
-    const latestTextRef = useRef(textSettings);
-    latestBgRef.current = backgroundSettings;
-    latestLayoutRef.current = layoutSettings;
-    latestTextRef.current = textSettings;
 
     // 非同期処理の中から最新の loadState を参照するための ref
     const loadStateRef = useRef<LoadState>(loadState);
     loadStateRef.current = loadState;
 
-    /** 保存の唯一の入口。ガードと楽観ロックの後始末をここに集約する */
-    const persistToSupabase = async (
+    type PersistResult = 'ok' | 'conflict' | 'error' | 'blocked' | 'readonly';
+
+    /** 保存は1本ずつ順番に行う。同時に走ると、2本目が古い版のまま照合して「他の端末で先に更新」と誤判定していた */
+    const saveChainRef = useRef<Promise<unknown>>(Promise.resolve());
+    const savingCountRef = useRef(0);
+    const [isSaving, setIsSaving] = useState(false);
+
+    /** 保存に失敗したら、少しずつ間をあけて自動でやり直す */
+    const RETRY_DELAYS_MS = [3000, 10000, 30000, 60000];
+    const retryTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const retryCountRef = useRef(0);
+    const clearRetry = () => {
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = undefined;
+        retryCountRef.current = 0;
+    };
+    const scheduleRetry = () => {
+        if (retryTimerRef.current) return;
+        const delay = RETRY_DELAYS_MS[Math.min(retryCountRef.current, RETRY_DELAYS_MS.length - 1)];
+        retryCountRef.current += 1;
+        retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = undefined;
+            if (loadStateRef.current !== 'ready') return;
+            persistRef.current(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
+        }, delay);
+    };
+
+    /** 1回分の保存。ガードと楽観ロックの後始末をここに集約する */
+    const doPersist = async (
         storeId: StoreId,
         bg: Record<string, any>,
         layout: Record<string, any>,
         text: Record<string, Record<string, string>>
-    ): Promise<'ok' | 'conflict' | 'error' | 'blocked' | 'readonly'> => {
+    ): Promise<PersistResult> => {
         if (isLocalReadOnly) return 'readonly';
         if (loadStateRef.current !== 'ready') return 'blocked';
+        if (storeId !== selectedStoreRef.current) return 'blocked';
+        // 読み込んだ（または最後に保存した）内容と同じなら書かない。店の切り替えや保存ボタンのたびに
+        // 中身の同じ書き込みをしていたため、別の端末で開いている画面がうその競合になっていた
+        if (signatureOf(bg, layout, text) === lastPersistedRef.current) return 'ok';
 
-        const result = await saveAllSettings(storeId, bg, layout, text, versionsRef.current);
+        const attempt: Record<SettingsRow, any> = { background: bg, layout, text };
+        const noteWritten = (before: SettingsVersions, after: SettingsVersions) => {
+            (['background', 'layout', 'text'] as SettingsRow[]).forEach(row => {
+                if (after[row] && after[row] !== before[row]) dbSnapshotRef.current = { ...dbSnapshotRef.current, [row]: attempt[row] };
+            });
+        };
+
+        let before = { ...versionsRef.current };
+        let result = await saveAllSettings(storeId, bg, layout, text, versionsRef.current);
+        noteWritten(before, result.versions);
+        // 途中まで書けた行の版は、失敗しても覚えておく（次の保存の照合を正しくする）
+        versionsRef.current = { ...versionsRef.current, ...result.versions };
+
+        if (result.status === 'conflict') {
+            // 食い違いが「自分の書き込み（応答が届かなかった分など）」だけなら、版を取り直してもう一度書く。
+            // 他の人が直していた時だけ止める
+            const fresh = await loadStoreSettings(storeId);
+            if (fresh.ok && isOwnState(fresh, attempt)) {
+                versionsRef.current = fresh.versions;
+                dbSnapshotRef.current = { background: fresh.backgroundSettings, layout: fresh.layoutSettings, text: fresh.textSettings };
+                before = { ...versionsRef.current };
+                result = await saveAllSettings(storeId, bg, layout, text, versionsRef.current);
+                noteWritten(before, result.versions);
+                versionsRef.current = { ...versionsRef.current, ...result.versions };
+            }
+        }
 
         if (result.status === 'ok') {
-            versionsRef.current = result.versions;
             lastPersistedRef.current = signatureOf(bg, layout, text);
+            failedAttemptRef.current = null;
             setSupabaseSaveError(false);
+            clearRetry();
             updateLastSaved();
             return 'ok';
         }
@@ -618,23 +762,59 @@ export default function EditorPage() {
             loadStateRef.current = 'stale';
             setLoadState('stale');
             setSupabaseSaveError(true);
+            clearRetry();
             return 'conflict';
         }
 
+        failedAttemptRef.current = attempt;
         setSupabaseSaveError(true);
+        scheduleRetry();
         return 'error';
     };
 
+    /** DB の今の中身が、自分の知っている中身・今回・前回失敗した保存の中身のどれかと行ごとに一致するか */
+    const isOwnState = (fresh: { backgroundSettings: any; layoutSettings: any; textSettings: any }, attempt: Record<SettingsRow, any>) => {
+        const now: Record<SettingsRow, any> = { background: fresh.backgroundSettings, layout: fresh.layoutSettings, text: fresh.textSettings };
+        return (['background', 'layout', 'text'] as SettingsRow[]).every(row => {
+            const v = stableStringify(now[row]);
+            return v === stableStringify(dbSnapshotRef.current[row])
+                || v === stableStringify(attempt[row])
+                || (failedAttemptRef.current !== null && v === stableStringify(failedAttemptRef.current[row]));
+        });
+    };
+
+    /** 保存の唯一の入口。1本ずつ順番に実行する */
+    const persistToSupabase = (
+        storeId: StoreId,
+        bg: Record<string, any>,
+        layout: Record<string, any>,
+        text: Record<string, Record<string, string>>
+    ): Promise<PersistResult> => {
+        const run = async () => {
+            savingCountRef.current += 1;
+            setIsSaving(true);
+            try {
+                return await doPersist(storeId, bg, layout, text);
+            } finally {
+                savingCountRef.current -= 1;
+                if (savingCountRef.current === 0) setIsSaving(false);
+            }
+        };
+        const p = saveChainRef.current.then(run, run);
+        saveChainRef.current = p.catch(() => undefined);
+        return p;
+    };
+    /** タイマーや画面を閉じる時の処理から、いつも最新の保存処理を呼ぶための ref */
+    const persistRef = useRef(persistToSupabase);
+    persistRef.current = persistToSupabase;
+
+    /** まだ保存していない変更があるか */
+    const hasUnsavedChanges = () =>
+        loadStateRef.current === 'ready'
+        && signatureOf(latestBgRef.current, latestLayoutRef.current, latestTextRef.current) !== lastPersistedRef.current;
+
     useEffect(() => {
         if (loadState !== 'ready') return;
-
-        // Immediate localStorage write (local cache + preview sync)
-        // ※ここに書いた値を初期データとして読み戻すことはしない（事故の原因になったため）
-        const persistKeys = getStorageKeys(selectedStoreRef.current);
-        localStorage.setItem(persistKeys.backgroundSettings, JSON.stringify(backgroundSettings));
-        localStorage.setItem(persistKeys.layoutSettings, JSON.stringify(layoutSettings));
-        localStorage.setItem(persistKeys.textSettings, JSON.stringify(textSettings));
-        window.dispatchEvent(new Event('storage'));
 
         // 読み込んだ内容から変わっていなければ保存しない（開いただけで上書きしない）
         if (signatureOf(backgroundSettings, layoutSettings, textSettings) === lastPersistedRef.current) return;
@@ -643,20 +823,39 @@ export default function EditorPage() {
         if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current);
         supabaseSaveTimerRef.current = setTimeout(() => {
             supabaseSaveTimerRef.current = undefined;
-            persistToSupabase(selectedStoreRef.current, backgroundSettings, layoutSettings, textSettings);
+            persistRef.current(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
         }, 2000);
 
         return () => { if (supabaseSaveTimerRef.current) clearTimeout(supabaseSaveTimerRef.current); };
     }, [backgroundSettings, layoutSettings, textSettings, loadState]);
 
-    // Flush pending save on unmount to prevent data loss
+    // 画面内の移動（ログアウト等）で閉じる時、保存していない変更があれば保存する
     useEffect(() => {
         return () => {
-            if (supabaseSaveTimerRef.current) {
-                clearTimeout(supabaseSaveTimerRef.current);
-                persistToSupabase(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
+            if (hasUnsavedChanges()) {
+                persistRef.current(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
             }
         };
+    }, []);
+
+    // タブを閉じる・再読み込みの前に、保存していない変更があれば引き止める（2秒待ちの間に閉じると消えていた）
+    useEffect(() => {
+        const onBeforeUnload = (e: BeforeUnloadEvent) => {
+            const unsaved = hasUnsavedChanges();
+            if (!unsaved && savingCountRef.current === 0) return;
+            if (unsaved && savingCountRef.current === 0) {
+                // 引き止めている間に保存を始める（閉じるのをやめれば、そのまま保存が終わる）
+                if (supabaseSaveTimerRef.current) {
+                    clearTimeout(supabaseSaveTimerRef.current);
+                    supabaseSaveTimerRef.current = undefined;
+                }
+                persistRef.current(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
+            }
+            e.preventDefault();
+            e.returnValue = '';
+        };
+        window.addEventListener('beforeunload', onBeforeUnload);
+        return () => window.removeEventListener('beforeunload', onBeforeUnload);
     }, []);
 
     const handleLayoutChange = (sectionId: string, config: Partial<LayoutConfig>) => {
@@ -1039,8 +1238,9 @@ export default function EditorPage() {
                         <button
                             onClick={handleSaveBackground}
                             className="w-full py-2 bg-[#88c057] hover:bg-[#7ab04a] text-white rounded text-[11px] font-bold transition-colors shadow-lg"
+                            title="背景の変更は自動で保存されます"
                         >
-                            保存
+                            閉じる
                         </button>
                     </div>
                 </div>
@@ -1058,10 +1258,11 @@ export default function EditorPage() {
                         </span>
                         <select
                             value={selectedStore}
+                            disabled={isSwitchingStore || loadState === 'loading'}
                             onChange={(e) => handleStoreSwitch(e.target.value as StoreId)}
                             className={`text-xs font-bold ${storeTheme.topBarText} bg-transparent border ${storeTheme.topBarBorder} rounded-md px-2 py-1.5 cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                         >
-                            {(Object.values(STORE_CONFIGS) as Array<{ id: StoreId; displayName: string }>).map((store) => (
+                            {(Object.values(STORE_CONFIGS) as Array<{ id: StoreId; displayName: string; shortName: string }>).map((store) => (
                                 <option key={store.id} value={store.id} className="text-slate-900 bg-white">
                                     {store.shortName}
                                 </option>
@@ -1132,35 +1333,35 @@ export default function EditorPage() {
                         <button
                             onClick={async () => {
                                 if (!canSave) { alert(blockedSaveMessage()); return; }
+                                // 打った直後に押しても、その内容を含めて保存する
+                                await flushActiveEdit();
                                 if (supabaseSaveTimerRef.current) {
                                     clearTimeout(supabaseSaveTimerRef.current);
                                     supabaseSaveTimerRef.current = undefined;
                                 }
-                                const storeId = selectedStoreRef.current;
-                                const btnKeys = getStorageKeys(storeId);
-                                localStorage.setItem(btnKeys.backgroundSettings, JSON.stringify(backgroundSettings));
-                                localStorage.setItem(btnKeys.layoutSettings, JSON.stringify(layoutSettings));
-                                localStorage.setItem(btnKeys.textSettings, JSON.stringify(textSettings));
-                                window.dispatchEvent(new Event('storage'));
-                                const result = await persistToSupabase(storeId, backgroundSettings, layoutSettings, textSettings);
+                                const result = await persistRef.current(selectedStoreRef.current, latestBgRef.current, latestLayoutRef.current, latestTextRef.current);
                                 if (result === 'ok') { alert('保存しました!'); return; }
                                 if (result === 'conflict') { alert('他の端末で先に更新されていたため、保存を中止しました。\nページを再読み込みしてから編集し直してください。'); return; }
-                                alert('保存に失敗しました。再度お試しください。');
+                                if (result === 'blocked' || result === 'readonly') { alert(blockedSaveMessage()); return; }
+                                alert('保存に失敗しました。自動でやり直しています。\n「保存できていません」の表示が消えない時は、通信状況を確認してください。');
                             }}
                             disabled={!canSave}
                             className={`px-4 py-1.5 text-xs font-bold text-white rounded-md shadow-sm transition-colors ${canSave ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'}`}
                         >
                             保存
                         </button>
-                        {supabaseSaveError && (
-                            <span className="text-[10px] text-red-500 font-bold animate-pulse">!</span>
+                        {supabaseSaveError && loadState === 'ready' && (
+                            <span className="text-[11px] text-white bg-red-600 font-bold px-2 py-1 rounded whitespace-nowrap">保存できていません（自動でやり直しています）</span>
+                        )}
+                        {isSaving && !supabaseSaveError && (
+                            <span className="text-[10px] text-gray-400 whitespace-nowrap">保存中…</span>
                         )}
                         {lastSavedTime && (
                             <span className="text-[10px] text-gray-400">{lastSavedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         )}
                         <div className="h-5 w-px bg-gray-200" />
                         <button
-                            onClick={() => window.open('https://kabuki-sushi.co.jp/', '_blank')}
+                            onClick={() => window.open(`https://kabuki-sushi.co.jp${editPage === 'traveler' ? STORE_CONFIGS[selectedStore].travelerPath : STORE_CONFIGS[selectedStore].basePath}`, '_blank')}
                             className="p-1.5 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all"
                             title="サイトを表示"
                         >
@@ -1196,104 +1397,59 @@ export default function EditorPage() {
                         <div className="max-w-4xl mx-auto">
                             <h3 className="text-sm font-bold text-gray-800 mb-4">店舗情報（{STORE_CONFIGS[selectedStore].displayName}）</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">電話番号（表示用）</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.phoneDisplay || STORE_CONFIGS[selectedStore].links.phoneDisplay}
-                                        onChange={(e) => handleInlineTextChange('links', 'phoneDisplay', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="03-6457-6612"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">電話番号（発信用）</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.phone || STORE_CONFIGS[selectedStore].links.phone}
-                                        onChange={(e) => handleInlineTextChange('links', 'phone', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="0364576612"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">LINE</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.line || STORE_CONFIGS[selectedStore].links.line}
-                                        onChange={(e) => handleInlineTextChange('links', 'line', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://line.me/..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Instagram</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.instagram || STORE_CONFIGS[selectedStore].links.instagram}
-                                        onChange={(e) => handleInlineTextChange('links', 'instagram', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://www.instagram.com/..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Facebook</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.facebook || STORE_CONFIGS[selectedStore].links.facebook}
-                                        onChange={(e) => handleInlineTextChange('links', 'facebook', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://www.facebook.com/..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">TikTok</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.tiktok || STORE_CONFIGS[selectedStore].links.tiktok}
-                                        onChange={(e) => handleInlineTextChange('links', 'tiktok', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://www.tiktok.com/..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">YouTube</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.youtube || STORE_CONFIGS[selectedStore].links.youtube}
-                                        onChange={(e) => handleInlineTextChange('links', 'youtube', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://www.youtube.com/..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Google Map</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.mapsUrl || STORE_CONFIGS[selectedStore].links.mapsUrl}
-                                        onChange={(e) => handleInlineTextChange('links', 'mapsUrl', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://maps.app.goo.gl/..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">予約URL</label>
-                                    <input
-                                        type="text"
-                                        value={textSettings.links?.reserveUrl || STORE_CONFIGS[selectedStore].links.reserveUrl}
-                                        onChange={(e) => handleInlineTextChange('links', 'reserveUrl', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="https://www.tablecheck.com/..."
-                                    />
-                                </div>
+                                {([
+                                    ['phoneDisplay', '電話番号（表示用）', '03-6457-6612'],
+                                    ['phone', '電話番号（発信用）', '0364576612'],
+                                    ['line', 'LINE', 'https://line.me/...'],
+                                    ['instagram', 'Instagram', 'https://www.instagram.com/...'],
+                                    ['facebook', 'Facebook', 'https://www.facebook.com/...'],
+                                    ['tiktok', 'TikTok', 'https://www.tiktok.com/...'],
+                                    ['youtube', 'YouTube', 'https://www.youtube.com/...'],
+                                    ['mapsUrl', 'Google Map', 'https://maps.app.goo.gl/...'],
+                                    ['reserveUrl', '予約URL', 'https://www.tablecheck.com/...'],
+                                ] as const).map(([key, label, ph]) => (
+                                    <div key={`${selectedStore}-${key}`}>
+                                        <label className="block text-xs font-bold text-gray-500 mb-1">{label}</label>
+                                        <PanelInput
+                                            value={textSettings.links?.[key] || STORE_CONFIGS[selectedStore].links[key]}
+                                            onCommit={(v) => handleInlineTextChange('links', key, v)}
+                                            placeholder={ph}
+                                        />
+                                    </div>
+                                ))}
                             </div>
-                            <p className="text-xs text-gray-400 mt-3">変更後「保存」ボタンを押すとサイトに反映されます</p>
+                            <p className="text-xs text-gray-400 mt-3">入力して欄を離れると、約2秒後に自動で保存され、日本語・英語ページの両方に反映されます</p>
                         </div>
                     </div>
                 )}
 
                 {/* Preview Canvas */}
                 <div className={`flex-1 overflow-hidden relative flex justify-center ${storeTheme.canvas} p-8`}>
+                    {/* 読み込みが終わるまでは触れない。以前は読み込み中もコード内の古い初期メニューが表示されて触れたため、
+                        そこで触った内容が「元に戻す」の履歴に残り、全メニューが古い初期値に戻る事故の元になっていた */}
+                    {(loadState === 'loading' || isSwitchingStore) && (
+                        <div data-editor-loading className="absolute inset-0 z-[60] bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                            <div className="text-sm font-bold text-gray-600">読み込み中…</div>
+                        </div>
+                    )}
+                    {/* 読み込めない・他の端末で先に更新された時は、この画面では編集させない（直しても保存されないため） */}
+                    {(loadState === 'failed' || loadState === 'stale') && (
+                        <div className="absolute inset-0 z-[60] bg-black/40 flex items-center justify-center">
+                            <div className="bg-white rounded-lg shadow-2xl p-6 max-w-sm text-center space-y-3">
+                                <div className="text-sm font-bold text-gray-800">
+                                    {loadState === 'failed' ? '設定を読み込めませんでした' : '他の端末で先に更新されました'}
+                                </div>
+                                <div className="text-xs text-gray-500 leading-relaxed">
+                                    {loadState === 'failed'
+                                        ? 'この状態では保存できません。ページを再読み込みしてください。'
+                                        : '相手の変更を消さないよう、この画面からの保存を止めています。再読み込みすると最新の内容で編集できます。'}
+                                </div>
+                                <button onClick={() => window.location.reload()} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-bold">
+                                    再読み込み
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     <div
                         className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden relative ${device === 'mobile'
                             ? 'w-[375px] h-[667px] rounded-3xl border-8 border-gray-800'
@@ -1352,7 +1508,7 @@ export default function EditorPage() {
             {/* Image Asset Library Modal */}
             <ImageAssetLibrary
                 isOpen={showAssetLibrary}
-                onClose={() => setShowAssetLibrary(false)}
+                onClose={() => { setShowAssetLibrary(false); setEditingMenuImage(null); }}
                 onSelect={handleImageSelect}
                 mediaType={activeBackgroundTab === 'video' ? 'video' : 'image'}
                 storeId={selectedStore}
