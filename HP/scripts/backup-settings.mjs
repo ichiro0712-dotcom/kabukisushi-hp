@@ -54,7 +54,7 @@ async function backupFiles() {
   return (await readdir(BACKUP_DIR)).filter(f => BACKUP_NAME.test(f)).sort((a, b) => backupTime(a) - backupTime(b))
 }
 
-async function slackDm(text) {
+export async function slackDm(text) {
   if (DRY_RUN) { console.log(`[dry-run] Slack に送る内容:\n${text}`); return }
   const md = await readFile(BOT_MD, 'utf8')
   const token = md.match(/xoxb-[A-Za-z0-9-]+/)?.[0]
@@ -209,7 +209,7 @@ async function main() {
   await pruneBackups(now)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(async err => {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(async err => {
   console.error('バックアップ失敗:', err.message)
   // 毎朝の自動実行で失敗したら、気づけるように知らせる（以前はログに残るだけだった）
   if (NOTIFY) {

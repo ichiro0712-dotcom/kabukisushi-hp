@@ -144,7 +144,7 @@ export async function latestBackupFile() {
 }
 
 // 単体で実行したとき
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const path = process.argv[2] || await latestBackupFile()
   if (!path) { console.error('バックアップが見つかりません'); process.exit(1) }
   const body = JSON.parse(await readFile(path, 'utf8'))
