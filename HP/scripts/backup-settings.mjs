@@ -25,7 +25,7 @@ import { pathToFileURL } from 'node:url'
 import { checkSettings } from './check-settings.mjs'
 
 const SITE = 'https://kabuki-sushi.co.jp'
-const BACKUP_DIR = process.env.HP_BACKUP_DIR || join(homedir(), 'Desktop', 'わびすけ', 'cc-company', 'システム', 'HPバックアップ')
+export const BACKUP_DIR = process.env.HP_BACKUP_DIR || join(homedir(), 'Desktop', 'わびすけ', 'cc-company', 'システム', 'HPバックアップ')
 /** 試すときは HP_NOTIFY_DRY_RUN=1 で、Slack に送らず画面に出すだけにする */
 const DRY_RUN = process.env.HP_NOTIFY_DRY_RUN === '1'
 /** 直近この日数のバックアップは全部残す */
@@ -68,8 +68,8 @@ export async function slackDm(text) {
   if (!body.ok) throw new Error(`Slack への送信に失敗: ${body.error}`)
 }
 
-/** 公開中のバンドルから、本番が実際に使っている Supabase の接続先を読み取る */
-async function resolveProductionDb() {
+/** 公開中のバンドルから、本番が実際に使っている Supabase の接続先を読み取る（写真のバックアップでも使う） */
+export async function resolveProductionDb() {
   const html = await (await fetch(SITE, { cache: 'no-store' })).text()
   const asset = html.match(/assets\/index-[A-Za-z0-9_-]+\.js/)?.[0]
   if (!asset) throw new Error('公開中のバンドルを特定できませんでした')
