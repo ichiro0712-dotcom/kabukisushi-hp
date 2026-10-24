@@ -451,11 +451,14 @@ export function TravelerPage({
                                 />
                             </p>
                         )}
-                        <div className="flex justify-center mb-10">
-                            <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
-                                <InlineEditableText value={textSettings.drink?.description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('drink', 'description_en', val)} isEditing={isEditing} />
-                            </p>
-                        </div>
+                        {/* 文言が空なら枠ごと出さない（既定値を持たせると消せなくなる） */}
+                        {(textSettings.drink?.description_en || isEditing) && (
+                            <div className="flex justify-center mb-10">
+                                <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
+                                    <InlineEditableText value={textSettings.drink?.description_en || ''} onChange={(val) => onTextChange?.('drink', 'description_en', val)} isEditing={isEditing} />
+                                </p>
+                            </div>
+                        )}
 
                         <div className="max-w-4xl mx-auto space-y-8">
                             {/* Sake Section */}
@@ -732,11 +735,14 @@ export function TravelerPage({
                         {((textSettings.menu?.nigiri_subtitle_en ?? textSettings.menu?.nigiri_subtitle ?? 'Fish in Season') || isEditing) && (
                             <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.nigiri_subtitle_en ?? textSettings.menu?.nigiri_subtitle ?? 'Fish in Season'} onChange={(val) => onTextChange?.('menu', 'nigiri_subtitle_en', val)} isEditing={isEditing} /></div>
                         )}
-                        <div className="flex justify-center mb-10">
-                            <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
-                                <InlineEditableText value={textSettings.menu?.nigiri_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'nigiri_description_en', val)} isEditing={isEditing} />
-                            </p>
-                        </div>
+                        {/* 文言が空なら枠ごと出さない（既定値を持たせると消せなくなる） */}
+                        {(textSettings.menu?.nigiri_description_en || isEditing) && (
+                            <div className="flex justify-center mb-10">
+                                <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
+                                    <InlineEditableText value={textSettings.menu?.nigiri_description_en || ''} onChange={(val) => onTextChange?.('menu', 'nigiri_description_en', val)} isEditing={isEditing} />
+                                </p>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-24">
                             {(() => {
@@ -849,11 +855,14 @@ export function TravelerPage({
                         {((textSettings.menu?.makimono_subtitle_en ?? textSettings.menu?.makimono_subtitle ?? 'Rolls') || isEditing) && (
                             <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.makimono_subtitle_en ?? textSettings.menu?.makimono_subtitle ?? 'Rolls'} onChange={(val) => onTextChange?.('menu', 'makimono_subtitle_en', val)} isEditing={isEditing} /></div>
                         )}
-                        <div className="flex justify-center mb-10">
-                            <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
-                                <InlineEditableText value={textSettings.menu?.makimono_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'makimono_description_en', val)} isEditing={isEditing} />
-                            </p>
-                        </div>
+                        {/* 文言が空なら枠ごと出さない（既定値を持たせると消せなくなる） */}
+                        {(textSettings.menu?.makimono_description_en || isEditing) && (
+                            <div className="flex justify-center mb-10">
+                                <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
+                                    <InlineEditableText value={textSettings.menu?.makimono_description_en || ''} onChange={(val) => onTextChange?.('menu', 'makimono_description_en', val)} isEditing={isEditing} />
+                                </p>
+                            </div>
+                        )}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const section = textSettings.menu || {};
@@ -955,11 +964,14 @@ export function TravelerPage({
                         {((textSettings.menu?.ippin_subtitle_en ?? textSettings.menu?.ippin_subtitle ?? 'A La Carte') || isEditing) && (
                             <div className="text-center text-xl mb-8 text-[#deb55a]" style={{ fontFamily: "'Archivo Narrow', sans-serif" }}><InlineEditableText value={textSettings.menu?.ippin_subtitle_en ?? textSettings.menu?.ippin_subtitle ?? 'A La Carte'} onChange={(val) => onTextChange?.('menu', 'ippin_subtitle_en', val)} isEditing={isEditing} /></div>
                         )}
-                        <div className="flex justify-center mb-10">
-                            <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
-                                <InlineEditableText value={textSettings.menu?.ippin_description_en || 'Kindly order at least 5 items per person'} onChange={(val) => onTextChange?.('menu', 'ippin_description_en', val)} isEditing={isEditing} />
-                            </p>
-                        </div>
+                        {/* 文言が空なら枠ごと出さない（既定値を持たせると消せなくなる） */}
+                        {(textSettings.menu?.ippin_description_en || isEditing) && (
+                            <div className="flex justify-center mb-10">
+                                <p className="text-lg md:text-2xl text-[#deb55a] font-semibold border border-[#deb55a]/40 rounded-full px-6 py-3 bg-[#deb55a]/5 tracking-wide">
+                                    <InlineEditableText value={textSettings.menu?.ippin_description_en || ''} onChange={(val) => onTextChange?.('menu', 'ippin_description_en', val)} isEditing={isEditing} />
+                                </p>
+                            </div>
+                        )}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             {(() => {
                                 const section = textSettings.menu || {};
